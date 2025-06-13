@@ -6,10 +6,32 @@ public class Player : MonoBehaviour
 {
     [SerializeField] private float speed;
     [SerializeField] private Vector2 moveDir;
+    [SerializeField] private bool isMeleeing = false;
+    [SerializeField] private GameObject meleeArea;
+
+    private float timeToMelee = .25f;
+    private float meleeTimer = 0f;
+
+    private void Start()
+    {
+        meleeArea.SetActive(false);
+    }
 
     private void Update()
     {
         Move();
+
+        if (isMeleeing)
+        {
+            meleeTimer += Time.deltaTime;
+
+            if (meleeTimer >= timeToMelee)
+            {
+                meleeTimer = 0;
+                isMeleeing = false;
+                meleeArea.SetActive(isMeleeing);
+            }
+        }
     }
 
     /// <summary>
@@ -25,11 +47,25 @@ public class Player : MonoBehaviour
         transform.position = new Vector3(newPos.x, newPos.y, pos.z);
     }
 
+    private void Melee()
+    {
+        isMeleeing = true;
+        meleeArea.SetActive(isMeleeing);
+    }
+
     /// <summary>
-    /// New Input system function, reads values from configured input file
+    /// New Input system function, reads values from configured input file for movement, WASD to move
     /// </summary>
-    public void OnMovePlayer(InputAction.CallbackContext context)
+    public void OnPlayerMove(InputAction.CallbackContext context)
     {
         moveDir = context.ReadValue<Vector2>();
+    }
+    
+    /// <summary>
+    /// New Input system function, just calls the Melee function when activated, left click or 'E'
+    /// </summary>
+    public void OnPlayerMelee(InputAction.CallbackContext context)
+    {
+        Melee();
     }
 }
