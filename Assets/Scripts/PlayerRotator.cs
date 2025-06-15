@@ -9,6 +9,10 @@ public class PlayerRotator : Rotator
 {
     [SerializeField] private Camera cam;
 
+    void Start()
+    {
+        cam = Camera.main;
+    }
     /// <summary>
     /// New Input System function, just takes in mouse position as a Vector 2
     /// </summary>

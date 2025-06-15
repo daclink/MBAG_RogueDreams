@@ -9,16 +9,20 @@ public class Player : MonoBehaviour
     [SerializeField] private bool isMeleeing = false;
     [SerializeField] private GameObject meleeArea;
 
+    private bool canMove = true;
+
     private float timeToMelee = .25f;
     private float meleeTimer = 0f;
 
     private void Start()
     {
         meleeArea.SetActive(false);
+        RoomExits.OnRoomExit += DisableMovement;
     }
 
     private void Update()
     {
+        if (!canMove) return;
         Move();
 
         if (isMeleeing)
@@ -32,6 +36,11 @@ public class Player : MonoBehaviour
                 meleeArea.SetActive(isMeleeing);
             }
         }
+    }
+
+    private void DisableMovement()
+    {
+        canMove = !canMove;
     }
 
     /// <summary>
