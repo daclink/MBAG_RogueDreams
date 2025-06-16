@@ -105,6 +105,7 @@ MonoBehaviour:
   mainCamera: {fileID: 0}
   newPlayerPosition: {x: 0, y: -3}
   oldPlayerPosition: {x: 0, y: 0}
+  cameraLerpDuration: 0.75
 --- !u!61 &7106630473134592559
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -256,6 +257,7 @@ MonoBehaviour:
   mainCamera: {fileID: 0}
   newPlayerPosition: {x: 0, y: 3}
   oldPlayerPosition: {x: 0, y: 0}
+  cameraLerpDuration: 0.75
 --- !u!61 &2883944904054339199
 BoxCollider2D:
   m_ObjectHideFlags: 0
