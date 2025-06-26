@@ -1,21 +1,23 @@
 using Unity.VisualScripting.Dependencies.NCalc;
 using UnityEngine;
 using UnityEngine.Android;
+using UnityEngine.Windows.WebCam;
 
 public class RoomExits : MonoBehaviour
 {
     public delegate void RoomExit();
     public static event RoomExit OnRoomExit;
-     
+    
     [SerializeField] private Vector2 cameraPanDistance;
-    [SerializeField] private Camera mainCamera;
-    private Vector3 oldCameraPosition;
-    [SerializeField] private Vector2 newPlayerPosition;
-    [SerializeField] private Vector2 oldPlayerPosition;
     [SerializeField] private float cameraLerpDuration;
+    private Camera mainCamera;
+    private Vector3 oldCameraPosition;
     private Vector3 newCameraPosition;
     private float timeElapsed = 0f;
     private bool lerpInProgress = false;
+    
+    [SerializeField] private Vector2 newPlayerPosition;
+    [SerializeField] private Vector2 oldPlayerPosition;
 
     void Start()
     {
@@ -29,6 +31,12 @@ public class RoomExits : MonoBehaviour
 
     private void Update()
     {
+        //brute force fix, camera not finding immediately
+        if (mainCamera == null)
+        {
+            FindCamera();
+        }
+        
         // --------------- CAMERA LERP ----------------
         if (lerpInProgress)
         {   
@@ -39,20 +47,24 @@ public class RoomExits : MonoBehaviour
             //lerp the cameras position
             mainCamera.gameObject.transform.position = Vector3.Lerp(oldCameraPosition, newCameraPosition, t);
             
+            if (timeElapsed >= cameraLerpDuration)
+            {
+                //once lerp is done, reset lerp variables
+                timeElapsed = 0f;
+                lerpInProgress = false;
+                OnRoomExit?.Invoke();
+            }
         }
-        if (timeElapsed >= cameraLerpDuration)
-        {
-            //once lerp is done, reset lerp variables
-            timeElapsed = 0f;
-            lerpInProgress = false;
-            OnRoomExit?.Invoke();
-        }
+
         // --------------------------------------------
     }
     
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        //if not collided with the player then return
         if(!collision.CompareTag("Player"))return;
+
+        if (mainCamera == null) return;
         
         //this event disables and enables player movement
         OnRoomExit?.Invoke();

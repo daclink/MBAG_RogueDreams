@@ -18,6 +18,7 @@ public class Player : MonoBehaviour
     {
         meleeArea.SetActive(false);
         RoomExits.OnRoomExit += DisableMovement;
+        LevelExit.OnLevelExit += DisableMovement;
     }
 
     private void Update()
@@ -75,6 +76,15 @@ public class Player : MonoBehaviour
     /// </summary>
     public void OnPlayerMelee(InputAction.CallbackContext context)
     {
-        Melee();
+        if (context.started)
+        {
+            Melee();
+        }
+    }
+
+    public void OnDestroy()
+    {
+        RoomExits.OnRoomExit -= DisableMovement;
+        LevelExit.OnLevelExit -= DisableMovement;
     }
 }

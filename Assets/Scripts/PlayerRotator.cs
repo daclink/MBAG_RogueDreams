@@ -18,6 +18,8 @@ public class PlayerRotator : Rotator
     /// </summary>
     public void OnPlayerLook(InputAction.CallbackContext context)
     {
+        if (cam == null) return;
+        
         Vector2 mousePos = cam.ScreenToWorldPoint(context.ReadValue<Vector2>());
         LookAt(mousePos);
     }
