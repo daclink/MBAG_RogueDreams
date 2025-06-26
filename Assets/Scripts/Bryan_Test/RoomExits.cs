@@ -9,8 +9,8 @@ public class RoomExits : MonoBehaviour
     public static event RoomExit OnRoomExit;
     
     [SerializeField] private Vector2 cameraPanDistance;
-    private Camera mainCamera;
     [SerializeField] private float cameraLerpDuration;
+    private Camera mainCamera;
     private Vector3 oldCameraPosition;
     private Vector3 newCameraPosition;
     private float timeElapsed = 0f;
@@ -27,21 +27,19 @@ public class RoomExits : MonoBehaviour
     private void FindCamera()
     {
         mainCamera = Camera.main;
-
     }
 
     private void Update()
     {
+        //brute force fix, camera not finding immediately
         if (mainCamera == null)
         {
-            mainCamera = Camera.main;
+            FindCamera();
         }
-        
         
         // --------------- CAMERA LERP ----------------
         if (lerpInProgress)
         {   
-            Debug.Log("lerpInProgress");
             //keep track of elapsed time for camera panning
             timeElapsed += Time.deltaTime;
             //t is the amount the camera should move for interpolation each frame
@@ -49,26 +47,24 @@ public class RoomExits : MonoBehaviour
             //lerp the cameras position
             mainCamera.gameObject.transform.position = Vector3.Lerp(oldCameraPosition, newCameraPosition, t);
             
+            if (timeElapsed >= cameraLerpDuration)
+            {
+                //once lerp is done, reset lerp variables
+                timeElapsed = 0f;
+                lerpInProgress = false;
+                OnRoomExit?.Invoke();
+            }
         }
-        if (timeElapsed >= cameraLerpDuration)
-        {
-            //once lerp is done, reset lerp variables
-            timeElapsed = 0f;
-            lerpInProgress = false;
-            OnRoomExit?.Invoke();
-        }
+
         // --------------------------------------------
     }
     
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        //if not collided with the player then return
         if(!collision.CompareTag("Player"))return;
-        
-        if (mainCamera == null)
-        {
-            Debug.LogError("Main camera is still null when trying to transition rooms!");
-            return;
-        }
+
+        if (mainCamera == null) return;
         
         //this event disables and enables player movement
         OnRoomExit?.Invoke();
@@ -86,10 +82,8 @@ public class RoomExits : MonoBehaviour
 
     private void LerpCamera()
     {
-        // Debug.Log("Lerping Camera from LerpCamera");
         oldCameraPosition = mainCamera.transform.position;
         newCameraPosition = new Vector3(cameraPanDistance.x + oldCameraPosition.x, cameraPanDistance.y + oldCameraPosition.y, oldCameraPosition.z);
-        Debug.Log("Old Camera Pos: " + oldCameraPosition + ", New Camera Pos: " + newCameraPosition);
         lerpInProgress = true;
     }
 }

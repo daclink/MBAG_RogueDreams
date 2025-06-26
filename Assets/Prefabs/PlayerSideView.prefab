@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 5495002955294341502}
   - component: {fileID: 745829555252119656}
   m_Layer: 0
-  m_Name: Player
+  m_Name: PlayerSideView
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -197,7 +197,7 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDamping: 0
   m_AngularDamping: 0.05
-  m_GravityScale: 0
+  m_GravityScale: 1
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2

@@ -14,6 +14,7 @@ public class GameManager : MonoBehaviour
     
     [SerializeField] private Camera mainCameraPrefab;
     [SerializeField] private GameObject playerPrefab;
+    [SerializeField] private GameObject playerSideViewPrefab;
 
     private int sceneNumber;
 
@@ -34,13 +35,14 @@ public class GameManager : MonoBehaviour
     
     void Start()
     {
-        sceneNumber = 0;
+        sceneNumber = SceneManager.GetActiveScene().buildIndex;
         LevelExit.OnLevelExit += LoadNextScene;
         SceneManager.sceneLoaded += OnSceneLoaded;
 
         LoadScene(sceneNumber);
     }
 
+    //loads the next available scene - hard coded for now with just 2 scenes
     private void LoadNextScene()
     {
         if (sceneNumber == 0)
@@ -52,24 +54,22 @@ public class GameManager : MonoBehaviour
             sceneNumber--;
         }
         LoadScene(sceneNumber);
-        //possibly need the player prefab and the main camera to be singletons
     }
 
+    //loads a scene based on the passed in index
     private void LoadScene(int sceneNumber)
     {
-        Debug.Log("Loading scene " + sceneNumber);
         SceneManager.LoadScene(sceneNumber);
     }
-
-    //everytime a scene is loaded, this function will be called
+    
+    //everytime a scene is loaded, this function will be called automatically
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        Debug.Log("Scene " + scene.name + " is loaded");
 
         if (scene.buildIndex == 0)
         {
             Instantiate(mainCameraPrefab, new Vector3(0, 0, -10), Quaternion.identity);
-            Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
+            Instantiate(playerSideViewPrefab, new Vector3(0, -2.45f, 0), Quaternion.identity);
         } 
         else if (scene.buildIndex == 1)
         {
