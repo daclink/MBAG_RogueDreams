@@ -132,6 +132,9 @@ MonoBehaviour:
   moveDir: {x: 0, y: 0}
   isMeleeing: 0
   meleeArea: {fileID: 8507161216502267023}
+  health: 10
+  collectedItem: {fileID: 0}
+  healthText: {fileID: 0}
 --- !u!114 &9153042883107652899
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -272,7 +275,7 @@ GameObject:
   - component: {fileID: 1889982780315122169}
   m_Layer: 0
   m_Name: PlayerVisual
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
