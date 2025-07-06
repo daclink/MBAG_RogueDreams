@@ -1,13 +1,19 @@
 using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class Player : MonoBehaviour
 {
+    private const string ITEM_TAG = "Item";
+    
     [SerializeField] private float speed;
     [SerializeField] private Vector2 moveDir;
     [SerializeField] private bool isMeleeing = false;
     [SerializeField] private GameObject meleeArea;
+    [SerializeField] private int health = 10;
+    [SerializeField] private BaseItem collectedItem;
+    [SerializeField] private HealthText healthText;
 
     private bool canMove = true;
 
@@ -19,6 +25,8 @@ public class Player : MonoBehaviour
         meleeArea.SetActive(false);
         RoomExits.OnRoomExit += DisableMovement;
         LevelExit.OnLevelExit += DisableMovement;
+        
+        healthText.UpdateHealth(health);
     }
 
     private void Update()
@@ -82,9 +90,29 @@ public class Player : MonoBehaviour
         }
     }
 
+    public void AddHealth(int heal)
+    {
+        health += heal;
+        healthText.UpdateHealth(health);
+    }
+
+
     public void OnDestroy()
     {
         RoomExits.OnRoomExit -= DisableMovement;
         LevelExit.OnLevelExit -= DisableMovement;
+    }
+
+    private void OnCollisionEnter2D(Collision2D other)
+    {
+        if (other.transform.TryGetComponent(out BaseItem item))
+        {
+            // set collectedItem to anything that inherits the item base class
+            collectedItem = item;
+            // call collectedItem.Collect(this)
+            collectedItem.Collect(this);
+            // reset collectedItem back to null
+            collectedItem = null;
+        }
     }
 }
