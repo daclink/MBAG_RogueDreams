@@ -81,5 +81,6 @@ public class GameManager : MonoBehaviour
             OnCameraInstantiated?.Invoke();
         }
     }
+    
 
 }

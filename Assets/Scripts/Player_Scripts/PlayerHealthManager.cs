@@ -2,11 +2,15 @@ using UnityEngine;
 
 public class PlayerHealthManager : MonoBehaviour
 {
+    public delegate void SetHealthText(int health);
+    public static event SetHealthText OnSetHealthText;
+    
     [SerializeField] private int startHealth = 100;
     private int currHealth;
     
     void Start()
     {
+        HealingItem.OnAddHealth += AddHealth;
         SetHealth(startHealth);
         //listen to 2 events
         //  - one event for adding health from the healing items
@@ -17,6 +21,8 @@ public class PlayerHealthManager : MonoBehaviour
     void SetHealthBar(int health)
     {
         //set the healthBarVisual here
+        //fire event to the HealthText script with the health value
+        OnSetHealthText?.Invoke(health);
     }
     
     /**
@@ -37,6 +43,7 @@ public class PlayerHealthManager : MonoBehaviour
      */
     void AddHealth(int health)
     {
+        Debug.Log("Adding " + health + " health");
         currHealth += health;
         if (currHealth > startHealth)
         {
@@ -62,6 +69,11 @@ public class PlayerHealthManager : MonoBehaviour
         }
         SetHealthBar(currHealth);
         
+    }
+
+    public void OnDestroy()
+    {
+        HealingItem.OnAddHealth -= AddHealth;
     }
 
 
