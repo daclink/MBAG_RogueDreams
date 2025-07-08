@@ -105,7 +105,7 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDamping: 0
   m_AngularDamping: 0.05
-  m_GravityScale: 1
+  m_GravityScale: 0
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -168,5 +168,6 @@ MonoBehaviour:
   health: 10
   attackDmg: 2
   moveSpeed: 5
-  aggroRange: 3
+  agroRange: 0
+  patrolRange: 0
   currentState: 0

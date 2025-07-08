@@ -7,13 +7,15 @@ public abstract class BaseEnemy : MonoBehaviour
     [SerializeField] protected float health;
     [SerializeField] protected float attackDmg;
     [SerializeField] protected float moveSpeed;
-    [SerializeField] protected float aggroRange;
+    [SerializeField] protected float agroRange;
+    [SerializeField] protected float patrolRange;
 
     protected GameObject player;
     protected float distanceToPlayer;
+    protected float dmgTaken;
     
     protected Rigidbody2D rb;
-    protected bool isAggroed;
+    protected bool isAgroed;
     protected bool enableMovement;
     
     [SerializeField] protected EnemyState currentState;
@@ -33,7 +35,7 @@ public abstract class BaseEnemy : MonoBehaviour
 
         ChangeState(EnemyState.Idle);
         enableMovement = false;
-        isAggroed = false;
+        isAgroed = false;
     }
 
     // in child classes, use 'protected override void Update()' and call 'base.Update();' at the top of the update
@@ -43,12 +45,12 @@ public abstract class BaseEnemy : MonoBehaviour
         {
             HandleState();
         }
+        
     }
-    
     
     protected virtual void TakeDamage(float dmgAmount)
     {
-        ChangeState(EnemyState.TakeDamage);
+        //ChangeState(EnemyState.TakeDamage);
         health -= dmgAmount;
         if (health <= 0)
         {

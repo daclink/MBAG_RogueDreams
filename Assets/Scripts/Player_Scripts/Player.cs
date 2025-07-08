@@ -20,7 +20,7 @@ public class Player : MonoBehaviour
     // [SerializeField] private HealthText healthText;
 
     private bool canMove = true;
-
+    
     private float timeToMelee = .25f;
     private float meleeTimer = 0f;
 
@@ -118,5 +118,7 @@ public class Player : MonoBehaviour
             // reset collectedItem back to null
             collectedItem = null;
         }
+        
+        
     }
 }
