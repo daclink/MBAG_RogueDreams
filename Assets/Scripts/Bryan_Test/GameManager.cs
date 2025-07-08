@@ -17,6 +17,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject playerPrefab;
     [SerializeField] private GameObject playerSideViewPrefab;
     [SerializeField] private Canvas UICanvasPrefab;
+    [SerializeField] private GameObject meleeEnemyPrefab;
 
     private int sceneNumber;
 
@@ -78,6 +79,7 @@ public class GameManager : MonoBehaviour
             Instantiate(UICanvasPrefab, new Vector3(0, 0, -10), Quaternion.identity);
             Instantiate(mainCameraPrefab, new Vector3(-10, 23, -10), Quaternion.identity);
             Instantiate(playerPrefab, new Vector3(-10, 23, 0), Quaternion.identity);
+            Instantiate(meleeEnemyPrefab, new Vector3(-4, 20, 0), Quaternion.identity);
             OnCameraInstantiated?.Invoke();
         }
     }
