@@ -47,3 +47,4 @@ MonoBehaviour:
   mainCameraPrefab: {fileID: 8180705985475151378, guid: c3e89993e371640149b260ad0e3ab338, type: 3}
   playerPrefab: {fileID: 833193759461314858, guid: a650f8867a1124019891f8cec67fe5e4, type: 3}
   playerSideViewPrefab: {fileID: 833193759461314858, guid: 72ec8f6759d4c4f7ebcdefe6527ef40b, type: 3}
+  UICanvasPrefab: {fileID: 1684348679410332725, guid: 95edd5000a2574b7790f224056676b64, type: 3}

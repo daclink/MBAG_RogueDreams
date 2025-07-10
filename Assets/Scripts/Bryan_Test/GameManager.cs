@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Events;
@@ -15,6 +16,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Camera mainCameraPrefab;
     [SerializeField] private GameObject playerPrefab;
     [SerializeField] private GameObject playerSideViewPrefab;
+    [SerializeField] private Canvas UICanvasPrefab;
 
     private int sceneNumber;
 
@@ -73,10 +75,12 @@ public class GameManager : MonoBehaviour
         } 
         else if (scene.buildIndex == 1)
         {
+            Instantiate(UICanvasPrefab, new Vector3(0, 0, -10), Quaternion.identity);
             Instantiate(mainCameraPrefab, new Vector3(-10, 23, -10), Quaternion.identity);
             Instantiate(playerPrefab, new Vector3(-10, 23, 0), Quaternion.identity);
             OnCameraInstantiated?.Invoke();
         }
     }
+    
 
 }

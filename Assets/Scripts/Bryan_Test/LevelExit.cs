@@ -9,6 +9,7 @@ public class LevelExit : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        Debug.Log("Collision object tag " + collision.gameObject.tag);
         if(!collision.CompareTag("Player"))return;
 
         OnLevelExit?.Invoke();
