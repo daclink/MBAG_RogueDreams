@@ -7,41 +7,36 @@ public class Knockback : MonoBehaviour
     //knockback should only be APPLIED to player or enemy
     //knockback should only be between the player and enemy/projectiles
     
-    // public delegate void TriggerMovement();
-    // public static event TriggerMovement OnTriggerMovement;
     
+    [SerializeField] private float knockbackStrength;
+    [SerializeField] private float knockbackDuration;
     
     private bool inKnockback = false;
-    [SerializeField] private float knockbackStrength = 15f;
-    [SerializeField] private float knockbackDuration = 0.15f;
+    private Vector2 direction;
     
     public void KnockbackObject(GameObject target, GameObject incomingObject)
     {
         if (inKnockback) return;
         
-        Debug.Log("In knockback script");
-        
+        // get the knockback targets RB 
         Rigidbody2D targetRB = target.GetComponent<Rigidbody2D>();
-        //Rigidbody2D incomingRB = incomingObject.GetComponent<Rigidbody2D>();
         if (targetRB == null)
         {
-            Debug.Log("targetRB or incomingRB is null");
+            Debug.Log("targetRB is null");
             return;
         }
         
         //TODO: disable movement of target and incoming objects instead of the line below
         targetRB.linearVelocity = Vector2.zero;
-        //incomingRB.linearVelocity = Vector2.zero;
-        
         
         //calculate knockback direction
-        Vector2 direction = (target.transform.position - incomingObject.transform.position).normalized;
-        //apply knockback
-        targetRB.linearVelocity = new Vector2(direction.x * knockbackStrength, direction.y * knockbackStrength);
+        direction = (target.transform.position - incomingObject.transform.position).normalized;
+        
 
         if (!inKnockback)
         {
             inKnockback = true;
+            
             StartCoroutine(KnockbackCR(target, targetRB));
         }
     }
@@ -49,6 +44,8 @@ public class Knockback : MonoBehaviour
     private IEnumerator KnockbackCR(GameObject target, Rigidbody2D targetRB)
     {
         //knockback the target for the set duration
+        //apply knockback
+        targetRB.linearVelocity = new Vector2(direction.x * knockbackStrength, direction.y * knockbackStrength);
         yield return new WaitForSeconds(knockbackDuration);
         //after the wait for delay seconds, stop the enemy movement
         if (target != null)
@@ -60,6 +57,10 @@ public class Knockback : MonoBehaviour
         }
     }
 
+    /**
+     * This is needed to identify weather the player or enemy needs movement enabled after the knockback
+     * This is hardcoded but works fine
+     */
     private void IdentifyTarget(GameObject target)
     {
         if (target.CompareTag("Player"))

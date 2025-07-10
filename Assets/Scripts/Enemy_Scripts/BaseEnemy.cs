@@ -4,34 +4,34 @@ using UnityEngine;
 public abstract class BaseEnemy : MonoBehaviour
 {
 
+    //delegates
     public delegate void DamagePlayer(float attackDamage);
     public static event DamagePlayer OnDamagePlayer;
     
+    //serializeable fields
     [SerializeField] protected float health;
     [SerializeField] protected float attackDmg;
     [SerializeField] protected float moveSpeed;
     [SerializeField] protected float agroRange;
     [SerializeField] protected float patrolRange;
     [SerializeField] protected Knockback knockback;
+    [SerializeField] protected Rigidbody2D rb;
+    [SerializeField] protected EnemyState currentState;
 
+
+    //non-serializable fields
     protected Transform playerTransform;
     protected float distanceToPlayer;
     protected float dmgTaken;
-    
-    protected Rigidbody2D rb;
     protected bool isAgroed;
     protected bool enableMovement;
     
-    [SerializeField] protected EnemyState currentState;
-
     // to be used in each child class.
     protected abstract void PostStart();
 
     //initialize globally used variables for the class and child classes and call postStart
     protected virtual void Start()
     {
-        rb = GetComponent<Rigidbody2D>();
-        
         //this should assign player correctly assuming the player is spawned properly BEFORE the enemy is
         playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
         
@@ -42,22 +42,22 @@ public abstract class BaseEnemy : MonoBehaviour
         isAgroed = false;
     }
 
+    // when exiting knockback, enemies movement needs to be put back to true
     public void ExitKnockback()
     {
         enableMovement = true;
     }
 
-    // in child classes, use 'protected override void Update()' and call 'base.Update();' at the top of the update
+    // in child classes, use 'protected override void Update()' and call 'base.Update();'
+    // at the top of the update
     protected virtual void Update()
     {
-        Debug.Log("ENEMY Enable Movement: " + enableMovement);
-        // if (currentState != null)
-        // {
-            HandleState();
-        // }
-        
+        HandleState();
     }
 
+    /**
+     * On collision, damage the player the correct amount and change state to attacking
+     */
     protected virtual void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Player"))
@@ -84,9 +84,9 @@ public abstract class BaseEnemy : MonoBehaviour
         }
     }
     
+    //this is used when the enemy takes damage from the player
     protected virtual void TakeDamage(float dmgAmount)
     {
-        //ChangeState(EnemyState.TakeDamage);
         health -= dmgAmount;
         if (health <= 0)
         {

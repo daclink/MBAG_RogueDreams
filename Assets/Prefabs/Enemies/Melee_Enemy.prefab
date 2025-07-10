@@ -12,10 +12,10 @@ GameObject:
   - component: {fileID: 5658258776222419858}
   - component: {fileID: 4047588612167406092}
   - component: {fileID: 3331891198007786218}
+  - component: {fileID: 5777749690199371584}
   - component: {fileID: -7593655131362422988}
-  - component: {fileID: 2954136722070184345}
   m_Layer: 6
-  m_Name: Ranged_Enemy
+  m_Name: Melee_Enemy
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -116,7 +116,7 @@ Rigidbody2D:
     m_Bits: 0
   m_Interpolate: 0
   m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 4
 --- !u!58 &3331891198007786218
 CircleCollider2D:
@@ -154,6 +154,28 @@ CircleCollider2D:
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
   m_Radius: 0.5
+--- !u!114 &5777749690199371584
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3024127687653583934}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2bd17267fa07549cbadb02e3c5097e8f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  health: 10
+  attackDmg: 2
+  moveSpeed: 135
+  agroRange: 3
+  patrolRange: 8
+  knockback: {fileID: -7593655131362422988}
+  rb: {fileID: 4047588612167406092}
+  currentState: 0
+  patrolMovementDuration: 1
+  patrolMovementInterval: 1
 --- !u!114 &-7593655131362422988
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -166,26 +188,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 29f1c90b7f834d2589d9f47c0fc9e7e9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  knockbackStrength: 15
+  knockbackStrength: 8
   knockbackDuration: 0.15
---- !u!114 &2954136722070184345
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3024127687653583934}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2bd4aaf052e1340079c18aca2b73d050, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  health: 10
-  attackDmg: 2
-  moveSpeed: 50
-  agroRange: 5
-  patrolRange: 8
-  knockback: {fileID: -7593655131362422988}
-  currentState: 0
-  bulletPrefab: {fileID: 750461020118402510, guid: 459a30c02f948403baf5fcf00a06a102, type: 3}
-  bulletInterval: 2

@@ -4,41 +4,37 @@ using UnityEngine;
 
 public class RangedEnemy : BaseEnemy
 {
-    private bool readyToShoot;
-    private bool movingInPatrolState;
-    private bool enablePatrolStateMovement;
-    private Vector2 patrolMoveDirection;
+    
+    
     [SerializeField] private GameObject bulletPrefab;
-    [SerializeField] private float bulletInterval;
+    [SerializeField] private float firingInterval;
+
+    
+    private bool readyToShoot;
+
 
     protected override void PostStart()
     {
-        health = 10f;
-        attackDmg = 2f;
-        agroRange = 5f;
-        patrolRange = 8f;
-        movingInPatrolState = false; 
-        enablePatrolStateMovement = false;
         enableMovement = true;
         readyToShoot = true;
-
     }
 
     protected override void Update()
     {
-        base.Update();
+        base.Update(); 
 
         distanceToPlayer = Vector3.Distance(playerTransform.position, transform.position);
-        
-        if (enablePatrolStateMovement)
-        {
-            PatrolMovement();
-        }
+
     }
     
+    /**
+     * Idle state will have no movement 
+     */
     protected override void HandleIdle()
     {
         if (!enableMovement) return;
+        
+        rb.linearVelocity = Vector3.zero;
         
         if (distanceToPlayer < agroRange)
         {
@@ -49,11 +45,12 @@ public class RangedEnemy : BaseEnemy
         {
             ChangeState(EnemyState.Patrol);
         }
-        
-        
-        
+
     }
     
+    /**
+     * Patrol state will move towards the enemy at the moveSpeed speed
+     */
     protected override void HandlePatrol()
     {
         if (!enableMovement) return;
@@ -70,42 +67,13 @@ public class RangedEnemy : BaseEnemy
             ChangeState(EnemyState.Idle);
         }
 
-        
-        //random movement while in patrol state
-        if (!movingInPatrolState)
-        {
-            //pick direction to move in patrol state
-            float randomX = UnityEngine.Random.Range(-1.0f, 1.0f);
-            float randomY = UnityEngine.Random.Range(-1.0f, 1.0f);
-            
-            patrolMoveDirection = new Vector2(randomX, randomY).normalized;
-            
-            
-            //Debug.Log("not moving in patrol state, picking direction: " + patrolMoveDirection);
-            movingInPatrolState = true;
-            StartCoroutine(PatrolMovementCR());
-        }
-        
-        
-    }
-
-    private IEnumerator PatrolMovementCR()
-    {
-        enablePatrolStateMovement = true;
-        yield return new WaitForSeconds(0.5f);
-        enablePatrolStateMovement = false;
-        rb.linearVelocity = Vector3.zero;
-        yield return new WaitForSeconds(1f);
-        movingInPatrolState = false;
-    }
-
-    private void PatrolMovement()
-    {
-        rb.linearVelocity = patrolMoveDirection * (Time.deltaTime * moveSpeed);
+        Vector3 direction = new Vector3(transform.position.x - playerTransform.position.x, transform.position.y - playerTransform.position.y, 0).normalized;
+        rb.linearVelocity = -direction * (Time.deltaTime * moveSpeed);   
     }
     
-    
-    
+    /**
+     * Agro state will move towards the player at half speed and fire bullets at the correct interval
+     */
     protected override void HandleAgro()
     {
         if (!enableMovement) return;
@@ -116,8 +84,12 @@ public class RangedEnemy : BaseEnemy
             ChangeState(EnemyState.Patrol);
             return;
         }
+        
+        //move at half speed towards the player
+        Vector3 direction = new Vector3(transform.position.x - playerTransform.position.x, transform.position.y - playerTransform.position.y, 0).normalized;
+        rb.linearVelocity = -direction * (Time.deltaTime * (moveSpeed/2));
 
-        //instantiate a bullet, and shoot it in the direction from above
+        //check if enemy is allowed to shoot and start the bullet shooting CR
 
         if (readyToShoot)
         {
@@ -127,20 +99,28 @@ public class RangedEnemy : BaseEnemy
 
     }
 
+    /**
+     * Coroutine to handle the bullet firing
+     */
     private IEnumerator FireProjectileCR()
     {
-        
         Instantiate(bulletPrefab, transform.position, Quaternion.identity);
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(firingInterval);
         readyToShoot = true;
         
     }
 
+    /**
+     * Entered when the player and enemy come into direct contact, handled in the base class
+     */
     protected override void HandleAttacking()
     {
        ChangeState(EnemyState.Idle);
     }
 
+    /**
+     * Handles taking damage
+     */
     protected override void HandleDamage()
     {
         
@@ -153,17 +133,25 @@ public class RangedEnemy : BaseEnemy
 
     }
 
+    /**
+     * This state handles when the enemy dies
+     */
     protected override void HandleDead()
     {
-        Debug.Log("Deaddddddd");
         Destroy(gameObject);
     }
 
+    /**
+     * Handles collisions with the enemy such as bullet collisions
+     */
     protected override void OnCollisionEnter2D(Collision2D collision)
     {
         base.OnCollisionEnter2D(collision);
     }
 
+    /**
+     * This handles trigger object hitting the enemy such as player weapon
+     */
     protected override void OnTriggerEnter2D(Collider2D collision)
     {
         if (!enableMovement) return;

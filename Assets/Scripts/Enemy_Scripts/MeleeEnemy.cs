@@ -6,21 +6,21 @@ using UnityEngine;
 public class MeleeEnemy : BaseEnemy
 {
     //might be useful to keep track of the previous state
+    
+    [SerializeField] private float patrolMovementDuration;
+    [SerializeField] private float patrolMovementInterval;
+    
     private bool movingInPatrolState;
     private bool enablePatrolStateMovement;
     private Vector2 patrolMoveDirection;
+    private float rangeMin = -1f;
+    private float rangeMax = 1f;
     
     protected override void PostStart()
     {
-        health = 10f;
-        attackDmg = 2f;
-        // moveSpeed = 50f;
-        agroRange = 3f;
-        patrolRange = 8f;
         movingInPatrolState = false;
         enablePatrolStateMovement = false;
         enableMovement = true;
-
     }
 
     protected override void Update()
@@ -76,13 +76,12 @@ public class MeleeEnemy : BaseEnemy
         if (!movingInPatrolState)
         {
             //pick direction to move in patrol state
-            float randomX = UnityEngine.Random.Range(-1.0f, 1.0f);
-            float randomY = UnityEngine.Random.Range(-1.0f, 1.0f);
+            float randomX = UnityEngine.Random.Range(rangeMin, rangeMax);
+            float randomY = UnityEngine.Random.Range(rangeMin, rangeMax);
             
+            //calculate the movement direction
             patrolMoveDirection = new Vector2(randomX, randomY).normalized;
-            
-            
-            //Debug.Log("not moving in patrol state, picking direction: " + patrolMoveDirection);
+
             movingInPatrolState = true;
             StartCoroutine(PatrolMovementCR());
         }
@@ -90,13 +89,18 @@ public class MeleeEnemy : BaseEnemy
         
     }
 
+    /**
+     * move for patrolMovementDuration
+     * stop moving for patrolMovementInterval
+     */
     private IEnumerator PatrolMovementCR()
-    {
+    { 
+        
         enablePatrolStateMovement = true;
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(patrolMovementDuration);
         enablePatrolStateMovement = false;
         rb.linearVelocity = Vector3.zero;
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(patrolMovementInterval);
         movingInPatrolState = false;
     }
 
@@ -104,8 +108,6 @@ public class MeleeEnemy : BaseEnemy
     {
         rb.linearVelocity = patrolMoveDirection * (Time.deltaTime * moveSpeed);
     }
-    
-    
     
     protected override void HandleAgro()
     {
@@ -119,24 +121,19 @@ public class MeleeEnemy : BaseEnemy
         }
         
         //while in the agro state, move towards the player
-        
         //calculate the direction that the player is from the enemy
         Vector3 direction = new Vector3(transform.position.x - playerTransform.position.x, transform.position.y - playerTransform.position.y, 0).normalized;
-        rb.linearVelocity = -direction * (Time.deltaTime * moveSpeed);   
-        
-        
-        // Debug.Log(" linearVelocity of enemy: " + rb.linearVelocity + " move speed : " + moveSpeed);
+        //move rowards the player
+        rb.linearVelocity = -direction * (Time.deltaTime * moveSpeed);
     }
 
     protected override void HandleAttacking()
     {
-       
        ChangeState(EnemyState.Idle);
     }
 
     protected override void HandleDamage()
     {
-
 
         base.TakeDamage(dmgTaken);
         if (health <= 0)
@@ -149,7 +146,6 @@ public class MeleeEnemy : BaseEnemy
 
     protected override void HandleDead()
     {
-        Debug.Log("Deaddddddd");
         Destroy(gameObject);
     }
 

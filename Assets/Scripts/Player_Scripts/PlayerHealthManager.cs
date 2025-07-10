@@ -76,6 +76,8 @@ public class PlayerHealthManager : MonoBehaviour
     public void OnDestroy()
     {
         HealingItem.OnAddHealth -= AddHealth;
+        BaseEnemy.OnDamagePlayer -= RemoveHealth;
+        BulletScript.OnDamagePlayer -= RemoveHealth;
     }
 
 

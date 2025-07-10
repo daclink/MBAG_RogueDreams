@@ -5,39 +5,34 @@ using UnityEngine;
 public class BulletScript : MonoBehaviour
 {
     public delegate void DamagePlayer(float damage);
-
     public static event DamagePlayer OnDamagePlayer;
-
-    private Transform target;
-    private Rigidbody2D rb;
-    private float currTime;
-    private float damage;
-
+    
+    [SerializeField] private Rigidbody2D rb;
+    [SerializeField] private float damage;
     [SerializeField] private float bulletSpeed;
     [SerializeField] private float bulletLifeTime;
 
+    private Transform target;
+    private float currTime;
 
 
     void Start()
     {
-        // Debug.Log("Bullet instantiated");
+        //where the bullet is going
         target = GameObject.FindGameObjectWithTag("Player").transform;
-        Vector3 direction =
-            new Vector3(transform.position.x - target.position.x, transform.position.y - target.position.y, 0)
-                .normalized;
-        rb = GetComponent<Rigidbody2D>();
+        
+        //starting bullet direction and velocity
+        Vector3 direction = new Vector3(transform.position.x - target.position.x, transform.position.y - target.position.y, 0).normalized;
         rb.linearVelocity = -direction * bulletSpeed;
-        //Debug.Log("Bullet velocity " + rb.linearVelocity );
-
+        
+        //start timer
         currTime = 0f;
-        bulletLifeTime = 5f;
-        damage = 5f;
+
     }
 
-    // Update is called once per frame
     void Update()
     {
-
+        //ensures the bullet is not on screen forever but instead for a set max amount of time
         currTime += Time.deltaTime;
         if (currTime >= bulletLifeTime)
         {

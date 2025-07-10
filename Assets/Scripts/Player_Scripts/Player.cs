@@ -17,20 +17,15 @@ public class Player : MonoBehaviour
     [SerializeField] private GameObject meleeArea;
     [SerializeField] private BaseItem collectedItem;
     [SerializeField] private Knockback knockback;
-
+    [SerializeField] private float timeToMelee;
     
-    
-    // [SerializeField] private int health = 10;
-    // [SerializeField] private HealthText healthText;
 
     private bool enableMovement = true;
-    
-    private float timeToMelee = .25f;
-    private float meleeTimer = 0f;
+    private float meleeTimer;
 
     private void Start()
     {
-        
+        meleeTimer = 0f;
         meleeArea.SetActive(false);
         RoomExits.OnRoomExit += DisableMovement;
         LevelExit.OnLevelExit += DisableMovement;
@@ -49,7 +44,7 @@ public class Player : MonoBehaviour
 
             if (meleeTimer >= timeToMelee)
             {
-                meleeTimer = 0;
+                meleeTimer = 0f;
                 isMeleeing = false;
                 meleeArea.SetActive(isMeleeing);
             }
@@ -103,20 +98,7 @@ public class Player : MonoBehaviour
             Melee();
         }
     }
-
-    // public void AddHealth(int heal)
-    // {
-    //     health += heal;
-    //     healthText.UpdateHealth(health);
-    // }
-
-
-    public void OnDestroy()
-    {
-        RoomExits.OnRoomExit -= DisableMovement;
-        LevelExit.OnLevelExit -= DisableMovement;
-    }
-
+    
     private void OnCollisionEnter2D(Collision2D other)
     {
         Debug.Log("Player hit by : " + other.gameObject.tag);
@@ -141,26 +123,13 @@ public class Player : MonoBehaviour
                 enableMovement = false;
                 knockback.KnockbackObject(gameObject, other.gameObject);
             }
-
-            // if (other.gameObject.CompareTag(ENEMY_BULLET_TAG))
-            // {
-            //     Destroy(other.gameObject);
-            // }
             
         }
     }
-
-    // private void OnTriggerEnter2D(Collider2D other)
-    // {
-    //     if (other.gameObject.CompareTag(ENEMY_BULLET_TAG))
-    //     {
-    //         if (knockback != null)
-    //         {
-    //             Debug.Log("Knockback called on player from trigger enter");
-    //             enableMovement = false;
-    //             knockback.KnockbackObject(gameObject, other.gameObject);
-    //             Destroy(other.gameObject);
-    //         }
-    //     }
-    // }
+    
+    public void OnDestroy()
+    {
+        RoomExits.OnRoomExit -= DisableMovement;
+        LevelExit.OnLevelExit -= DisableMovement;
+    }
 }
