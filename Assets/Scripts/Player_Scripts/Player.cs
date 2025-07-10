@@ -9,6 +9,7 @@ public class Player : MonoBehaviour
     
     private const string ITEM_TAG = "Item";
     private const string ENEMY_TAG = "Enemy";
+    private const string ENEMY_BULLET_TAG = "EnemyBullet";
     
     [SerializeField] private float speed;
     [SerializeField] private Vector2 moveDir;
@@ -118,6 +119,8 @@ public class Player : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D other)
     {
+        Debug.Log("Player hit by : " + other.gameObject.tag);
+        
         if (other.transform.TryGetComponent(out BaseItem item))
         {
             // set collectedItem to anything that inherits the item base class
@@ -130,16 +133,34 @@ public class Player : MonoBehaviour
 
         //knockback player/this
         //TODO: add tags for things such as projectiles
-        //TODO: take player damage here
-        if (other.gameObject.CompareTag(ENEMY_TAG))
+        if (other.gameObject.CompareTag(ENEMY_TAG) || other.gameObject.CompareTag(ENEMY_BULLET_TAG))
         {
-            if(knockback != null)
+            if (knockback != null)
             {
+                Debug.Log("Knockback called on player");
                 enableMovement = false;
                 knockback.KnockbackObject(gameObject, other.gameObject);
             }
+
+            // if (other.gameObject.CompareTag(ENEMY_BULLET_TAG))
+            // {
+            //     Destroy(other.gameObject);
+            // }
+            
         }
-        
-        
     }
+
+    // private void OnTriggerEnter2D(Collider2D other)
+    // {
+    //     if (other.gameObject.CompareTag(ENEMY_BULLET_TAG))
+    //     {
+    //         if (knockback != null)
+    //         {
+    //             Debug.Log("Knockback called on player from trigger enter");
+    //             enableMovement = false;
+    //             knockback.KnockbackObject(gameObject, other.gameObject);
+    //             Destroy(other.gameObject);
+    //         }
+    //     }
+    // }
 }

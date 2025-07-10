@@ -7,15 +7,16 @@ TagManager:
   - Item
   - Enemy
   - PlayerWeapon
+  - EnemyBullet
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - EnemyBullet
   - Water
   - UI
-  - 
-  - 
+  - Enemy
+  - Player
   - 
   - 
   - 

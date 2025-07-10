@@ -1,42 +1,41 @@
-using System;
 using System.Collections;
 using Enemy_Scripts;
 using UnityEngine;
 
-public class MeleeEnemy : BaseEnemy
+public class RangedEnemy : BaseEnemy
 {
-    //might be useful to keep track of the previous state
+    private bool readyToShoot;
     private bool movingInPatrolState;
     private bool enablePatrolStateMovement;
     private Vector2 patrolMoveDirection;
-    
+    [SerializeField] private GameObject bulletPrefab;
+    [SerializeField] private float bulletInterval;
+
     protected override void PostStart()
     {
         health = 10f;
         attackDmg = 2f;
-        // moveSpeed = 50f;
-        agroRange = 3f;
+        agroRange = 5f;
         patrolRange = 8f;
-        movingInPatrolState = false;
+        movingInPatrolState = false; 
         enablePatrolStateMovement = false;
         enableMovement = true;
+        readyToShoot = true;
 
     }
 
     protected override void Update()
     {
         base.Update();
-        
-        distanceToPlayer = Vector3.Distance(playerTransform.position, transform.position);
 
-        //handles patrol state movements 
+        distanceToPlayer = Vector3.Distance(playerTransform.position, transform.position);
+        
         if (enablePatrolStateMovement)
         {
-            PatrolMovement();   
+            PatrolMovement();
         }
-        
     }
-
+    
     protected override void HandleIdle()
     {
         if (!enableMovement) return;
@@ -117,27 +116,34 @@ public class MeleeEnemy : BaseEnemy
             ChangeState(EnemyState.Patrol);
             return;
         }
+
+        //instantiate a bullet, and shoot it in the direction from above
+
+        if (readyToShoot)
+        {
+            readyToShoot = false;
+            StartCoroutine(FireProjectileCR());
+        }
+
+    }
+
+    private IEnumerator FireProjectileCR()
+    {
         
-        //while in the agro state, move towards the player
+        Instantiate(bulletPrefab, transform.position, Quaternion.identity);
+        yield return new WaitForSeconds(2f);
+        readyToShoot = true;
         
-        //calculate the direction that the player is from the enemy
-        Vector3 direction = new Vector3(transform.position.x - playerTransform.position.x, transform.position.y - playerTransform.position.y, 0).normalized;
-        rb.linearVelocity = -direction * (Time.deltaTime * moveSpeed);   
-        
-        
-        // Debug.Log(" linearVelocity of enemy: " + rb.linearVelocity + " move speed : " + moveSpeed);
     }
 
     protected override void HandleAttacking()
     {
-       
        ChangeState(EnemyState.Idle);
     }
 
     protected override void HandleDamage()
     {
-
-
+        
         base.TakeDamage(dmgTaken);
         if (health <= 0)
         {
@@ -165,5 +171,5 @@ public class MeleeEnemy : BaseEnemy
         base.OnTriggerEnter2D(collision);
 
     }
-    
+
 }

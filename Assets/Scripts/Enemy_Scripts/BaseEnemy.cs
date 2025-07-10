@@ -69,6 +69,7 @@ public abstract class BaseEnemy : MonoBehaviour
         
     }
 
+    //this is for incoming damage to enemies from the player or other sources
     protected virtual void OnTriggerEnter2D(Collider2D other)
     {
         // TODO: player bullets/ranged weapons that should knockback enemies include here

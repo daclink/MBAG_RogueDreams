@@ -10,6 +10,7 @@ public class PlayerHealthManager : MonoBehaviour
     
     void Start()
     {
+        BulletScript.OnDamagePlayer += RemoveHealth;
         BaseEnemy.OnDamagePlayer += RemoveHealth;
         HealingItem.OnAddHealth += AddHealth;
         SetHealth(startHealth);
