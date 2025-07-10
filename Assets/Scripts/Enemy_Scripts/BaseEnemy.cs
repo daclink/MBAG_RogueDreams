@@ -3,12 +3,16 @@ using UnityEngine;
 
 public abstract class BaseEnemy : MonoBehaviour
 {
+
+    public delegate void DamagePlayer(float attackDamage);
+    public static event DamagePlayer OnDamagePlayer;
     
     [SerializeField] protected float health;
     [SerializeField] protected float attackDmg;
     [SerializeField] protected float moveSpeed;
     [SerializeField] protected float agroRange;
     [SerializeField] protected float patrolRange;
+    [SerializeField] protected Knockback knockback;
 
     protected Transform playerTransform;
     protected float distanceToPlayer;
@@ -34,18 +38,49 @@ public abstract class BaseEnemy : MonoBehaviour
         PostStart();
 
         ChangeState(EnemyState.Idle);
-        enableMovement = false;
+        enableMovement = true;
         isAgroed = false;
+    }
+
+    public void ExitKnockback()
+    {
+        enableMovement = true;
     }
 
     // in child classes, use 'protected override void Update()' and call 'base.Update();' at the top of the update
     protected virtual void Update()
     {
-        if (currentState != null)
-        {
+        Debug.Log("ENEMY Enable Movement: " + enableMovement);
+        // if (currentState != null)
+        // {
             HandleState();
+        // }
+        
+    }
+
+    protected virtual void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            OnDamagePlayer?.Invoke(attackDmg);
+            rb.linearVelocity = Vector3.zero;
+            ChangeState(EnemyState.Attacking);
         }
         
+    }
+
+    protected virtual void OnTriggerEnter2D(Collider2D other)
+    {
+        // TODO: player bullets/ranged weapons that should knockback enemies include here
+        if (other.gameObject.CompareTag("PlayerWeapon"))
+        {
+            enableMovement = false;
+            
+            Debug.Log("HIT BY PLAYER WEAPON");
+            knockback.KnockbackObject(gameObject, other.gameObject);
+            dmgTaken = 2f;
+            ChangeState(EnemyState.TakeDamage);
+        }
     }
     
     protected virtual void TakeDamage(float dmgAmount)
@@ -84,9 +119,9 @@ public abstract class BaseEnemy : MonoBehaviour
     // called in the update function
     protected void HandleState()
     {
-        #if UNITY_EDITOR
-                Debug.Log("PARENT:State changed to " + currentState);
-        #endif
+        // #if UNITY_EDITOR
+        //         Debug.Log("PARENT:State changed to " + currentState);
+        // #endif
         switch (currentState)
         {
             case EnemyState.Idle:

@@ -6,7 +6,6 @@ using UnityEngine;
 public class MeleeEnemy : BaseEnemy
 {
     //might be useful to keep track of the previous state
-
     private bool movingInPatrolState;
     private bool enablePatrolStateMovement;
     private Vector2 patrolMoveDirection;
@@ -20,6 +19,8 @@ public class MeleeEnemy : BaseEnemy
         patrolRange = 8f;
         movingInPatrolState = false;
         enablePatrolStateMovement = false;
+        enableMovement = true;
+
     }
 
     protected override void Update()
@@ -38,7 +39,13 @@ public class MeleeEnemy : BaseEnemy
 
     protected override void HandleIdle()
     {
-        enableMovement = false;
+        if (!enableMovement) return;
+        
+        if (distanceToPlayer < agroRange)
+        {
+            ChangeState(EnemyState.Agro);
+            return;
+        }
         if (distanceToPlayer < patrolRange)
         {
             ChangeState(EnemyState.Patrol);
@@ -50,6 +57,8 @@ public class MeleeEnemy : BaseEnemy
     
     protected override void HandlePatrol()
     {
+        if (!enableMovement) return;
+
         if (distanceToPlayer < agroRange)
         {
             rb.linearVelocity = Vector3.zero;
@@ -83,7 +92,6 @@ public class MeleeEnemy : BaseEnemy
 
     private IEnumerator PatrolMovementCR()
     {
-        Debug.Log("Started patrol movement Coroutine");
         enablePatrolStateMovement = true;
         yield return new WaitForSeconds(0.5f);
         enablePatrolStateMovement = false;
@@ -94,7 +102,6 @@ public class MeleeEnemy : BaseEnemy
 
     private void PatrolMovement()
     {
-        Debug.Log("Started patrol movement for 0.5 seconds");
         rb.linearVelocity = patrolMoveDirection * (Time.deltaTime * moveSpeed);
     }
     
@@ -102,6 +109,8 @@ public class MeleeEnemy : BaseEnemy
     
     protected override void HandleAgro()
     {
+        if (!enableMovement) return;
+        
         if (distanceToPlayer > agroRange)
         {
             rb.linearVelocity = Vector3.zero;
@@ -121,22 +130,20 @@ public class MeleeEnemy : BaseEnemy
 
     protected override void HandleAttacking()
     {
-       // TODO: apply knockback to the enemy
        
-       // TODO: fire event to the player controller that will deal attackDmg to the player
-       
-       // AFTER knockback is completed, switch state back Patrol
-       ChangeState(EnemyState.Patrol);
+       ChangeState(EnemyState.Idle);
     }
 
     protected override void HandleDamage()
     {
+
+
         base.TakeDamage(dmgTaken);
         if (health <= 0)
         {
             return;
         }
-        ChangeState(EnemyState.Patrol);
+        ChangeState(EnemyState.Idle);
 
     }
 
@@ -146,22 +153,17 @@ public class MeleeEnemy : BaseEnemy
         Destroy(gameObject);
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    protected override void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("Player"))
-        {
-            rb.linearVelocity = Vector3.zero;
-            ChangeState(EnemyState.Attacking);
-        }
+        base.OnCollisionEnter2D(collision);
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    protected override void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.CompareTag("PlayerWeapon"))
-        {
-            dmgTaken = 2f;
-            ChangeState(EnemyState.TakeDamage);
-        }
+        if (!enableMovement) return;
+        
+        base.OnTriggerEnter2D(collision);
+
     }
     
 }

@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.Hierarchy;
 using UnityEngine;
 
 public class Knockback : MonoBehaviour
@@ -21,20 +22,20 @@ public class Knockback : MonoBehaviour
         Debug.Log("In knockback script");
         
         Rigidbody2D targetRB = target.GetComponent<Rigidbody2D>();
-        Rigidbody2D incomingRB = incomingObject.GetComponent<Rigidbody2D>();
-        if (targetRB == null || incomingRB == null)
+        //Rigidbody2D incomingRB = incomingObject.GetComponent<Rigidbody2D>();
+        if (targetRB == null)
         {
             Debug.Log("targetRB or incomingRB is null");
             return;
         }
         
         //TODO: disable movement of target and incoming objects instead of the line below
-        targetRB.velocity = Vector2.zero;
-        incomingRB.velocity = Vector2.zero;
+        targetRB.linearVelocity = Vector2.zero;
+        //incomingRB.linearVelocity = Vector2.zero;
         
         
         //calculate knockback direction
-        Vector2 direction = (target.transform.position - transform.position).normalized;
+        Vector2 direction = (target.transform.position - incomingObject.transform.position).normalized;
         //apply knockback
         targetRB.linearVelocity = new Vector2(direction.x * knockbackStrength, direction.y * knockbackStrength);
 
@@ -54,8 +55,20 @@ public class Knockback : MonoBehaviour
         {
             targetRB.linearVelocity = Vector3.zero;
             //enable movement for the gameobjects target and incomingobject
-            
+            IdentifyTarget(target);
             inKnockback = false;
+        }
+    }
+
+    private void IdentifyTarget(GameObject target)
+    {
+        if (target.CompareTag("Player"))
+        {
+            target.gameObject.GetComponent<Player>().ExitKnockback();
+        }
+        else if (target.CompareTag("Enemy"))
+        {
+            target.gameObject.GetComponent<BaseEnemy>().ExitKnockback();
         }
     }
     

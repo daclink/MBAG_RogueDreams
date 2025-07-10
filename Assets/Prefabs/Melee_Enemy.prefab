@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 4047588612167406092}
   - component: {fileID: 3331891198007786218}
   - component: {fileID: 5777749690199371584}
+  - component: {fileID: -7593655131362422988}
   m_Layer: 0
   m_Name: Melee_Enemy
   m_TagString: Enemy
@@ -170,4 +171,19 @@ MonoBehaviour:
   moveSpeed: 120
   agroRange: 3
   patrolRange: 5
+  knockback: {fileID: -7593655131362422988}
   currentState: 0
+--- !u!114 &-7593655131362422988
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3024127687653583934}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29f1c90b7f834d2589d9f47c0fc9e7e9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  knockbackStrength: 15
+  knockbackDuration: 0.15

@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 5495002955294341502}
   - component: {fileID: 745829555252119656}
   - component: {fileID: 5738996269611469754}
+  - component: {fileID: 7147059276842096835}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -135,6 +136,7 @@ MonoBehaviour:
   isMeleeing: 0
   meleeArea: {fileID: 8507161216502267023}
   collectedItem: {fileID: 0}
+  knockback: {fileID: 7147059276842096835}
 --- !u!114 &9153042883107652899
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -224,6 +226,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   startHealth: 100
+--- !u!114 &7147059276842096835
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 833193759461314858}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29f1c90b7f834d2589d9f47c0fc9e7e9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  knockbackStrength: 15
+  knockbackDuration: 0.15
 --- !u!1 &2060872873663126492
 GameObject:
   m_ObjectHideFlags: 0

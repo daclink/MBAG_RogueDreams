@@ -8,12 +8,15 @@ public class Player : MonoBehaviour
     
     
     private const string ITEM_TAG = "Item";
+    private const string ENEMY_TAG = "Enemy";
     
     [SerializeField] private float speed;
     [SerializeField] private Vector2 moveDir;
     [SerializeField] private bool isMeleeing = false;
     [SerializeField] private GameObject meleeArea;
     [SerializeField] private BaseItem collectedItem;
+    [SerializeField] private Knockback knockback;
+
     
     
     // [SerializeField] private int health = 10;
@@ -26,15 +29,16 @@ public class Player : MonoBehaviour
 
     private void Start()
     {
+        
         meleeArea.SetActive(false);
         RoomExits.OnRoomExit += DisableMovement;
         LevelExit.OnLevelExit += DisableMovement;
-        
-        // healthText.UpdateHealth(health);
     }
 
     private void Update()
     {
+        Debug.Log("PLAYER Enable Movement: " + enableMovement);
+
         if (!enableMovement) return;
         Move();
 
@@ -54,6 +58,11 @@ public class Player : MonoBehaviour
     private void DisableMovement()
     {
         enableMovement = !enableMovement;
+    }
+
+    public void ExitKnockback()
+    {
+        enableMovement = true;
     }
 
     /// <summary>
@@ -117,6 +126,18 @@ public class Player : MonoBehaviour
             collectedItem.Collect(this);
             // reset collectedItem back to null
             collectedItem = null;
+        }
+
+        //knockback player/this
+        //TODO: add tags for things such as projectiles
+        //TODO: take player damage here
+        if (other.gameObject.CompareTag(ENEMY_TAG))
+        {
+            if(knockback != null)
+            {
+                enableMovement = false;
+                knockback.KnockbackObject(gameObject, other.gameObject);
+            }
         }
         
         
