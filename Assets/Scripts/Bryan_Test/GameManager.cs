@@ -20,6 +20,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject meleeEnemyPrefab;
 
     private int sceneNumber;
+    
+    public int targetFrameRate = 60;
 
     
     private void Awake()
@@ -43,6 +45,9 @@ public class GameManager : MonoBehaviour
         SceneManager.sceneLoaded += OnSceneLoaded;
 
         LoadScene(sceneNumber);
+        
+        QualitySettings.vSyncCount = 0;
+        Application.targetFrameRate = targetFrameRate;
     }
 
     //loads the next available scene - hard coded for now with just 2 scenes

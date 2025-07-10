@@ -167,7 +167,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   health: 10
   attackDmg: 2
-  moveSpeed: 5
-  agroRange: 0
-  patrolRange: 0
+  moveSpeed: 120
+  agroRange: 3
+  patrolRange: 5
   currentState: 0

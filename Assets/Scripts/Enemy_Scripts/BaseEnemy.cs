@@ -10,7 +10,7 @@ public abstract class BaseEnemy : MonoBehaviour
     [SerializeField] protected float agroRange;
     [SerializeField] protected float patrolRange;
 
-    protected GameObject player;
+    protected Transform playerTransform;
     protected float distanceToPlayer;
     protected float dmgTaken;
     
@@ -29,7 +29,7 @@ public abstract class BaseEnemy : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         
         //this should assign player correctly assuming the player is spawned properly BEFORE the enemy is
-        player = GameObject.FindGameObjectWithTag("Player");
+        playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
         
         PostStart();
 

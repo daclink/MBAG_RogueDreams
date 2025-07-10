@@ -19,7 +19,7 @@ public class Player : MonoBehaviour
     // [SerializeField] private int health = 10;
     // [SerializeField] private HealthText healthText;
 
-    private bool canMove = true;
+    private bool enableMovement = true;
     
     private float timeToMelee = .25f;
     private float meleeTimer = 0f;
@@ -35,7 +35,7 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
-        if (!canMove) return;
+        if (!enableMovement) return;
         Move();
 
         if (isMeleeing)
@@ -53,7 +53,7 @@ public class Player : MonoBehaviour
 
     private void DisableMovement()
     {
-        canMove = !canMove;
+        enableMovement = !enableMovement;
     }
 
     /// <summary>
