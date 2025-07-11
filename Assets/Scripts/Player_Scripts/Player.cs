@@ -8,34 +8,34 @@ public class Player : MonoBehaviour
     
     
     private const string ITEM_TAG = "Item";
+    private const string ENEMY_TAG = "Enemy";
+    private const string ENEMY_BULLET_TAG = "EnemyBullet";
     
     [SerializeField] private float speed;
     [SerializeField] private Vector2 moveDir;
     [SerializeField] private bool isMeleeing = false;
     [SerializeField] private GameObject meleeArea;
     [SerializeField] private BaseItem collectedItem;
+    [SerializeField] private Knockback knockback;
+    [SerializeField] private float timeToMelee;
     
-    
-    // [SerializeField] private int health = 10;
-    // [SerializeField] private HealthText healthText;
 
-    private bool canMove = true;
-
-    private float timeToMelee = .25f;
-    private float meleeTimer = 0f;
+    private bool enableMovement = true;
+    private float meleeTimer;
 
     private void Start()
     {
+        meleeTimer = 0f;
         meleeArea.SetActive(false);
         RoomExits.OnRoomExit += DisableMovement;
         LevelExit.OnLevelExit += DisableMovement;
-        
-        // healthText.UpdateHealth(health);
     }
 
     private void Update()
     {
-        if (!canMove) return;
+        Debug.Log("PLAYER Enable Movement: " + enableMovement);
+
+        if (!enableMovement) return;
         Move();
 
         if (isMeleeing)
@@ -44,7 +44,7 @@ public class Player : MonoBehaviour
 
             if (meleeTimer >= timeToMelee)
             {
-                meleeTimer = 0;
+                meleeTimer = 0f;
                 isMeleeing = false;
                 meleeArea.SetActive(isMeleeing);
             }
@@ -53,7 +53,12 @@ public class Player : MonoBehaviour
 
     private void DisableMovement()
     {
-        canMove = !canMove;
+        enableMovement = !enableMovement;
+    }
+
+    public void ExitKnockback()
+    {
+        enableMovement = true;
     }
 
     /// <summary>
@@ -93,22 +98,11 @@ public class Player : MonoBehaviour
             Melee();
         }
     }
-
-    // public void AddHealth(int heal)
-    // {
-    //     health += heal;
-    //     healthText.UpdateHealth(health);
-    // }
-
-
-    public void OnDestroy()
-    {
-        RoomExits.OnRoomExit -= DisableMovement;
-        LevelExit.OnLevelExit -= DisableMovement;
-    }
-
+    
     private void OnCollisionEnter2D(Collision2D other)
     {
+        Debug.Log("Player hit by : " + other.gameObject.tag);
+        
         if (other.transform.TryGetComponent(out BaseItem item))
         {
             // set collectedItem to anything that inherits the item base class
@@ -118,5 +112,24 @@ public class Player : MonoBehaviour
             // reset collectedItem back to null
             collectedItem = null;
         }
+
+        //knockback player/this
+        //TODO: add tags for things such as projectiles
+        if (other.gameObject.CompareTag(ENEMY_TAG) || other.gameObject.CompareTag(ENEMY_BULLET_TAG))
+        {
+            if (knockback != null)
+            {
+                Debug.Log("Knockback called on player");
+                enableMovement = false;
+                knockback.KnockbackObject(gameObject, other.gameObject);
+            }
+            
+        }
+    }
+    
+    public void OnDestroy()
+    {
+        RoomExits.OnRoomExit -= DisableMovement;
+        LevelExit.OnLevelExit -= DisableMovement;
     }
 }

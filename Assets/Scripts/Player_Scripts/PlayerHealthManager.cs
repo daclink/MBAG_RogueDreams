@@ -10,6 +10,8 @@ public class PlayerHealthManager : MonoBehaviour
     
     void Start()
     {
+        BulletScript.OnDamagePlayer += RemoveHealth;
+        BaseEnemy.OnDamagePlayer += RemoveHealth;
         HealingItem.OnAddHealth += AddHealth;
         SetHealth(startHealth);
         //listen to 2 events
@@ -57,9 +59,9 @@ public class PlayerHealthManager : MonoBehaviour
      * current health and makes sure health does not go below 0
      * int health is the passed in int value to subtract from the current health
      */
-    void RemoveHealth(int health)
+    void RemoveHealth(float health)
     {
-        currHealth -= health;
+        currHealth -= (int) health;
         if (currHealth <= 0)
         {
             currHealth = 0;
@@ -74,6 +76,8 @@ public class PlayerHealthManager : MonoBehaviour
     public void OnDestroy()
     {
         HealingItem.OnAddHealth -= AddHealth;
+        BaseEnemy.OnDamagePlayer -= RemoveHealth;
+        BulletScript.OnDamagePlayer -= RemoveHealth;
     }
 
 

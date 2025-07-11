@@ -12,9 +12,10 @@ GameObject:
   - component: {fileID: 433803515960145620}
   - component: {fileID: 9043560273130262835}
   - component: {fileID: 9153042883107652899}
+  - component: {fileID: 5738996269611469754}
+  - component: {fileID: 7147059276842096835}
   - component: {fileID: 5495002955294341502}
   - component: {fileID: 745829555252119656}
-  - component: {fileID: 5738996269611469754}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -134,9 +135,9 @@ MonoBehaviour:
   moveDir: {x: 0, y: 0}
   isMeleeing: 0
   meleeArea: {fileID: 8507161216502267023}
-  health: 10
   collectedItem: {fileID: 0}
-  healthText: {fileID: 0}
+  knockback: {fileID: 7147059276842096835}
+  timeToMelee: 0.25
 --- !u!114 &9153042883107652899
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -150,6 +151,33 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cam: {fileID: 0}
+--- !u!114 &5738996269611469754
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 833193759461314858}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 283f3bf621cfa4660a6d34a7d3392d94, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  startHealth: 100
+--- !u!114 &7147059276842096835
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 833193759461314858}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29f1c90b7f834d2589d9f47c0fc9e7e9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  knockbackStrength: 15
+  knockbackDuration: 0.15
 --- !u!58 &5495002955294341502
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -212,20 +240,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 1
-  m_Constraints: 0
---- !u!114 &5738996269611469754
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 833193759461314858}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 283f3bf621cfa4660a6d34a7d3392d94, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  startHealth: 100
+  m_Constraints: 4
 --- !u!1 &2060872873663126492
 GameObject:
   m_ObjectHideFlags: 0
@@ -499,7 +514,7 @@ GameObject:
   - component: {fileID: 6257997894013893949}
   m_Layer: 0
   m_Name: MeleeArea
-  m_TagString: Untagged
+  m_TagString: PlayerWeapon
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

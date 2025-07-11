@@ -17,8 +17,13 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject playerPrefab;
     [SerializeField] private GameObject playerSideViewPrefab;
     [SerializeField] private Canvas UICanvasPrefab;
+    [SerializeField] private GameObject meleeEnemyPrefab;
+    [SerializeField] private GameObject rangedEnemyPrefab;
+    [SerializeField] private GameObject healingItemPrefab;
 
     private int sceneNumber;
+    
+    public int targetFrameRate = 60;
 
     
     private void Awake()
@@ -42,6 +47,9 @@ public class GameManager : MonoBehaviour
         SceneManager.sceneLoaded += OnSceneLoaded;
 
         LoadScene(sceneNumber);
+        
+        QualitySettings.vSyncCount = 0;
+        Application.targetFrameRate = targetFrameRate;
     }
 
     //loads the next available scene - hard coded for now with just 2 scenes
@@ -78,6 +86,9 @@ public class GameManager : MonoBehaviour
             Instantiate(UICanvasPrefab, new Vector3(0, 0, -10), Quaternion.identity);
             Instantiate(mainCameraPrefab, new Vector3(-10, 23, -10), Quaternion.identity);
             Instantiate(playerPrefab, new Vector3(-10, 23, 0), Quaternion.identity);
+            Instantiate(meleeEnemyPrefab, new Vector3(-5, 23, 0), Quaternion.identity);
+            Instantiate(rangedEnemyPrefab, new Vector3(12, 21, 0), Quaternion.identity);
+            Instantiate(healingItemPrefab, new Vector3(12, 12, 0), Quaternion.identity);
             OnCameraInstantiated?.Invoke();
         }
     }
