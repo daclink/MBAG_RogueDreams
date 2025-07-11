@@ -93,7 +93,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rotateSpeed: 90
-  healAmount: 2
+  healAmount: 5
 --- !u!1 &7610546329953580297
 GameObject:
   m_ObjectHideFlags: 0
