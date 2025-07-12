@@ -25,6 +25,7 @@ public abstract class BaseEnemy : MonoBehaviour
     protected float dmgTaken;
     protected bool isAgroed;
     protected bool enableMovement;
+    protected bool playerDead;
     
     // to be used in each child class.
     protected abstract void PostStart();
@@ -41,6 +42,7 @@ public abstract class BaseEnemy : MonoBehaviour
         enableMovement = true;
         isAgroed = false;
     }
+    
 
     // when exiting knockback, enemies movement needs to be put back to true
     public void ExitKnockback()
@@ -120,6 +122,7 @@ public abstract class BaseEnemy : MonoBehaviour
     // called in the update function
     protected void HandleState()
     {
+        
         // #if UNITY_EDITOR
         //         Debug.Log("PARENT:State changed to " + currentState);
         // #endif

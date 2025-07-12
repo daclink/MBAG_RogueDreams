@@ -163,7 +163,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 283f3bf621cfa4660a6d34a7d3392d94, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  startHealth: 100
+  startHealth: 10
 --- !u!114 &7147059276842096835
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -176,7 +176,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 29f1c90b7f834d2589d9f47c0fc9e7e9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  knockbackStrength: 15
+  knockbackStrength: 8
   knockbackDuration: 0.15
 --- !u!58 &5495002955294341502
 CircleCollider2D:
