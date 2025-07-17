@@ -26,6 +26,7 @@ public abstract class BaseEnemy : MonoBehaviour
     protected bool isAgroed;
     protected bool enableMovement;
     protected bool playerDead;
+    protected float validIdleRange;
     
     // to be used in each child class.
     protected abstract void PostStart();
@@ -41,6 +42,7 @@ public abstract class BaseEnemy : MonoBehaviour
         ChangeState(EnemyState.Idle);
         enableMovement = true;
         isAgroed = false;
+        validIdleRange = patrolRange + 1f;
     }
     
 
@@ -55,6 +57,17 @@ public abstract class BaseEnemy : MonoBehaviour
     protected virtual void Update()
     {
         HandleState();
+
+        if (playerTransform == null)
+        {
+            Debug.Log("Player is inactive, keeping state in idle");
+            currentState = EnemyState.Idle;
+            distanceToPlayer = validIdleRange;
+        }
+        else
+        {
+            distanceToPlayer = Vector3.Distance(playerTransform.position, transform.position);
+        }
     }
 
     /**
@@ -79,7 +92,7 @@ public abstract class BaseEnemy : MonoBehaviour
         {
             enableMovement = false;
             
-            Debug.Log("HIT BY PLAYER WEAPON");
+            // Debug.Log("HIT BY PLAYER WEAPON");
             knockback.KnockbackObject(gameObject, other.gameObject);
             dmgTaken = 2f;
             ChangeState(EnemyState.TakeDamage);
@@ -92,7 +105,7 @@ public abstract class BaseEnemy : MonoBehaviour
         health -= dmgAmount;
         if (health <= 0)
         {
-            Debug.Log("Enemy is dead");
+            // Debug.Log("Enemy is dead");
             ChangeState(EnemyState.Dead);
             //any other code to kill the enemy gameObject
         }

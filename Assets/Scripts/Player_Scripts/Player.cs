@@ -33,7 +33,7 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
-        Debug.Log("PLAYER Enable Movement: " + enableMovement);
+        // Debug.Log("PLAYER Enable Movement: " + enableMovement);
 
         if (!enableMovement) return;
         Move();
@@ -101,7 +101,7 @@ public class Player : MonoBehaviour
     
     private void OnCollisionEnter2D(Collision2D other)
     {
-        Debug.Log("Player hit by : " + other.gameObject.tag);
+        // Debug.Log("Player hit by : " + other.gameObject.tag);
         
         if (other.transform.TryGetComponent(out BaseItem item))
         {
@@ -117,9 +117,9 @@ public class Player : MonoBehaviour
         //TODO: add tags for things such as projectiles
         if (other.gameObject.CompareTag(ENEMY_TAG) || other.gameObject.CompareTag(ENEMY_BULLET_TAG))
         {
-            if (knockback != null)
+            if (knockback != null && gameObject.activeInHierarchy)
             {
-                Debug.Log("Knockback called on player");
+                // Debug.Log("Knockback called on player");
                 enableMovement = false;
                 knockback.KnockbackObject(gameObject, other.gameObject);
             }
