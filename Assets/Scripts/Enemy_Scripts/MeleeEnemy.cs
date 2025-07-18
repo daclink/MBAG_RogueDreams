@@ -27,8 +27,6 @@ public class MeleeEnemy : BaseEnemy
     {
         base.Update();
         
-        distanceToPlayer = Vector3.Distance(playerTransform.position, transform.position);
-
         //handles patrol state movements 
         if (enablePatrolStateMovement)
         {

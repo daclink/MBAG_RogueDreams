@@ -8,7 +8,7 @@ public class HealthText : MonoBehaviour
 
     public void Start()
     {
-        PlayerHealthManager.OnSetHealthText += UpdateHealth;
+        //PlayerHealthManager.OnSetHealthText += UpdateHealth;
     }
 
     public void UpdateHealth(int health)
@@ -18,6 +18,6 @@ public class HealthText : MonoBehaviour
 
     public void OnDestroy()
     {
-        PlayerHealthManager.OnSetHealthText -= UpdateHealth;
+        //PlayerHealthManager.OnSetHealthText -= UpdateHealth;
     }
 }

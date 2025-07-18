@@ -22,9 +22,7 @@ public class RangedEnemy : BaseEnemy
     protected override void Update()
     {
         base.Update(); 
-
-        distanceToPlayer = Vector3.Distance(playerTransform.position, transform.position);
-
+        
     }
     
     /**

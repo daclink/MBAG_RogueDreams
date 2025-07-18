@@ -1,3 +1,4 @@
+using System.Collections;
 using TMPro;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -45,11 +46,23 @@ public class GameManager : MonoBehaviour
         sceneNumber = SceneManager.GetActiveScene().buildIndex;
         LevelExit.OnLevelExit += LoadNextScene;
         SceneManager.sceneLoaded += OnSceneLoaded;
+        PlayerHealthManager.OnPlayerDeath += PlayerDeath;
 
         LoadScene(sceneNumber);
         
         QualitySettings.vSyncCount = 0;
         Application.targetFrameRate = targetFrameRate;
+    }
+
+    void PlayerDeath()
+    {
+        StartCoroutine(DeathSequence());
+    }
+
+    public IEnumerator DeathSequence()
+    {
+        yield return new WaitForSeconds(3f);
+        LoadNextScene();
     }
 
     //loads the next available scene - hard coded for now with just 2 scenes

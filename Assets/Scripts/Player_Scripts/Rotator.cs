@@ -8,13 +8,13 @@ public class Rotator : MonoBehaviour
     /// <summary>
     /// Will make the current object look at the target
     /// </summary>
-    protected void LookAt(Vector3 target)
+    protected void LookAt(GameObject objectToRotate, Vector3 target)
     {
         //Get the angle between the transform position and the target, added 180 to deal with angle offset
         float lookAngle = AngleBetweenTwoPoints(transform.position, target) + 180;
         
         //set new rotation
-        transform.eulerAngles = new Vector3(0, 0, lookAngle);
+        objectToRotate.transform.eulerAngles = new Vector3(0, 0, lookAngle);
     }
     /// <summary>
     /// Returns angle between pointA and pointB
