@@ -2,8 +2,11 @@ using UnityEngine;
 
 public class PlayerHealthManager : MonoBehaviour
 {
-    public delegate void SetHealthText(int health);
-    public static event SetHealthText OnSetHealthText;
+    public delegate void PlayerDeath();
+    public static event PlayerDeath OnPlayerDeath;
+    
+    public delegate void SetHealthAmt(int health);
+    public static event SetHealthAmt OnSetHealthAmt;
     
     [SerializeField] private int startHealth = 100;
     private int currHealth;
@@ -24,7 +27,9 @@ public class PlayerHealthManager : MonoBehaviour
     {
         //set the healthBarVisual here
         //fire event to the HealthText script with the health value
-        OnSetHealthText?.Invoke(health);
+        
+        
+        OnSetHealthAmt?.Invoke(health);
     }
     
     /**
@@ -67,6 +72,9 @@ public class PlayerHealthManager : MonoBehaviour
             currHealth = 0;
             SetHealthBar(currHealth);
             // kill player here either directly or through an event to another script
+            OnPlayerDeath?.Invoke();
+            gameObject.SetActive(false);
+            Destroy(gameObject);
             return;
         }
         SetHealthBar(currHealth);
