@@ -17,5 +17,5 @@ public class BaseItem : MonoBehaviour
         transform.eulerAngles = new Vector3(rot.x, rot.y, rot.z + (-rotateSpeed * Time.deltaTime));
     }
 
-    public virtual void Collect(Player player) {}
+    public virtual void Collect() {}
 }

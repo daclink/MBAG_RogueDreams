@@ -108,7 +108,7 @@ public class Player : MonoBehaviour
             // set collectedItem to anything that inherits the item base class
             collectedItem = item;
             // call collectedItem.Collect(this)
-            collectedItem.Collect(this);
+            collectedItem.Collect();
             // reset collectedItem back to null
             collectedItem = null;
         }
