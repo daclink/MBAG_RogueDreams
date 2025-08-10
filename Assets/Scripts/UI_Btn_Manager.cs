@@ -5,6 +5,9 @@ using UnityEngine.SceneManagement;
 public class UI_Btn_Manager : MonoBehaviour
 {
     
+    private static UI_Btn_Manager instance;
+    public static UI_Btn_Manager Instance { get {return instance; } }
+
     public delegate void NewGamePress();
     public static event NewGamePress OnNewGamePress;
 
@@ -13,7 +16,18 @@ public class UI_Btn_Manager : MonoBehaviour
 
     void Start()
     {
-        DontDestroyOnLoad(gameObject);
+        //singleton
+        if (instance != null && instance != this)
+        {
+            Destroy(gameObject);
+        }
+        else
+        {
+            instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        
+        
     }
     
     public void NewGame()
