@@ -39,7 +39,7 @@ public class UI_Btn_Manager : MonoBehaviour
     public void LoadGame()
     {
         Debug.Log("Load Game");
-        OnNewGamePress?.Invoke();
+        OnLoadGamePress?.Invoke();
     }
 
     public void ExitGame()
