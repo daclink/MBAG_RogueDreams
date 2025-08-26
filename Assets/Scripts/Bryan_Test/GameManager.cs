@@ -14,6 +14,7 @@ public class GameManager : MonoBehaviour
     public delegate void CameraInstantiated();
     public static event CameraInstantiated OnCameraInstantiated;
     
+    
     [SerializeField] private Camera mainCameraPrefab;
     [SerializeField] private GameObject playerPrefab;
     [SerializeField] private GameObject playerSideViewPrefab;
@@ -57,6 +58,13 @@ public class GameManager : MonoBehaviour
         QualitySettings.vSyncCount = 0;
         Application.targetFrameRate = targetFrameRate;
     }
+
+    // public void OpenPauseMenu()
+    // {
+    //     Debug.Log("Game Manager open pause menu");
+    //     PauseManager.Instance.PauseGame();
+    // }
+    
 
     void PlayerDeath()
     {

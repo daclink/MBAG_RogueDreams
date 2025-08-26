@@ -14,6 +14,7 @@ public class UI_Btn_Manager : MonoBehaviour
     public delegate void LoadGamePress();
     public static event LoadGamePress OnLoadGamePress;
 
+
     void Start()
     {
         //singleton
@@ -26,8 +27,6 @@ public class UI_Btn_Manager : MonoBehaviour
             instance = this;
             DontDestroyOnLoad(gameObject);
         }
-        
-        
     }
     
     public void NewGame()
@@ -48,8 +47,30 @@ public class UI_Btn_Manager : MonoBehaviour
         Application.Quit();
     }
 
+    //when pressing the menu button in the main menu, call the pause game function in the pause manager and display the pause menu in the main menu scene
     public void MainMenu()
     {
         Debug.Log("Main Menu");
+        OpenPauseMenu();
     }
+
+    private void OpenPauseMenu()
+    {
+        // GameManager.Instance.OpenPauseMenu();
+        PauseManager.Instance.PauseGame();
+    }
+    
+    
+    // -------------------------------------- Pause Menu -----------------------------------//
+    public void ExitPauseMenu()
+    {
+        ClosePauseMenu();
+    }
+
+    private void ClosePauseMenu()
+    {
+        PauseManager.Instance.ResumeGame();
+        //mainMenu.SetActive(true);
+    }
+    
 }
