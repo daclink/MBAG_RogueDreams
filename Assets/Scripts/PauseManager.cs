@@ -1,4 +1,7 @@
+using System;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PauseManager : MonoBehaviour
 {
@@ -12,6 +15,7 @@ public class PauseManager : MonoBehaviour
     
     private PauseAction action;
     private bool paused = false;
+    private bool gamePausable = false;
 
     private void Awake()
     {
@@ -32,6 +36,12 @@ public class PauseManager : MonoBehaviour
 
     private void Start()
     {
+        SceneManager.activeSceneChanged += OnSceneChanged;
+        
+        int startScene = SceneManager.GetActiveScene().buildIndex;
+        
+        if(startScene != 0) gamePausable = true;
+        
         if (instance != null && instance != this)
         {
             Debug.Log("Destroying duplicate menu object.");
@@ -47,6 +57,19 @@ public class PauseManager : MonoBehaviour
         action.Pause.PauseGame.performed += _ => DeterminePause();
     }
 
+    private void OnSceneChanged(Scene curr, Scene next)
+    {
+        if (next.buildIndex != 0)
+        {
+            gamePausable = true;
+        }
+        else
+        {
+            gamePausable = false;
+        }
+    }
+    
+    
     private void DeterminePause()
     {
         if (paused)
@@ -61,6 +84,8 @@ public class PauseManager : MonoBehaviour
     
     public void PauseGame()
     {
+        if (!gamePausable) return;
+        
         Debug.Log("pause manager: Game Paused");
         Time.timeScale = 0;
         AudioListener.pause = true;
@@ -71,11 +96,17 @@ public class PauseManager : MonoBehaviour
 
     public void ResumeGame()
     {
+        if (!gamePausable) return;
+        
         Debug.Log("Game Resumed");
         Time.timeScale = 1;
         AudioListener.pause = false;
         paused = false;
         optionsMenu.SetActive(false);
     }
-    
+
+    private void OnDestroy()
+    {
+        SceneManager.activeSceneChanged -= OnSceneChanged;
+    }
 }

@@ -26,7 +26,6 @@ public class GameManager : MonoBehaviour
     private int sceneNumber;
     
     public int targetFrameRate = 60;
-
     
     private void Awake()
     {
@@ -64,6 +63,7 @@ public class GameManager : MonoBehaviour
     //     Debug.Log("Game Manager open pause menu");
     //     PauseManager.Instance.PauseGame();
     // }
+    
     
 
     void PlayerDeath()
