@@ -6,7 +6,6 @@ using UnityEngine.InputSystem;
 public class Player : MonoBehaviour
 {
     
-    
     private const string ITEM_TAG = "Item";
     private const string ENEMY_TAG = "Enemy";
     private const string ENEMY_BULLET_TAG = "EnemyBullet";
@@ -73,7 +72,7 @@ public class Player : MonoBehaviour
         //change current position to new position
         transform.position = new Vector3(newPos.x, newPos.y, pos.z);
     }
-
+    
     private void Melee()
     {
         isMeleeing = true;
@@ -98,6 +97,7 @@ public class Player : MonoBehaviour
             Melee();
         }
     }
+    
     
     private void OnCollisionEnter2D(Collision2D other)
     {

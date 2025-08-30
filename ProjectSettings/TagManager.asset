@@ -8,6 +8,7 @@ TagManager:
   - Enemy
   - PlayerWeapon
   - EnemyBullet
+  - MainMenu
   layers:
   - Default
   - TransparentFX

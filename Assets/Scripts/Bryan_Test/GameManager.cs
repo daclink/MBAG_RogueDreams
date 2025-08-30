@@ -14,6 +14,7 @@ public class GameManager : MonoBehaviour
     public delegate void CameraInstantiated();
     public static event CameraInstantiated OnCameraInstantiated;
     
+    
     [SerializeField] private Camera mainCameraPrefab;
     [SerializeField] private GameObject playerPrefab;
     [SerializeField] private GameObject playerSideViewPrefab;
@@ -25,7 +26,6 @@ public class GameManager : MonoBehaviour
     private int sceneNumber;
     
     public int targetFrameRate = 60;
-
     
     private void Awake()
     {
@@ -45,6 +45,10 @@ public class GameManager : MonoBehaviour
     {
         sceneNumber = SceneManager.GetActiveScene().buildIndex;
         LevelExit.OnLevelExit += LoadNextScene;
+        
+        //temporary for now until save game stuff is setup
+        UI_Btn_Manager.OnNewGamePress += LoadNextScene;
+        UI_Btn_Manager.OnLoadGamePress += LoadNextScene;
         SceneManager.sceneLoaded += OnSceneLoaded;
         PlayerHealthManager.OnPlayerDeath += PlayerDeath;
 
@@ -53,6 +57,14 @@ public class GameManager : MonoBehaviour
         QualitySettings.vSyncCount = 0;
         Application.targetFrameRate = targetFrameRate;
     }
+
+    // public void OpenPauseMenu()
+    // {
+    //     Debug.Log("Game Manager open pause menu");
+    //     PauseManager.Instance.PauseGame();
+    // }
+    
+    
 
     void PlayerDeath()
     {
@@ -68,13 +80,13 @@ public class GameManager : MonoBehaviour
     //loads the next available scene - hard coded for now with just 2 scenes
     private void LoadNextScene()
     {
-        if (sceneNumber == 0)
+        if (sceneNumber == 0 || sceneNumber == 1)
         {
             sceneNumber++;
         }
         else
         {
-            sceneNumber--;
+            sceneNumber = 0;
         }
         LoadScene(sceneNumber);
     }
@@ -91,10 +103,14 @@ public class GameManager : MonoBehaviour
 
         if (scene.buildIndex == 0)
         {
+            
+        }
+        if (scene.buildIndex == 1)
+        {
             Instantiate(mainCameraPrefab, new Vector3(0, 0, -10), Quaternion.identity);
             Instantiate(playerSideViewPrefab, new Vector3(0, -2.45f, 0), Quaternion.identity);
         } 
-        else if (scene.buildIndex == 1)
+        else if (scene.buildIndex == 2)
         {
             Instantiate(UICanvasPrefab, new Vector3(0, 0, -10), Quaternion.identity);
             Instantiate(mainCameraPrefab, new Vector3(-10, 23, -10), Quaternion.identity);
