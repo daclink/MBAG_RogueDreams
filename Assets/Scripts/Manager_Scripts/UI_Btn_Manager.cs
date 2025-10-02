@@ -4,10 +4,11 @@ using UnityEngine.SceneManagement;
 
 public class UI_Btn_Manager : MonoBehaviour
 {
-    
+    // Singleton object
     private static UI_Btn_Manager instance;
     public static UI_Btn_Manager Instance { get {return instance; } }
 
+    // Events for menu button presses
     public delegate void NewGamePress();
     public static event NewGamePress OnNewGamePress;
 
@@ -17,7 +18,7 @@ public class UI_Btn_Manager : MonoBehaviour
 
     void Start()
     {
-        //singleton
+        // Singleton pattern for the UI Button Manager
         if (instance != null && instance != this)
         {
             Destroy(gameObject);
@@ -29,12 +30,20 @@ public class UI_Btn_Manager : MonoBehaviour
         }
     }
     
+    // -------------------------------------- Main Menu Buttons -----------------------------------//
+    
+    /**
+     * Fires the new game button press event to the GameManager script
+     */
     public void NewGame()
     {
         Debug.Log("New Game");
         OnNewGamePress?.Invoke();
     }
 
+    /**
+     * Fires the load game button press script to the GameManager script
+     */
     public void LoadGame()
     {
         Debug.Log("Load Game");
@@ -46,20 +55,25 @@ public class UI_Btn_Manager : MonoBehaviour
         Debug.Log("Exit Game");
         Application.Quit();
     }
+    
+    /**
+     * When pause button is clicked, open the pause menu using the pause managers pauseGame function
+     */
+    private void OpenPauseMenu()
+    {
+        PauseManager.Instance.PauseGame();
+    }
 
-    //when pressing the menu button in the main menu, call the pause game function in the pause manager and display the pause menu in the main menu scene
+    /**
+     * DEPRICATED
+     * When pressing the menu button in the main menu, call the pause game function in the
+     * pause manager and display the pause menu in the main menu scene
+     */
     public void MainMenu()
     {
         Debug.Log("Main Menu");
         OpenPauseMenu();
     }
-
-    private void OpenPauseMenu()
-    {
-        // GameManager.Instance.OpenPauseMenu();
-        PauseManager.Instance.PauseGame();
-    }
-    
     
     // -------------------------------------- Pause Menu -----------------------------------//
     public void ExitPauseMenu()
@@ -70,7 +84,5 @@ public class UI_Btn_Manager : MonoBehaviour
     private void ClosePauseMenu()
     {
         PauseManager.Instance.ResumeGame();
-        //mainMenu.SetActive(true);
     }
-    
 }

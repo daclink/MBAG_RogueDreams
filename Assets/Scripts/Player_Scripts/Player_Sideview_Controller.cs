@@ -11,8 +11,8 @@ public class Player_Sideview_Controller : MonoBehaviour
     private float rayDistance;
     private float horizontalInput;
     private float newVelocityX;
-
     
+    [Header("Player Side View Settings")]
     [SerializeField] private float airControlFactor;
     [SerializeField] private float groundControlFactor;
     [SerializeField] private float speed;
@@ -20,8 +20,6 @@ public class Player_Sideview_Controller : MonoBehaviour
     [SerializeField] private float jumpForce;
     [SerializeField] private CapsuleCollider2D playerVisualCollider;
     
-
-
     private void Start()
     {
         RoomExits.OnRoomExit += DisableMovement;
@@ -29,14 +27,14 @@ public class Player_Sideview_Controller : MonoBehaviour
         rayDistance = playerVisualCollider.bounds.extents.y + .05f;
     }
     
-    /**
-     * Flips the bool value of enable movement
-     */
     private void DisableMovement()
     {
         enableMovement = !enableMovement;
     }
-
+    
+    /**
+     * Needs to check if the player is on the ground every frame
+     */
     private void Update()
     {
         isGrounded = IsGrounded();
@@ -47,7 +45,7 @@ public class Player_Sideview_Controller : MonoBehaviour
         if (!enableMovement)
         {
             // If movement is disabled, ensure horizontal velocity is zeroed out.
-            // the reason for this is when movement is disabled, there is another script taking over the velocity control (knockback)
+            // The reason for this is when movement is disabled, there is another script taking over the velocity control (knockback)
             rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
             return;
         }
@@ -56,12 +54,12 @@ public class Player_Sideview_Controller : MonoBehaviour
         float currentVelocityX = rb.linearVelocity.x;
         float currentVelocityY = rb.linearVelocity.y;
         
-        //if we are in the air...
+        // If we are in the air...
         if (!isGrounded)
         {
             newVelocityX = Mathf.Lerp(currentVelocityX, targetSpeed, airControlFactor);
         }
-        else // if we are on the ground...
+        else // If we are on the ground...
         {
             newVelocityX = Mathf.Lerp(currentVelocityX, targetSpeed, groundControlFactor);
         }
@@ -69,11 +67,17 @@ public class Player_Sideview_Controller : MonoBehaviour
         rb.linearVelocity = new Vector2(newVelocityX, currentVelocityY);
     }
     
+    /**
+     * New input system function
+     */
     public void OnPlayerMove(InputAction.CallbackContext context)
     {
         horizontalInput = context.ReadValue<Vector2>().x;
     }
 
+    /**
+     * New input system function
+     */
     public void OnPlayerJump(InputAction.CallbackContext context)
     {
         if (!enableMovement || !isGrounded)
@@ -88,11 +92,12 @@ public class Player_Sideview_Controller : MonoBehaviour
         
     }
     
+    /**
+     * Uses a raycast to see if the player is touching the ground
+     */
     private bool IsGrounded()
     {
-        //raycast to see if player is touching the ground
         return Physics2D.Raycast(transform.position, Vector2.down, rayDistance, LayerMask.GetMask("Ground"));
-
     }
     
     public void OnDestroy()

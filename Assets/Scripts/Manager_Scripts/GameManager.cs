@@ -7,14 +7,15 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-    
+    // Singleton object
     private static GameManager instance;
     public static GameManager Instance { get {return instance; } }
     
+    // Event to listen to when the camera is instantiated
     public delegate void CameraInstantiated();
     public static event CameraInstantiated OnCameraInstantiated;
     
-    
+    [Header("Game Prefabs")]
     [SerializeField] private Camera mainCameraPrefab;
     [SerializeField] private GameObject playerPrefab;
     [SerializeField] private GameObject playerSideViewPrefab;
@@ -29,7 +30,7 @@ public class GameManager : MonoBehaviour
     
     private void Awake()
     {
-        //singleton instance of the gamemanager
+        // Singleton instance pattern for the GameManager
         if (instance != null && instance != this)
         {
             Destroy(gameObject);
@@ -46,7 +47,7 @@ public class GameManager : MonoBehaviour
         sceneNumber = SceneManager.GetActiveScene().buildIndex;
         LevelExit.OnLevelExit += LoadNextScene;
         
-        //temporary for now until save game stuff is setup
+        // Temporary for now until save game stuff is setup
         UI_Btn_Manager.OnNewGamePress += LoadNextScene;
         UI_Btn_Manager.OnLoadGamePress += LoadNextScene;
         SceneManager.sceneLoaded += OnSceneLoaded;
@@ -54,30 +55,31 @@ public class GameManager : MonoBehaviour
 
         LoadScene(sceneNumber);
         
+        // Disable vsync and set fps
         QualitySettings.vSyncCount = 0;
         Application.targetFrameRate = targetFrameRate;
     }
-
-    // public void OpenPauseMenu()
-    // {
-    //     Debug.Log("Game Manager open pause menu");
-    //     PauseManager.Instance.PauseGame();
-    // }
     
-    
-
+    /**
+     * Occurs when the player dies
+     */
     void PlayerDeath()
     {
         StartCoroutine(DeathSequence());
     }
 
+    /**
+     * Sequence for when player dies, waits until loading next scene (set for demo to loop to menu)
+     */
     public IEnumerator DeathSequence()
     {
         yield return new WaitForSeconds(3f);
         LoadNextScene();
     }
 
-    //loads the next available scene - hard coded for now with just 2 scenes
+    /**
+     * Loads the next available scene - hard coded for now with just 2 scenes
+     */
     private void LoadNextScene()
     {
         if (sceneNumber == 0 || sceneNumber == 1)
@@ -91,16 +93,20 @@ public class GameManager : MonoBehaviour
         LoadScene(sceneNumber);
     }
 
-    //loads a scene based on the passed in index
+    /**
+     * Loads a scene based on the passed in scene index
+     */
     private void LoadScene(int sceneNumber)
     {
         SceneManager.LoadScene(sceneNumber);
     }
     
-    //everytime a scene is loaded, this function will be called automatically
+    /**
+     * Everytime a scene is loaded, this function will be called automatically
+     * Spawns in all objects needed for each scene when the scene is loaded
+     */
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-
         if (scene.buildIndex == 0)
         {
             
@@ -121,6 +127,4 @@ public class GameManager : MonoBehaviour
             OnCameraInstantiated?.Invoke();
         }
     }
-    
-
 }

@@ -2,9 +2,11 @@ using UnityEngine;
 
 public class PlayerHealthManager : MonoBehaviour
 {
+    // Event for when the player dies / health reaches 0
     public delegate void PlayerDeath();
     public static event PlayerDeath OnPlayerDeath;
     
+    // Event to set the player health to a specific amount
     public delegate void SetHealthAmt(int health);
     public static event SetHealthAmt OnSetHealthAmt;
     
@@ -17,18 +19,19 @@ public class PlayerHealthManager : MonoBehaviour
         BaseEnemy.OnDamagePlayer += RemoveHealth;
         HealingItem.OnAddHealth += AddHealth;
         SetHealth(startHealth);
-        //listen to 2 events
+        // Listen to 3 events
         //  - one event for adding health from the healing items
         //  - one event for taking damage from the enemy class
+        //  - one event for taking damage from a bullet / projectile
     }
     
-
+    /**
+     * Sets the health bar visual to the health int
+     */ 
     void SetHealthBar(int health)
     {
-        //set the healthBarVisual here
-        //fire event to the HealthText script with the health value
-        
-        
+        // Set the healthBarVisual here
+        // Fire event to the HealthText script with the health value
         OnSetHealthAmt?.Invoke(health);
     }
     

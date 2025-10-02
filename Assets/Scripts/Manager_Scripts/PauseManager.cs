@@ -5,13 +5,12 @@ using UnityEngine.SceneManagement;
 
 public class PauseManager : MonoBehaviour
 {
-    //[SerializeField] private GameObject optionsMenuPrefab;
-    [SerializeField] private GameObject optionsMenu;
-    
+    // Singleton object
     private static PauseManager instance;
     public static PauseManager Instance { get {return instance; } }
-
-
+    
+    [Header("Pause Prefabs")]
+    [SerializeField] private GameObject optionsMenu;
     
     private PauseAction action;
     private bool paused = false;
@@ -20,15 +19,19 @@ public class PauseManager : MonoBehaviour
     private void Awake()
     {
         action = new PauseAction();
-        //optionsMenu = Instantiate(optionsMenuPrefab, transform.position, Quaternion.identity);
-        //optionsMenu.SetActive(false);
     }
 
+    /**
+     * Enables the pause
+     */
     private void OnEnable()
     {
         action.Enable();
     }
 
+    /**
+     * Disables the pause
+     */
     private void OnDisable()
     {
         action.Disable();
@@ -42,6 +45,7 @@ public class PauseManager : MonoBehaviour
         
         if(startScene != 0) gamePausable = true;
         
+        // Singleton instance pattern for PauseManager
         if (instance != null && instance != this)
         {
             Debug.Log("Destroying duplicate menu object.");
@@ -49,7 +53,6 @@ public class PauseManager : MonoBehaviour
         }
         else
         {
-            // Debug.Log("Set to dont destroy this object");
             instance = this;
             DontDestroyOnLoad(gameObject);
         }
@@ -57,8 +60,12 @@ public class PauseManager : MonoBehaviour
         action.Pause.PauseGame.performed += _ => DeterminePause();
     }
 
+    /**
+     * Handles custom logic for when the scene changes to set a bool
+     */
     private void OnSceneChanged(Scene curr, Scene next)
     {
+        // Check if the current scene is a pausable scene
         if (next.buildIndex != 0)
         {
             gamePausable = true;
@@ -69,7 +76,9 @@ public class PauseManager : MonoBehaviour
         }
     }
     
-    
+    /**
+     * Used to find out if the game should be paused or playing currently
+     */
     private void DeterminePause()
     {
         if (paused)
@@ -82,6 +91,9 @@ public class PauseManager : MonoBehaviour
         }
     }
     
+    /*
+     * When the game is paused, freeze the time and audio and activate the pause menu overlay
+     */
     public void PauseGame()
     {
         if (!gamePausable) return;
@@ -91,9 +103,11 @@ public class PauseManager : MonoBehaviour
         AudioListener.pause = true;
         paused = true;
         optionsMenu.SetActive(true);
-        Debug.Log("OptionsMenu Active");
     }
 
+    /**
+     * When the game is resumed, unfreeze the time and audio and deactivate the pause menu overlay
+     */
     public void ResumeGame()
     {
         if (!gamePausable) return;

@@ -1,6 +1,9 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+/**
+ * DEPRICATED - WAS USED FOR TESTING PURPOSES
+ */
 public class TestPlayerController : MonoBehaviour
 {
     private Vector2 movement;
@@ -17,7 +20,6 @@ public class TestPlayerController : MonoBehaviour
     void Update()
     {
         rb.linearVelocity = movement;
-        // Debug.Log(rb.linearVelocity);
     }
 
     void OnMove(InputValue value)
