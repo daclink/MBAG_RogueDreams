@@ -1,16 +1,19 @@
 fileFormatVersion: 2
-guid: 6b16bd24ce6ce4d2691ef877d10a7a07
+guid: 04f9860d3342641a0b0af57c57dbd1e7
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -1294950330752531866
-    second: base_char_anim_frames_0
+      213: 2724993660542676303
+    second: octo_front_idle_0
   - first:
-      213: 4440738992076028368
-    second: base_char_anim_frames_1
+      213: -7870323516721091247
+    second: octo_front_idle_1
   - first:
-      213: 5724490360820319215
-    second: base_char_anim_frames_2
+      213: -1990305708331420196
+    second: octo_front_idle_2
+  - first:
+      213: -5757409125142135381
+    second: octo_front_idle_3
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -57,7 +60,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 640
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -106,13 +109,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: base_char_anim_frames_0
+      name: octo_front_idle_0
       rect:
         serializedVersion: 2
-        x: 20
-        y: 8
-        width: 292
-        height: 632
+        x: 2
+        y: 0
+        width: 60
+        height: 41
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -121,20 +124,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 66288bdf889670ee0800000000000000
-      internalID: -1294950330752531866
+      spriteID: f4d66dfeb4f11d520800000000000000
+      internalID: 2724993660542676303
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: base_char_anim_frames_1
+      name: octo_front_idle_1
       rect:
         serializedVersion: 2
-        x: 340
-        y: 8
-        width: 292
-        height: 632
+        x: 65
+        y: 0
+        width: 62
+        height: 41
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -143,20 +146,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0d9fae2d59ca0ad30800000000000000
-      internalID: 4440738992076028368
+      spriteID: 15daf66d57ef6c290800000000000000
+      internalID: -7870323516721091247
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: base_char_anim_frames_2
+      name: octo_front_idle_2
       rect:
         serializedVersion: 2
-        x: 660
-        y: 8
-        width: 292
-        height: 632
+        x: 128
+        y: 0
+        width: 64
+        height: 41
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -165,8 +168,30 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: fe3c7dc47a9717f40800000000000000
-      internalID: 5724490360820319215
+      spriteID: cd5397cd0830164e0800000000000000
+      internalID: -1990305708331420196
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: octo_front_idle_3
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 0
+        width: 64
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bad7f4d97e29910b0800000000000000
+      internalID: -5757409125142135381
       vertices: []
       indices: 
       edges: []
@@ -175,7 +200,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 185dd2f697b5a49fda6341b6e315c3d1
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -183,13 +208,12 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries:
-      - key: SpriteEditor.SliceSettings
-        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":292.0,"y":632.0},"gridSpriteOffset":{"x":20.0,"y":40.0},"gridSpritePadding":{"x":28.0,"y":0.0},"pivot":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
+      entries: []
     nameFileIdTable:
-      base_char_anim_frames_0: -1294950330752531866
-      base_char_anim_frames_1: 4440738992076028368
-      base_char_anim_frames_2: 5724490360820319215
+      octo_front_idle_0: 2724993660542676303
+      octo_front_idle_1: -7870323516721091247
+      octo_front_idle_2: -1990305708331420196
+      octo_front_idle_3: -5757409125142135381
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

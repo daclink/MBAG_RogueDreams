@@ -1,16 +1,22 @@
 fileFormatVersion: 2
-guid: 6b16bd24ce6ce4d2691ef877d10a7a07
+guid: ef02e992fe3924c8799385ca78322039
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -1294950330752531866
-    second: base_char_anim_frames_0
+      213: 6254842839232714668
+    second: octo_attack_right_0
   - first:
-      213: 4440738992076028368
-    second: base_char_anim_frames_1
+      213: 8155961805723617130
+    second: octo_attack_right_1
   - first:
-      213: 5724490360820319215
-    second: base_char_anim_frames_2
+      213: -1511454334828144723
+    second: octo_attack_right_2
+  - first:
+      213: -1991356087783349331
+    second: octo_attack_right_3
+  - first:
+      213: 8578694418265897890
+    second: octo_attack_right_4
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -57,7 +63,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 640
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -106,13 +112,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: base_char_anim_frames_0
+      name: octo_attack_right_0
       rect:
         serializedVersion: 2
-        x: 20
-        y: 8
-        width: 292
-        height: 632
+        x: 7
+        y: 0
+        width: 48
+        height: 40
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -121,20 +127,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 66288bdf889670ee0800000000000000
-      internalID: -1294950330752531866
+      spriteID: ca79c563c6aadc650800000000000000
+      internalID: 6254842839232714668
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: base_char_anim_frames_1
+      name: octo_attack_right_1
       rect:
         serializedVersion: 2
-        x: 340
-        y: 8
-        width: 292
-        height: 632
+        x: 70
+        y: 0
+        width: 50
+        height: 40
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -143,20 +149,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0d9fae2d59ca0ad30800000000000000
-      internalID: 4440738992076028368
+      spriteID: a674fc7dc0ccf2170800000000000000
+      internalID: 8155961805723617130
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: base_char_anim_frames_2
+      name: octo_attack_right_2
       rect:
         serializedVersion: 2
-        x: 660
-        y: 8
-        width: 292
-        height: 632
+        x: 134
+        y: 0
+        width: 50
+        height: 41
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -165,8 +171,52 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: fe3c7dc47a9717f40800000000000000
-      internalID: 5724490360820319215
+      spriteID: da7185e5a4c360be0800000000000000
+      internalID: -1511454334828144723
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: octo_attack_right_3
+      rect:
+        serializedVersion: 2
+        x: 200
+        y: 0
+        width: 48
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: da3ac5650384d54e0800000000000000
+      internalID: -1991356087783349331
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: octo_attack_right_4
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 0
+        width: 48
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2ab7d5d1f15ad0770800000000000000
+      internalID: 8578694418265897890
       vertices: []
       indices: 
       edges: []
@@ -175,7 +225,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 185dd2f697b5a49fda6341b6e315c3d1
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -183,13 +233,13 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries:
-      - key: SpriteEditor.SliceSettings
-        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":292.0,"y":632.0},"gridSpriteOffset":{"x":20.0,"y":40.0},"gridSpritePadding":{"x":28.0,"y":0.0},"pivot":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
+      entries: []
     nameFileIdTable:
-      base_char_anim_frames_0: -1294950330752531866
-      base_char_anim_frames_1: 4440738992076028368
-      base_char_anim_frames_2: 5724490360820319215
+      octo_attack_right_0: 6254842839232714668
+      octo_attack_right_1: 8155961805723617130
+      octo_attack_right_2: -1511454334828144723
+      octo_attack_right_3: -1991356087783349331
+      octo_attack_right_4: 8578694418265897890
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

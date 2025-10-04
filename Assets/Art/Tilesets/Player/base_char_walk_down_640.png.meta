@@ -1,16 +1,13 @@
 fileFormatVersion: 2
-guid: 6b16bd24ce6ce4d2691ef877d10a7a07
+guid: f34f959b17ac04340a08a49d43bd7527
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -1294950330752531866
-    second: base_char_anim_frames_0
+      213: -2243762986643575272
+    second: base_char_walk_down_640_0
   - first:
-      213: 4440738992076028368
-    second: base_char_anim_frames_1
-  - first:
-      213: 5724490360820319215
-    second: base_char_anim_frames_2
+      213: -9163914929914626061
+    second: base_char_walk_down_640_1
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -106,67 +103,45 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: base_char_anim_frames_0
+      name: base_char_walk_down_640_0
       rect:
         serializedVersion: 2
-        x: 20
-        y: 8
-        width: 292
-        height: 632
+        x: 180
+        y: 0
+        width: 290
+        height: 630
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 66288bdf889670ee0800000000000000
-      internalID: -1294950330752531866
+      spriteID: 241ec41b0635743c5aa6ade7f1ffbbda
+      internalID: 2120246004
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: base_char_anim_frames_1
+      name: base_char_walk_down_640_1
       rect:
         serializedVersion: 2
-        x: 340
-        y: 8
-        width: 292
-        height: 632
+        x: 820
+        y: 0
+        width: 290
+        height: 630
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 0d9fae2d59ca0ad30800000000000000
-      internalID: 4440738992076028368
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: base_char_anim_frames_2
-      rect:
-        serializedVersion: 2
-        x: 660
-        y: 8
-        width: 292
-        height: 632
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: fe3c7dc47a9717f40800000000000000
-      internalID: 5724490360820319215
+      spriteID: 2ee5efddfcfa84124a9dfb2c8da78e70
+      internalID: 1590557769
       vertices: []
       indices: 
       edges: []
@@ -175,7 +150,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 185dd2f697b5a49fda6341b6e315c3d1
+    spriteID: 32069bd7a0b8b410ba40555e9130e4df
     internalID: 0
     vertices: []
     indices: 
@@ -185,11 +160,10 @@ TextureImporter:
     spriteCustomMetadata:
       entries:
       - key: SpriteEditor.SliceSettings
-        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":292.0,"y":632.0},"gridSpriteOffset":{"x":20.0,"y":40.0},"gridSpritePadding":{"x":28.0,"y":0.0},"pivot":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":292.0,"y":632.0},"gridSpriteOffset":{"x":20.0,"y":40.0},"gridSpritePadding":{"x":28.0,"y":0.0},"pivot":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
-      base_char_anim_frames_0: -1294950330752531866
-      base_char_anim_frames_1: 4440738992076028368
-      base_char_anim_frames_2: 5724490360820319215
+      base_char_walk_down_640_0: 2120246004
+      base_char_walk_down_640_1: 1590557769
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
