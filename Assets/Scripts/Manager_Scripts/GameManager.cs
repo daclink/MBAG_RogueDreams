@@ -1,0 +1,130 @@
+using System.Collections;
+using TMPro;
+using UnityEditor.SceneManagement;
+using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.SceneManagement;
+
+public class GameManager : MonoBehaviour
+{
+    // Singleton object
+    private static GameManager instance;
+    public static GameManager Instance { get {return instance; } }
+    
+    // Event to listen to when the camera is instantiated
+    public delegate void CameraInstantiated();
+    public static event CameraInstantiated OnCameraInstantiated;
+    
+    [Header("Game Prefabs")]
+    [SerializeField] private Camera mainCameraPrefab;
+    [SerializeField] private GameObject playerPrefab;
+    [SerializeField] private GameObject playerSideViewPrefab;
+    [SerializeField] private Canvas UICanvasPrefab;
+    [SerializeField] private GameObject meleeEnemyPrefab;
+    [SerializeField] private GameObject rangedEnemyPrefab;
+    [SerializeField] private GameObject healingItemPrefab;
+
+    private int sceneNumber;
+    
+    public int targetFrameRate = 60;
+    
+    private void Awake()
+    {
+        // Singleton instance pattern for the GameManager
+        if (instance != null && instance != this)
+        {
+            Destroy(gameObject);
+        }
+        else
+        {
+            instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+    }
+    
+    void Start()
+    {
+        sceneNumber = SceneManager.GetActiveScene().buildIndex;
+        LevelExit.OnLevelExit += LoadNextScene;
+        
+        // Temporary for now until save game stuff is setup
+        UI_Btn_Manager.OnNewGamePress += LoadNextScene;
+        UI_Btn_Manager.OnLoadGamePress += LoadNextScene;
+        SceneManager.sceneLoaded += OnSceneLoaded;
+        PlayerHealthManager.OnPlayerDeath += PlayerDeath;
+
+        LoadScene(sceneNumber);
+        
+        // Disable vsync and set fps
+        QualitySettings.vSyncCount = 0;
+        Application.targetFrameRate = targetFrameRate;
+    }
+    
+    /**
+     * Occurs when the player dies
+     */
+    void PlayerDeath()
+    {
+        StartCoroutine(DeathSequence());
+    }
+
+    /**
+     * Sequence for when player dies, waits until loading next scene (set for demo to loop to menu)
+     */
+    public IEnumerator DeathSequence()
+    {
+        yield return new WaitForSeconds(3f);
+        LoadNextScene();
+    }
+
+    /**
+     * Loads the next available scene - hard coded for now with just 2 scenes
+     */
+    private void LoadNextScene()
+    {
+        if (sceneNumber == 0 || sceneNumber == 1)
+        {
+            sceneNumber++;
+        }
+        else
+        {
+            sceneNumber = 0;
+        }
+        LoadScene(sceneNumber);
+    }
+
+    /**
+     * Loads a scene based on the passed in scene index
+     */
+    private void LoadScene(int sceneNumber)
+    {
+        SceneManager.LoadScene(sceneNumber);
+    }
+    
+    /**
+     * Everytime a scene is loaded, this function will be called automatically
+     * Spawns in all objects needed for each scene when the scene is loaded
+     */
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.buildIndex == 0)
+        {
+            
+        }
+        if (scene.buildIndex == 1)
+        {
+            Instantiate(mainCameraPrefab, new Vector3(0, 0, -10), Quaternion.identity);
+            Instantiate(playerSideViewPrefab, new Vector3(0, -2.45f, 0), Quaternion.identity);
+        } 
+        else if (scene.buildIndex == 2)
+        {
+            Instantiate(UICanvasPrefab, new Vector3(0, 0, -10), Quaternion.identity);
+            Instantiate(mainCameraPrefab, new Vector3(-10, 23, -10), Quaternion.identity);
+            Instantiate(playerPrefab, new Vector3(-10, 23, 0), Quaternion.identity);
+            Instantiate(meleeEnemyPrefab, new Vector3(-5, 23, 0), Quaternion.identity);
+            Instantiate(rangedEnemyPrefab, new Vector3(12, 21, 0), Quaternion.identity);
+            Instantiate(healingItemPrefab, new Vector3(12, 12, 0), Quaternion.identity);
+            OnCameraInstantiated?.Invoke();
+        }
+    }
+}

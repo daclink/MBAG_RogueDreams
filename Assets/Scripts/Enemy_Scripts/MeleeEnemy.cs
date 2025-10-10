@@ -5,8 +5,9 @@ using UnityEngine;
 
 public class MeleeEnemy : BaseEnemy
 {
-    //might be useful to keep track of the previous state
+    // TODO: Might be useful to keep track of the previous state
     
+    [Header("Patrol Settings")]
     [SerializeField] private float patrolMovementDuration;
     [SerializeField] private float patrolMovementInterval;
     
@@ -16,6 +17,10 @@ public class MeleeEnemy : BaseEnemy
     private float rangeMin = -1f;
     private float rangeMax = 1f;
     
+    /**
+     * Abstract method implementation
+     * Initialize melee enemy bools
+     */
     protected override void PostStart()
     {
         movingInPatrolState = false;
@@ -23,22 +28,29 @@ public class MeleeEnemy : BaseEnemy
         enableMovement = true;
     }
 
+    /**
+    * Abstract method implementation
+    * Calls the base update method 
+    */
     protected override void Update()
     {
         base.Update();
         
-        //handles patrol state movements 
+        // Handles patrol state movements 
         if (enablePatrolStateMovement)
         {
             PatrolMovement();   
         }
-        
     }
 
+    /**
+     * Abstract method implementation for idle state
+     */
     protected override void HandleIdle()
     {
         if (!enableMovement) return;
         
+        // Checks for if changing the state is necessary
         if (distanceToPlayer < agroRange)
         {
             ChangeState(EnemyState.Agro);
@@ -48,15 +60,16 @@ public class MeleeEnemy : BaseEnemy
         {
             ChangeState(EnemyState.Patrol);
         }
-        
-        
-        
     }
     
+    /**
+    * Abstract method implementation for patrol state
+    */
     protected override void HandlePatrol()
     {
         if (!enableMovement) return;
 
+        // Checks for if changing the state is necessary
         if (distanceToPlayer < agroRange)
         {
             rb.linearVelocity = Vector3.zero;
@@ -68,28 +81,25 @@ public class MeleeEnemy : BaseEnemy
             rb.linearVelocity = Vector3.zero;
             ChangeState(EnemyState.Idle);
         }
-
         
-        //random movement while in patrol state
+        // Random movement while in patrol state
         if (!movingInPatrolState)
         {
-            //pick direction to move in patrol state
+            // Pick direction to move in patrol state
             float randomX = UnityEngine.Random.Range(rangeMin, rangeMax);
             float randomY = UnityEngine.Random.Range(rangeMin, rangeMax);
             
-            //calculate the movement direction
+            // Calculate the movement direction
             patrolMoveDirection = new Vector2(randomX, randomY).normalized;
 
             movingInPatrolState = true;
             StartCoroutine(PatrolMovementCR());
         }
-        
-        
     }
 
     /**
-     * move for patrolMovementDuration
-     * stop moving for patrolMovementInterval
+     * Move for patrolMovementDuration
+     * Stop moving for patrolMovementInterval
      */
     private IEnumerator PatrolMovementCR()
     { 
@@ -102,15 +112,22 @@ public class MeleeEnemy : BaseEnemy
         movingInPatrolState = false;
     }
 
+    /**
+     * Handles the patrol state velocity
+     */
     private void PatrolMovement()
     {
         rb.linearVelocity = patrolMoveDirection * (Time.deltaTime * moveSpeed);
     }
     
+    /**
+     * Abstract method implementation for the agro state
+     */
     protected override void HandleAgro()
     {
         if (!enableMovement) return;
         
+        // Checks for if changing state is necessary
         if (distanceToPlayer > agroRange)
         {
             rb.linearVelocity = Vector3.zero;
@@ -118,46 +135,53 @@ public class MeleeEnemy : BaseEnemy
             return;
         }
         
-        //while in the agro state, move towards the player
-        //calculate the direction that the player is from the enemy
+        // While in the agro state, move towards the player
+        // Calculate the direction that the player is from the enemy
         Vector3 direction = new Vector3(transform.position.x - playerTransform.position.x, transform.position.y - playerTransform.position.y, 0).normalized;
-        //move rowards the player
+        // Move Towards the player
         rb.linearVelocity = -direction * (Time.deltaTime * moveSpeed);
     }
 
+    /**
+     * Abstract method implementation for the attacking state
+     * Currently unused so this instantly sets the state to the idle state
+     */
     protected override void HandleAttacking()
     {
        ChangeState(EnemyState.Idle);
     }
 
+    /**
+     * Abstract method implementation for the taking damage state
+     * Calls the base class take Damage method and then changes the state to idle
+     */
     protected override void HandleDamage()
     {
-
         base.TakeDamage(dmgTaken);
         if (health <= 0)
         {
             return;
         }
         ChangeState(EnemyState.Idle);
-
     }
 
+    /**
+     * Abstract method implementation for the dead state
+     * This just needs to destroy the enemy game object
+     */
     protected override void HandleDead()
     {
         Destroy(gameObject);
     }
-
-    protected override void OnCollisionEnter2D(Collision2D collision)
-    {
-        base.OnCollisionEnter2D(collision);
-    }
-
+    
+    /**
+     * This overrides the base class OnTriggerEnter method
+     * The purpose of this is to check if movement is enabled or not to determine if the collision should occur
+     */
     protected override void OnTriggerEnter2D(Collider2D collision)
     {
         if (!enableMovement) return;
         
         base.OnTriggerEnter2D(collision);
-
     }
-    
 }

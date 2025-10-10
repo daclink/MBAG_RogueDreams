@@ -2,11 +2,13 @@ using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-/// <summary>
-/// Inherits Rotator class
-/// </summary>
+
+/**
+ * Inherits Rotator class
+ */
 public class PlayerRotator : Rotator
 {
+    [Header("Player Rotator Objects")]
     [SerializeField] private Camera cam;
     [SerializeField] private GameObject objectToRotate;
 
@@ -14,9 +16,10 @@ public class PlayerRotator : Rotator
     {
         cam = Camera.main;
     }
-    /// <summary>
-    /// New Input System function, just takes in mouse position as a Vector 2
-    /// </summary>
+    
+    /**
+     * New Input System function, just takes in mouse position as a Vector 2
+     */
     public void OnPlayerLook(InputAction.CallbackContext context)
     {
         if (cam == null)

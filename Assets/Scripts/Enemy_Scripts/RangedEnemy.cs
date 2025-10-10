@@ -4,25 +4,19 @@ using UnityEngine;
 
 public class RangedEnemy : BaseEnemy
 {
-    
-    
+    [Header("Ranged Enemy Fields")]
     [SerializeField] private GameObject bulletPrefab;
     [SerializeField] private float firingInterval;
-
     
     private bool readyToShoot;
-
-
+    
+    /**
+     * Defines the PostStart method from the base class and sets proper variables
+     */
     protected override void PostStart()
     {
         enableMovement = true;
         readyToShoot = true;
-    }
-
-    protected override void Update()
-    {
-        base.Update(); 
-        
     }
     
     /**
@@ -34,6 +28,7 @@ public class RangedEnemy : BaseEnemy
         
         rb.linearVelocity = Vector3.zero;
         
+        //Checks if state needs to be changed
         if (distanceToPlayer < agroRange)
         {
             ChangeState(EnemyState.Agro);
@@ -43,7 +38,6 @@ public class RangedEnemy : BaseEnemy
         {
             ChangeState(EnemyState.Patrol);
         }
-
     }
     
     /**
@@ -53,6 +47,7 @@ public class RangedEnemy : BaseEnemy
     {
         if (!enableMovement) return;
 
+        // Checks if the state needs to be changed
         if (distanceToPlayer < agroRange)
         {
             rb.linearVelocity = Vector3.zero;
@@ -64,7 +59,8 @@ public class RangedEnemy : BaseEnemy
             rb.linearVelocity = Vector3.zero;
             ChangeState(EnemyState.Idle);
         }
-
+        
+        // Calculates the patrol movement direction and then moves in that direction
         Vector3 direction = new Vector3(transform.position.x - playerTransform.position.x, transform.position.y - playerTransform.position.y, 0).normalized;
         rb.linearVelocity = -direction * (Time.deltaTime * moveSpeed);   
     }
@@ -74,8 +70,9 @@ public class RangedEnemy : BaseEnemy
      */
     protected override void HandleAgro()
     {
-        if (!enableMovement) return;
+        if (!enableMovement || playerTransform == null) return;
         
+        // Checks if needing to change state
         if (distanceToPlayer > agroRange)
         {
             rb.linearVelocity = Vector3.zero;
@@ -83,29 +80,27 @@ public class RangedEnemy : BaseEnemy
             return;
         }
         
-        //move at half speed towards the player
+        // Move at half speed towards the player
         Vector3 direction = new Vector3(transform.position.x - playerTransform.position.x, transform.position.y - playerTransform.position.y, 0).normalized;
         rb.linearVelocity = -direction * (Time.deltaTime * (moveSpeed/2));
 
-        //check if enemy is allowed to shoot and start the bullet shooting CR
-
+        // Check if enemy is allowed to shoot and start the bullet shooting Coroutine
         if (readyToShoot)
         {
             readyToShoot = false;
             StartCoroutine(FireProjectileCR());
         }
-
     }
 
     /**
      * Coroutine to handle the bullet firing
+     * Instantiates a bullet prefab and waits a set amount of time before ready to shoot again
      */
     private IEnumerator FireProjectileCR()
     {
         Instantiate(bulletPrefab, transform.position, Quaternion.identity);
         yield return new WaitForSeconds(firingInterval);
         readyToShoot = true;
-        
     }
 
     /**
@@ -121,30 +116,21 @@ public class RangedEnemy : BaseEnemy
      */
     protected override void HandleDamage()
     {
-        
         base.TakeDamage(dmgTaken);
         if (health <= 0)
         {
             return;
         }
+        // After damage is taken, set the state to idle
         ChangeState(EnemyState.Idle);
-
     }
 
     /**
-     * This state handles when the enemy dies
+     * This state handles when the enemy dies by destroying the enemy game object
      */
     protected override void HandleDead()
     {
         Destroy(gameObject);
-    }
-
-    /**
-     * Handles collisions with the enemy such as bullet collisions
-     */
-    protected override void OnCollisionEnter2D(Collision2D collision)
-    {
-        base.OnCollisionEnter2D(collision);
     }
 
     /**
@@ -155,7 +141,6 @@ public class RangedEnemy : BaseEnemy
         if (!enableMovement) return;
         
         base.OnTriggerEnter2D(collision);
-
     }
 
 }

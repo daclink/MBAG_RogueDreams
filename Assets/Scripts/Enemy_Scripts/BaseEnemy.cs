@@ -4,11 +4,11 @@ using UnityEngine;
 public abstract class BaseEnemy : MonoBehaviour
 {
 
-    //delegates
+    // Event to damage the player
     public delegate void DamagePlayer(float attackDamage);
     public static event DamagePlayer OnDamagePlayer;
     
-    //serializeable fields
+    [Header("Enemy Settings")]
     [SerializeField] protected float health;
     [SerializeField] protected float attackDmg;
     [SerializeField] protected float moveSpeed;
@@ -28,17 +28,20 @@ public abstract class BaseEnemy : MonoBehaviour
     protected bool playerDead;
     protected float validIdleRange;
     
-    // to be used in each child class.
+    // To be used in each child class.
     protected abstract void PostStart();
 
-    //initialize globally used variables for the class and child classes and call postStart
+    /**
+     * Initialize globally used variables for the class and child classes and call postStart
+     */
     protected virtual void Start()
     {
-        //this should assign player correctly assuming the player is spawned properly BEFORE the enemy is
+        // This should assign player correctly assuming the player is spawned properly BEFORE the enemy is
         playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
         
         PostStart();
 
+        // Initially put the enemy in its idle state
         ChangeState(EnemyState.Idle);
         enableMovement = true;
         isAgroed = false;
@@ -46,18 +49,23 @@ public abstract class BaseEnemy : MonoBehaviour
     }
     
 
-    // when exiting knockback, enemies movement needs to be put back to true
+    /**
+     * When exiting knockback, enemies movement needs to be enabled 
+     */
     public void ExitKnockback()
     {
         enableMovement = true;
     }
 
-    // in child classes, use 'protected override void Update()' and call 'base.Update();'
-    // at the top of the update
+    /**
+     * In child classes, use 'protected override void Update()' and call 'base.Update();'
+     * at the top of the update
+     */
     protected virtual void Update()
     {
         HandleState();
-
+        // If the player transform is not set then keep the enemy idle
+        // Otherwise, calculate the distance to the player
         if (playerTransform == null)
         {
             Debug.Log("Player is inactive, keeping state in idle");
@@ -84,34 +92,34 @@ public abstract class BaseEnemy : MonoBehaviour
         
     }
 
-    //this is for incoming damage to enemies from the player or other sources
+    /**
+     * This is for incoming damage to enemies from the player or other sources
+     * Updates the enemy state when hit
+     */
     protected virtual void OnTriggerEnter2D(Collider2D other)
     {
         // TODO: player bullets/ranged weapons that should knockback enemies include here
         if (other.gameObject.CompareTag("PlayerWeapon"))
         {
             enableMovement = false;
-            
-            // Debug.Log("HIT BY PLAYER WEAPON");
             knockback.KnockbackObject(gameObject, other.gameObject);
             dmgTaken = 2f;
             ChangeState(EnemyState.TakeDamage);
         }
     }
     
-    //this is used when the enemy takes damage from the player
+    // This is used when the enemy takes damage from the player
     protected virtual void TakeDamage(float dmgAmount)
     {
         health -= dmgAmount;
         if (health <= 0)
         {
-            // Debug.Log("Enemy is dead");
             ChangeState(EnemyState.Dead);
-            //any other code to kill the enemy gameObject
+            // Add any other code to kill the enemy gameObject
         }
     }
 
-    // enemy state abstract methods
+    // Enemy state abstract methods to be implemented
     protected abstract void HandleIdle();
     protected abstract void HandleAgro();
     protected abstract void HandleDead();
@@ -119,8 +127,10 @@ public abstract class BaseEnemy : MonoBehaviour
     protected abstract void HandleDamage();
     protected abstract void HandlePatrol();
 
-    // used to change the enemy state, public so it can be accessed elsewhere if necessary
-    // make sure to only use this when changing states just for continuity
+    /**
+     * Used to change the enemy state
+     * Make sure to only use this when changing states just for continuity
+     */
     public void ChangeState(EnemyState newState)
     {
         if (currentState != newState)
@@ -132,7 +142,10 @@ public abstract class BaseEnemy : MonoBehaviour
         }
     }
 
-    // called in the update function
+    /**
+     * Called in the update function
+     * Determines which state the enemy is in and calls the appropriate abstract method
+     */
     protected void HandleState()
     {
         

@@ -57,7 +57,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 640
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -109,8 +109,8 @@ TextureImporter:
       name: base_char_anim_frames_0
       rect:
         serializedVersion: 2
-        x: 19
-        y: 9
+        x: 20
+        y: 8
         width: 292
         height: 632
       alignment: 0
@@ -131,8 +131,8 @@ TextureImporter:
       name: base_char_anim_frames_1
       rect:
         serializedVersion: 2
-        x: 339
-        y: 9
+        x: 340
+        y: 8
         width: 292
         height: 632
       alignment: 0
@@ -153,8 +153,8 @@ TextureImporter:
       name: base_char_anim_frames_2
       rect:
         serializedVersion: 2
-        x: 659
-        y: 9
+        x: 660
+        y: 8
         width: 292
         height: 632
       alignment: 0
@@ -175,7 +175,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 185dd2f697b5a49fda6341b6e315c3d1
     internalID: 0
     vertices: []
     indices: 
@@ -183,7 +183,9 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries: []
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":292.0,"y":632.0},"gridSpriteOffset":{"x":20.0,"y":40.0},"gridSpritePadding":{"x":28.0,"y":0.0},"pivot":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
       base_char_anim_frames_0: -1294950330752531866
       base_char_anim_frames_1: 4440738992076028368
