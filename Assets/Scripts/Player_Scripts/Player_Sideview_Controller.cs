@@ -11,6 +11,9 @@ public class Player_Sideview_Controller : MonoBehaviour
     private float rayDistance;
     private float horizontalInput;
     private float newVelocityX;
+    private float rotationValue;
+
+    private Animator animator;
     
     [Header("Player Side View Settings")]
     [SerializeField] private float airControlFactor;
@@ -22,9 +25,11 @@ public class Player_Sideview_Controller : MonoBehaviour
     
     private void Start()
     {
+        rotationValue = 0;
         RoomExits.OnRoomExit += DisableMovement;
         LevelExit.OnLevelExit += DisableMovement;
         rayDistance = playerVisualCollider.bounds.extents.y + .05f;
+        animator = transform.Find("PlayerVisual").GetComponent<Animator>();
     }
     
     private void DisableMovement()
@@ -38,6 +43,14 @@ public class Player_Sideview_Controller : MonoBehaviour
     private void Update()
     {
         isGrounded = IsGrounded();
+        if (horizontalInput != 0 && enableMovement)
+        {
+            animator.SetBool("IsWalking", true);
+        }
+        else
+        {
+            animator.SetBool("IsWalking", false);
+        }
     }
 
     private void FixedUpdate()
@@ -73,6 +86,15 @@ public class Player_Sideview_Controller : MonoBehaviour
     public void OnPlayerMove(InputAction.CallbackContext context)
     {
         horizontalInput = context.ReadValue<Vector2>().x;
+        if (horizontalInput < 0)
+        {
+            rotationValue = 180;
+        }
+        else
+        {
+            rotationValue = 0;
+        }
+        transform.rotation = Quaternion.Euler(0f, rotationValue, 0f); 
     }
 
     /**
