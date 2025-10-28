@@ -17,6 +17,7 @@ public class GameManager : MonoBehaviour
     
     [Header("Game Prefabs")]
     [SerializeField] private Camera mainCameraPrefab;
+    [SerializeField] private GameObject postProcessingGlobalVolumePrefab;
     [SerializeField] private GameObject playerPrefab;
     [SerializeField] private GameObject playerSideViewPrefab;
     [SerializeField] private Canvas UICanvasPrefab;
@@ -109,17 +110,19 @@ public class GameManager : MonoBehaviour
     {
         if (scene.buildIndex == 0)
         {
-            
+            Instantiate(postProcessingGlobalVolumePrefab, new Vector3(0,0,0), Quaternion.identity);
         }
         if (scene.buildIndex == 1)
         {
             Instantiate(mainCameraPrefab, new Vector3(0, 0, -10), Quaternion.identity);
+            Instantiate(postProcessingGlobalVolumePrefab, new Vector3(0,0,0), Quaternion.identity);
             Instantiate(playerSideViewPrefab, new Vector3(0, -2.45f, 0), Quaternion.identity);
         } 
         else if (scene.buildIndex == 2)
         {
             Instantiate(UICanvasPrefab, new Vector3(0, 0, -10), Quaternion.identity);
             Instantiate(mainCameraPrefab, new Vector3(-10, 23, -10), Quaternion.identity);
+            Instantiate(postProcessingGlobalVolumePrefab, new Vector3(0,0,0), Quaternion.identity);
             Instantiate(playerPrefab, new Vector3(-10, 23, 0), Quaternion.identity);
             Instantiate(meleeEnemyPrefab, new Vector3(-5, 23, 0), Quaternion.identity);
             Instantiate(rangedEnemyPrefab, new Vector3(12, 21, 0), Quaternion.identity);
