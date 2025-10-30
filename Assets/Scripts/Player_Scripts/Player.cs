@@ -2,6 +2,7 @@ using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Tilemaps;
 
 public class Player : MonoBehaviour
 {
@@ -18,9 +19,11 @@ public class Player : MonoBehaviour
     [SerializeField] private BaseItem collectedItem;
     [SerializeField] private Knockback knockback;
     [SerializeField] private float timeToMelee;
+    [SerializeField] private Animator animator;
 
     private bool enableMovement = true;
     private float meleeTimer;
+    private bool isMoving;
 
     private void Start()
     {
@@ -34,6 +37,7 @@ public class Player : MonoBehaviour
     {
         if (!enableMovement) return;
         Move();
+        Animate();
 
         // Check if the player is meleeing and set the timer
         if (isMeleeing)
@@ -57,6 +61,33 @@ public class Player : MonoBehaviour
     public void ExitKnockback()
     {
         enableMovement = true;
+    }
+
+    /**
+     * This method controls the animations
+     */
+    private void Animate()
+    {
+        if (moveDir.magnitude < -0.1 || moveDir.magnitude > 0.1)
+        {
+            isMoving = true;
+            if (enableMovement)
+            {
+                animator.SetFloat("X", moveDir.x);
+                animator.SetFloat("Y", moveDir.y);
+            }
+        }
+        else
+        {
+            isMoving = false;
+        }
+
+        // if (isMoving && enableMovement)
+        // {
+        //
+        // }
+        
+        animator.SetBool("IsWalking", isMoving);
     }
 
     
