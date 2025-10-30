@@ -64,7 +64,7 @@ public class Player : MonoBehaviour
     }
 
     /**
-     * This method controls the animations
+     * This method controls the animations between walking and idle
      */
     private void Animate()
     {
@@ -81,12 +81,6 @@ public class Player : MonoBehaviour
         {
             isMoving = false;
         }
-
-        // if (isMoving && enableMovement)
-        // {
-        //
-        // }
-        
         animator.SetBool("IsWalking", isMoving);
     }
 
