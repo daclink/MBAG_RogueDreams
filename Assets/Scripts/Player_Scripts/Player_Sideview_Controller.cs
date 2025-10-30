@@ -11,6 +11,10 @@ public class Player_Sideview_Controller : MonoBehaviour
     private float rayDistance;
     private float horizontalInput;
     private float newVelocityX;
+    private float rotationValue;
+    private SpriteRenderer spriteRenderer;
+    private bool isFacingRight = true;
+    private Animator animator;
     
     [Header("Player Side View Settings")]
     [SerializeField] private float airControlFactor;
@@ -20,11 +24,16 @@ public class Player_Sideview_Controller : MonoBehaviour
     [SerializeField] private float jumpForce;
     [SerializeField] private CapsuleCollider2D playerVisualCollider;
     
+    
     private void Start()
     {
+        rotationValue = 0;
         RoomExits.OnRoomExit += DisableMovement;
         LevelExit.OnLevelExit += DisableMovement;
         rayDistance = playerVisualCollider.bounds.extents.y + .05f;
+        Transform visualTransform = transform.Find("PlayerVisual");
+        animator = visualTransform.GetComponent<Animator>();
+        spriteRenderer = visualTransform.GetComponent<SpriteRenderer>();
     }
     
     private void DisableMovement()
@@ -38,6 +47,8 @@ public class Player_Sideview_Controller : MonoBehaviour
     private void Update()
     {
         isGrounded = IsGrounded();
+        UpdateAnimator();
+        UpdateSpriteDirection();
     }
 
     private void FixedUpdate()
@@ -68,6 +79,39 @@ public class Player_Sideview_Controller : MonoBehaviour
     }
     
     /**
+     * Sets the animator bool for isWalking accordingly
+     */
+    private void UpdateAnimator()
+    {
+        bool isWalking = Mathf.Abs(horizontalInput) > 0.01f && enableMovement;
+        animator.SetBool("IsWalking", isWalking);
+    }
+
+    /**
+     * This method determines when to flip the sprite
+     */
+    private void UpdateSpriteDirection()
+    {
+        if (horizontalInput < -0.01f && isFacingRight)
+        {
+            Flip();
+        }
+        else if (horizontalInput > 0.01f && !isFacingRight)
+        {
+            Flip();
+        }
+    }
+
+    /**
+     * This method flips the sprite and sets the facing bool cariable
+     */
+    private void Flip()
+    {
+        isFacingRight = !isFacingRight;
+        spriteRenderer.flipX = !isFacingRight;
+    }
+    
+    /**
      * New input system function
      */
     public void OnPlayerMove(InputAction.CallbackContext context)
@@ -89,7 +133,6 @@ public class Player_Sideview_Controller : MonoBehaviour
         {
             rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
         }
-        
     }
     
     /**

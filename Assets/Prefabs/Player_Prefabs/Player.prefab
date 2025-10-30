@@ -118,22 +118,6 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: 33c30b3b-2e90-4bbb-a37d-86abb3d078bc
     m_ActionName: 'Player/Jump[/Keyboard/space]'
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 9043560273130262835}
-        m_TargetAssemblyTypeName: Player, Assembly-CSharp
-        m_MethodName: OnPause
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: 41ad2ea9-0582-4245-aecd-2dd76178b095
-    m_ActionName: 'Player/Pause[/Keyboard/escape]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -151,13 +135,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eb97fcda913a6e548bb1b6685670ae47, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 5
+  speed: 3.5
   moveDir: {x: 0, y: 0}
   isMeleeing: 0
   meleeArea: {fileID: 8507161216502267023}
   collectedItem: {fileID: 0}
   knockback: {fileID: 7147059276842096835}
   timeToMelee: 0.25
+  animator: {fileID: 4483355761900938592}
 --- !u!114 &9153042883107652899
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -374,6 +359,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3163277586729666038}
   - component: {fileID: 8709322222796415015}
+  - component: {fileID: 4483355761900938592}
   m_Layer: 0
   m_Name: PlayerVisual
   m_TagString: Untagged
@@ -451,6 +437,28 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!95 &4483355761900938592
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2956745800686644920}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 008a21262104f4948af935483682a601, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &6343048625577003924
 GameObject:
   m_ObjectHideFlags: 0
