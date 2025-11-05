@@ -6,6 +6,15 @@ using UnityEngine.InputSystem;
 
 public class Player_Sideview_Controller : MonoBehaviour
 {
+    public delegate void JumpSound();
+    public static event JumpSound OnJump;
+    
+    public delegate void WalkSound();
+    public static event WalkSound OnWalk;
+
+    public delegate void StopWalkSound();
+    public static event StopWalkSound OnStopWalk;
+    
     private bool enableMovement = true;
     private bool isGrounded;
     private float rayDistance;
@@ -15,6 +24,7 @@ public class Player_Sideview_Controller : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private bool isFacingRight = true;
     private Animator animator;
+    private bool isWalking;
     
     [Header("Player Side View Settings")]
     [SerializeField] private float airControlFactor;
@@ -68,10 +78,32 @@ public class Player_Sideview_Controller : MonoBehaviour
         // If we are in the air...
         if (!isGrounded)
         {
+            //stop playing the walking sound and set isWalking to false
+            if (isWalking)
+            {
+                // Debug.Log("Player jumped, isWalking set to false");
+                isWalking = false;
+                OnStopWalk?.Invoke();
+            }
             newVelocityX = Mathf.Lerp(currentVelocityX, targetSpeed, airControlFactor);
         }
         else // If we are on the ground...
         {
+            //  if horizontal velocity.abs > 0.01 && isWalking is false, play the sound
+            if (Math.Abs(horizontalInput) > 0.1 && !isWalking)
+            {
+                // Debug.Log("Player started walking, isWalking set to true");
+                isWalking = true;
+                OnWalk?.Invoke();
+            } 
+            else if (Math.Abs(horizontalInput) < 0.1 && isWalking)
+            {
+                // Debug.Log("Player Stopped Walking, isWalking set to false");
+                //stop playing the walking sound and set isWalking to false
+                isWalking = false;
+                OnStopWalk?.Invoke();
+            }
+            
             newVelocityX = Mathf.Lerp(currentVelocityX, targetSpeed, groundControlFactor);
         }
         
@@ -117,6 +149,7 @@ public class Player_Sideview_Controller : MonoBehaviour
     public void OnPlayerMove(InputAction.CallbackContext context)
     {
         horizontalInput = context.ReadValue<Vector2>().x;
+        // OnWalk?.Invoke();
     }
 
     /**
@@ -131,6 +164,8 @@ public class Player_Sideview_Controller : MonoBehaviour
         
         if (context.performed)
         {
+            // Play jump sound here
+            OnJump?.Invoke();
             rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
         }
     }
