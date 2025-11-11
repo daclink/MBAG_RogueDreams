@@ -6,6 +6,8 @@ using UnityEngine.Tilemaps;
 
 public class Player : MonoBehaviour
 {
+    public delegate void Attack();
+    public static event Attack OnAttack;
     
     private const string ITEM_TAG = "Item";
     private const string ENEMY_TAG = "Enemy";
@@ -18,16 +20,16 @@ public class Player : MonoBehaviour
     [SerializeField] private GameObject meleeArea;
     [SerializeField] private BaseItem collectedItem;
     [SerializeField] private Knockback knockback;
-    [SerializeField] private float timeToMelee;
+    // [SerializeField] private float timeToMelee;
     [SerializeField] private Animator animator;
 
     private bool enableMovement = true;
-    private float meleeTimer;
+    // private float meleeTimer;
     private bool isMoving;
 
     private void Start()
     {
-        meleeTimer = 0f;
+        // meleeTimer = 0f;
         meleeArea.SetActive(false);
         RoomExits.OnRoomExit += DisableMovement;
         LevelExit.OnLevelExit += DisableMovement;
@@ -40,17 +42,17 @@ public class Player : MonoBehaviour
         Animate();
 
         // Check if the player is meleeing and set the timer
-        if (isMeleeing)
-        {
-            meleeTimer += Time.deltaTime;
-
-            if (meleeTimer >= timeToMelee)
-            {
-                meleeTimer = 0f;
-                isMeleeing = false;
-                meleeArea.SetActive(isMeleeing);
-            }
-        }
+        // if (isMeleeing)
+        // {
+        //     meleeTimer += Time.deltaTime;
+        //
+        //     if (meleeTimer >= timeToMelee)
+        //     {
+        //         meleeTimer = 0f;
+        //         isMeleeing = false;
+        //         meleeArea.SetActive(isMeleeing);
+        //     }
+        // }
     }
 
     private void DisableMovement()
@@ -101,11 +103,13 @@ public class Player : MonoBehaviour
     /**
      * Handles melee when player attacks
      */
-    private void Melee()
-    {
-        isMeleeing = true;
-        meleeArea.SetActive(isMeleeing);
-    }
+    // private void Melee()
+    // {
+    //     isMeleeing = true;
+    //     meleeArea.SetActive(isMeleeing);
+    // }
+    
+    //attack method 
 
     
     /**
@@ -124,7 +128,8 @@ public class Player : MonoBehaviour
     {
         if (context.started)
         {
-            Melee();
+            // Melee();
+            OnAttack?.Invoke();
         }
     }
     

@@ -37,5 +37,6 @@ public class Central_Sound_Script : MonoBehaviour
     {
         Player_Sideview_Controller.OnJump -= JumpSound;
         Player_Sideview_Controller.OnWalk -= WalkSound;
+        Player_Sideview_Controller.OnStopWalk -= StopWalkSound;
     }
 }
