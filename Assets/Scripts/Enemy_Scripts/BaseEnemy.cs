@@ -137,7 +137,7 @@ public abstract class BaseEnemy : MonoBehaviour
         {
             currentState = newState;
             #if UNITY_EDITOR
-                Debug.Log("State changed to " + newState);
+                // Debug.Log("State changed to " + newState);
             #endif
         }
     }
