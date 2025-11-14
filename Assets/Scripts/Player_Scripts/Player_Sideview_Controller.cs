@@ -117,6 +117,7 @@ public class Player_Sideview_Controller : MonoBehaviour
     {
         bool isWalking = Mathf.Abs(horizontalInput) > 0.01f && enableMovement;
         animator.SetBool("IsWalking", isWalking);
+        animator.SetBool("IsGrounded", isGrounded);
     }
 
     /**
@@ -164,7 +165,7 @@ public class Player_Sideview_Controller : MonoBehaviour
         
         if (context.performed)
         {
-            // Play jump sound here
+            // Play jump sound here and trigger jump animation here
             OnJump?.Invoke();
             rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
         }
