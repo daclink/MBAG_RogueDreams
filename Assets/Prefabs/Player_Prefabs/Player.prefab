@@ -118,6 +118,10 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: 33c30b3b-2e90-4bbb-a37d-86abb3d078bc
     m_ActionName: 'Player/Jump[/Keyboard/space]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 159bfa23-f753-4538-be2b-8fd52d6e6729
+    m_ActionName: 'Player/Collect[/Keyboard/e]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -141,7 +145,6 @@ MonoBehaviour:
   meleeArea: {fileID: 8507161216502267023}
   collectedItem: {fileID: 0}
   knockback: {fileID: 7147059276842096835}
-  timeToMelee: 0.25
   animator: {fileID: 4483355761900938592}
 --- !u!114 &9153042883107652899
 MonoBehaviour:
@@ -339,7 +342,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 1
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 1, g: 0, b: 0, a: 0.54509807}
+  m_Color: {r: 1, g: 0, b: 0, a: 0}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
