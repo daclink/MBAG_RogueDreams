@@ -30,7 +30,7 @@ public class Player : MonoBehaviour
     private void Start()
     {
         // meleeTimer = 0f;
-        meleeArea.SetActive(false);
+        // meleeArea.SetActive(false);
         RoomExits.OnRoomExit += DisableMovement;
         LevelExit.OnLevelExit += DisableMovement;
     }

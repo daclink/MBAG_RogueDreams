@@ -86,9 +86,8 @@ public class WeaponPickupBehavior : MonoBehaviour
     {
         Debug.Log("Attempting to collect weapon");
         collectTextPopUp.enabled = false;
-        
+        player.GetComponent<WeaponManager>().EquipWeapon(weaponSO.weaponPrefab);
         //pass the weaponSO.weaponPrefab to a player weapon manager that handles weapons on the player
-        //weaponManager.EquipWeapon(weaponSO.weaponPrefab)
         
         Destroy(gameObject);
     }
