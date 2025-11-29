@@ -18,13 +18,13 @@ public class Central_Sound_Script : MonoBehaviour
     // Below: For each event subscribed to, add a method to play specific sounds
     private void JumpSound()
     {
-        Debug.Log("Playing the player jump sound");
+        // Debug.Log("Playing the player jump sound");
         soundManager.Play("Player_Jump");
     }
 
     private void WalkSound()
     {
-        Debug.Log("Playing the player walking sound");
+        // Debug.Log("Playing the player walking sound");
         soundManager.Play("Player_Walking");
     }
 

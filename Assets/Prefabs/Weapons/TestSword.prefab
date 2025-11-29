@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 2151358337363267835}
   - component: {fileID: 6349430472615686664}
   - component: {fileID: 8933915381647592495}
-  - component: {fileID: 1310967109093636323}
+  - component: {fileID: 8488287103530341044}
   m_Layer: 0
   m_Name: TestSword
   m_TagString: Untagged
@@ -48,7 +48,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weaponDataSO: {fileID: 11400000, guid: 624dd4eb617354d6fb8e3858c5afca9a, type: 2}
   spriteRenderer: {fileID: 8933915381647592495}
-  weaponCollider: {fileID: 1310967109093636323}
+  weaponCollider: {fileID: 8488287103530341044}
 --- !u!212 &8933915381647592495
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -104,7 +104,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!61 &1310967109093636323
+--- !u!61 &8488287103530341044
 BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -148,5 +148,5 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.0001, y: 0.0001}
+  m_Size: {x: 0.5, y: 0.5}
   m_EdgeRadius: 0

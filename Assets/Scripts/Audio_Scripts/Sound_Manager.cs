@@ -60,7 +60,7 @@ public class Sound_Manager : MonoBehaviour
             Debug.LogWarning("Sound: " + soundName + " not found!");
             return;
         }
-        Debug.Log("Playing sound: " + soundName);
+        // Debug.Log("Playing sound: " + soundName);
         s.source.Play();
     }
 
@@ -71,7 +71,7 @@ public class Sound_Manager : MonoBehaviour
         {
             Debug.LogWarning("Sound: " + soundName + " not found!");
         }
-        Debug.Log("Stop sound: " + soundName);
+        // Debug.Log("Stop sound: " + soundName);
         s.source.Stop();
     }  
 

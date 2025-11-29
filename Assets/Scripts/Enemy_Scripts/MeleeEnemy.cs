@@ -157,12 +157,12 @@ public class MeleeEnemy : BaseEnemy
      */
     protected override void HandleDamage()
     {
-        base.TakeDamage(dmgTaken);
-        if (health <= 0)
-        {
-            return;
-        }
-        ChangeState(EnemyState.Idle);
+        // base.TakeDamage(dmgTaken);
+        // if (health <= 0)
+        // {
+        //     return;
+        // }
+        // ChangeState(EnemyState.Idle);
     }
 
     /**
@@ -171,6 +171,7 @@ public class MeleeEnemy : BaseEnemy
      */
     protected override void HandleDead()
     {
+        Debug.Log("Enemy Dead");
         Destroy(gameObject);
     }
     
@@ -178,10 +179,10 @@ public class MeleeEnemy : BaseEnemy
      * This overrides the base class OnTriggerEnter method
      * The purpose of this is to check if movement is enabled or not to determine if the collision should occur
      */
-    protected override void OnTriggerEnter2D(Collider2D collision)
-    {
-        if (!enableMovement) return;
-        
-        base.OnTriggerEnter2D(collision);
-    }
+    // protected override void OnTriggerEnter2D(Collider2D collision)
+    // {
+    //     if (!enableMovement) return;
+    //     
+    //     base.OnTriggerEnter2D(collision);
+    // }
 }

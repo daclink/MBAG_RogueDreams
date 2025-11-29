@@ -116,13 +116,13 @@ public class RangedEnemy : BaseEnemy
      */
     protected override void HandleDamage()
     {
-        base.TakeDamage(dmgTaken);
-        if (health <= 0)
-        {
-            return;
-        }
-        // After damage is taken, set the state to idle
-        ChangeState(EnemyState.Idle);
+        // base.TakeDamage(dmgTaken);
+        // if (health <= 0)
+        // {
+        //     return;
+        // }
+        // // After damage is taken, set the state to idle
+        // ChangeState(EnemyState.Idle);
     }
 
     /**
@@ -130,17 +130,18 @@ public class RangedEnemy : BaseEnemy
      */
     protected override void HandleDead()
     {
+        Debug.Log("Enemy Dead");
         Destroy(gameObject);
     }
 
     /**
      * This handles trigger object hitting the enemy such as player weapon
      */
-    protected override void OnTriggerEnter2D(Collider2D collision)
-    {
-        if (!enableMovement) return;
-        
-        base.OnTriggerEnter2D(collision);
-    }
+    // protected override void OnTriggerEnter2D(Collider2D collision)
+    // {
+    //     if (!enableMovement) return;
+    //     
+    //     base.OnTriggerEnter2D(collision);
+    // }
 
 }
