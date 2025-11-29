@@ -108,7 +108,10 @@ public abstract class BaseEnemy : MonoBehaviour
     //     }
     // }
     
-    // This is used when the enemy takes damage from the player
+    /**
+     * This is used when the enemy takes damage from any object causing damage to the enemy
+     * No need for the HandleDamage state as of now
+     */
     public virtual void TakeDamage(float dmgAmount)
     {
         Debug.Log("ENEMY taking dmg for " + dmgAmount);

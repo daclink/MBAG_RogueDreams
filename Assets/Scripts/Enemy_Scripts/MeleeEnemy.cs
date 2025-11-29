@@ -163,6 +163,8 @@ public class MeleeEnemy : BaseEnemy
         //     return;
         // }
         // ChangeState(EnemyState.Idle);
+        
+        //damage handled in the base class
     }
 
     /**

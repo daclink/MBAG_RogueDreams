@@ -123,6 +123,8 @@ public class RangedEnemy : BaseEnemy
         // }
         // // After damage is taken, set the state to idle
         // ChangeState(EnemyState.Idle);
+        
+        //Damage handled in the base class
     }
 
     /**

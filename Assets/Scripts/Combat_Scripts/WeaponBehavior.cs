@@ -3,6 +3,9 @@ using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
 
+//TODO: implement different weapon types. Not sure if we should have multiple weapon behavior scripts or what the clean way to do this 
+// is since I had to remove the baseWeapon class. Possibly refactor this into a type of base weapon class to handle each weapons behavior
+
 public class WeaponBehavior : MonoBehaviour
 {
     [SerializeField] private Weapon weaponDataSO;
@@ -56,6 +59,10 @@ public class WeaponBehavior : MonoBehaviour
         transform.rotation = frontIndicator.rotation;
     }
 
+    /**
+     * This is called when the player Attacks and is invoked from the player class OnPlayerMelee() method
+     * All subsequent attack methods run from here by initially calling Attack
+     */
     private void OnPlayerAttack()
     {
         Debug.Log("OnPlayerAttack invoked and called in weapon behavior script");
@@ -82,7 +89,7 @@ public class WeaponBehavior : MonoBehaviour
             // Debug.Log("Cannot attack while in weapon cooldown. Weapon Cooldown has left: " + currCooldown);
         }
     }
-
+    
     /**
      * starts the attack, animates, and starts coroutine that will end the attack
      */
@@ -133,6 +140,10 @@ public class WeaponBehavior : MonoBehaviour
         }
     }
 
+    /**
+     * This method takes in an enemy from the Trigger method and damages it the correct amount based on the weaponDataSO
+     * This calls the public TakeDamage method in the baseEnemy class
+     */
     private void DealDamage(BaseEnemy enemy)
     {
         if (enemy != null)
