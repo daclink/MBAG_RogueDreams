@@ -18,7 +18,7 @@ public class Player : MonoBehaviour
     [SerializeField] private Vector2 moveDir;
     [SerializeField] private bool isMeleeing = false;
     [SerializeField] private GameObject meleeArea;
-    [SerializeField] private BaseItem collectedItem;
+    // [SerializeField] private BaseItem collectedItem;
     [SerializeField] private Knockback knockback;
     // [SerializeField] private float timeToMelee;
     [SerializeField] private Animator animator;
@@ -33,6 +33,15 @@ public class Player : MonoBehaviour
         // meleeArea.SetActive(false);
         RoomExits.OnRoomExit += DisableMovement;
         LevelExit.OnLevelExit += DisableMovement;
+        BaseItem.OnItemCollected += ItemCollected;
+    }
+
+    /**
+     * Parse through itemData object to apply stat changes if applicable
+     */
+    private void ItemCollected(ItemData itemData)
+    {
+        
     }
 
     private void Update()
@@ -135,15 +144,15 @@ public class Player : MonoBehaviour
     
     private void OnCollisionEnter2D(Collision2D other)
     {
-        if (other.transform.TryGetComponent(out BaseItem item))
-        {
-            // Set collectedItem to anything that inherits the item base class
-            collectedItem = item;
-            // Call collectedItem.Collect(this)
-            collectedItem.Collect();
-            // Reset collectedItem back to null
-            collectedItem = null;
-        }
+        // if (other.transform.TryGetComponent(out BaseItem item))
+        // {
+        //     // Set collectedItem to anything that inherits the item base class
+        //     collectedItem = item;
+        //     // Call collectedItem.Collect(this)
+        //     collectedItem.Collect();
+        //     // Reset collectedItem back to null
+        //     collectedItem = null;
+        // }
 
         // Knockback player/this
         // TODO: add tags for things such as projectiles

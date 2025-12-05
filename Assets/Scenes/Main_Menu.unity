@@ -593,6 +593,10 @@ PrefabInstance:
       propertyPath: playerPrefab
       value: 
       objectReference: {fileID: 833193759461314858, guid: a650f8867a1124019891f8cec67fe5e4, type: 3}
+    - target: {fileID: 8835078952915776331, guid: d2682ff4bdc8243198f8b488ce39097c, type: 3}
+      propertyPath: healingItemPrefab
+      value: 
+      objectReference: {fileID: 5165700454202400388, guid: 8ab807467edf747b384a83f6bf19e4c6, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

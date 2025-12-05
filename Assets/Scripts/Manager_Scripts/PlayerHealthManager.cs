@@ -17,7 +17,7 @@ public class PlayerHealthManager : MonoBehaviour
     {
         BulletScript.OnDamagePlayer += RemoveHealth;
         BaseEnemy.OnDamagePlayer += RemoveHealth;
-        HealingItem.OnAddHealth += AddHealth;
+        // HealingItem.OnAddHealth += AddHealth;
         SetHealth(startHealth);
         // Listen to 3 events
         //  - one event for adding health from the healing items
@@ -86,7 +86,7 @@ public class PlayerHealthManager : MonoBehaviour
 
     public void OnDestroy()
     {
-        HealingItem.OnAddHealth -= AddHealth;
+        // HealingItem.OnAddHealth -= AddHealth;
         BaseEnemy.OnDamagePlayer -= RemoveHealth;
         BulletScript.OnDamagePlayer -= RemoveHealth;
     }
