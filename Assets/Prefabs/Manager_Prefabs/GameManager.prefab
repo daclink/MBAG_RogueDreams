@@ -1254,7 +1254,7 @@ MonoBehaviour:
   UICanvasPrefab: {fileID: 1684348679410332725, guid: 95edd5000a2574b7790f224056676b64, type: 3}
   meleeEnemyPrefab: {fileID: 3024127687653583934, guid: d74182711f07343b4ae5bdf97c719464, type: 3}
   rangedEnemyPrefab: {fileID: 3024127687653583934, guid: 4855e5b86196041ba838a296c207d5fc, type: 3}
-  healingItemPrefab: {fileID: 6107885248787220764, guid: 543bc4a214b03034a9c51d06af7f4930, type: 3}
+  healingItemPrefab: {fileID: 5165700454202400388, guid: 8ab807467edf747b384a83f6bf19e4c6, type: 3}
   targetFrameRate: 60
 --- !u!114 &4958252554729136832
 MonoBehaviour:

@@ -96,27 +96,40 @@ public abstract class BaseEnemy : MonoBehaviour
      * This is for incoming damage to enemies from the player or other sources
      * Updates the enemy state when hit
      */
-    protected virtual void OnTriggerEnter2D(Collider2D other)
-    {
-        // TODO: player bullets/ranged weapons that should knockback enemies include here
-        if (other.gameObject.CompareTag("PlayerWeapon"))
-        {
-            enableMovement = false;
-            knockback.KnockbackObject(gameObject, other.gameObject);
-            dmgTaken = 2f;
-            ChangeState(EnemyState.TakeDamage);
-        }
-    }
+    // protected virtual void OnTriggerEnter2D(Collider2D other)
+    // {
+    //     // TODO: player bullets/ranged weapons that should knockback enemies include here
+    //     if (other.gameObject.CompareTag("PlayerWeapon"))
+    //     {
+    //         enableMovement = false;
+    //         knockback.KnockbackObject(gameObject, other.gameObject);
+    //         dmgTaken = 2f;
+    //         ChangeState(EnemyState.TakeDamage);
+    //     }
+    // }
     
-    // This is used when the enemy takes damage from the player
-    protected virtual void TakeDamage(float dmgAmount)
+    /**
+     * This is used when the enemy takes damage from any object causing damage to the enemy
+     * No need for the HandleDamage state as of now
+     */
+    public virtual void TakeDamage(float dmgAmount)
     {
+        Debug.Log("ENEMY taking dmg for " + dmgAmount);
+        if (!enableMovement)
+        {
+            return;
+        }
         health -= dmgAmount;
+        enableMovement = false;
+        knockback.KnockbackObject(gameObject, playerTransform.gameObject);
         if (health <= 0)
         {
             ChangeState(EnemyState.Dead);
+            return;
             // Add any other code to kill the enemy gameObject
         }
+        Debug.Log("Enemy health is " + health);
+        ChangeState(EnemyState.Idle);
     }
 
     // Enemy state abstract methods to be implemented
@@ -137,7 +150,7 @@ public abstract class BaseEnemy : MonoBehaviour
         {
             currentState = newState;
             #if UNITY_EDITOR
-                Debug.Log("State changed to " + newState);
+                // Debug.Log("State changed to " + newState);
             #endif
         }
     }

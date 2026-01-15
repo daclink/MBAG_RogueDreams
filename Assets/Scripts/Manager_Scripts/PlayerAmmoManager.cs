@@ -9,7 +9,7 @@ public class PlayerAmmoManager : MonoBehaviour
     void Start()
     {
         // When ammo is picked up, set the current ammo to max
-        AmmoItem.OnAddAmmo += AddAmmo;
+        // AmmoItem.OnAddAmmo += AddAmmo;
         SetAmmo(maxAmmo);
     }
 
