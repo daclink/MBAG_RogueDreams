@@ -25,3 +25,45 @@ The following 6 will help with quickly understanding the interface:
 
 
 [Scripting tutorial series](https://www.youtube.com/playlist?list=PLX2vGYjWbI0S9-X2Q021GUtolTqbUBB9B)
+
+### Creating new weapon pickups
+- For initial creation, create an empty game object called WeaponPickup with a sprite renderer, any collider set to trigger, and add a text tmp pro UGUI as a child to this object
+- Add the weapon pickup behavior script to the parent object we created and assign the pickupSO, text pop up and sprite renderer from THIS object. 
+- Make this a prefab without the SO assigned
+
+- When wanting to make a new weapon, just drag the weaponPickup prefab into the scene, and assign the specific weaponSO to the weapon pickup behavior script. 
+- The weaponSO takes a sprite, the weapon prefab that will be passed to the player, and a weapon name
+
+### Claude help with structure:
+
+## Complete Flow:
+```
+Asset Creation:
+1. Create WeaponSO (e.g., "SwordDataSO") → Set damage, sprite, stats
+2. Create Weapon Prefab → Attach WeaponBehavior → Assign SwordDataSO
+3. Create WeaponPickupSO (e.g., "SwordPickupSO") → Assign weapon prefab
+
+In Scene:
+4. Drag WeaponPickup prefab → Assign SwordPickupSO
+5. Player collects → Weapon instantiated with all its data!
+```
+
+## Visual Structure:
+```
+Project Assets:
+├── ScriptableObjects/
+│   ├── Weapons/
+│   │   ├── SwordDataSO (WeaponSO)
+│   │   ├── AxeDataSO (WeaponSO)
+│   │   └── SpearDataSO (WeaponSO)
+│   └── Pickups/
+│       ├── SwordPickupSO (WeaponPickupSO) → references SwordPrefab
+│       ├── AxePickupSO (WeaponPickupSO) → references AxePrefab
+│       └── SpearPickupSO (WeaponPickupSO) → references SpearPrefab
+└── Prefabs/
+    ├── Weapons/
+    │   ├── SwordPrefab (has WeaponBehavior → references SwordDataSO)
+    │   ├── AxePrefab (has WeaponBehavior → references AxeDataSO)
+    │   └── SpearPrefab (has WeaponBehavior → references SpearDataSO)
+    └── Pickups/
+        └── WeaponPickup (reusable)

@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: 745829555252119656}
   - component: {fileID: 820835926459429819}
   - component: {fileID: 2297239077669237727}
+  - component: {fileID: 4870324739392185486}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -118,6 +119,10 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: 33c30b3b-2e90-4bbb-a37d-86abb3d078bc
     m_ActionName: 'Player/Jump[/Keyboard/space]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 159bfa23-f753-4538-be2b-8fd52d6e6729
+    m_ActionName: 'Player/Collect[/Keyboard/e]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -141,7 +146,6 @@ MonoBehaviour:
   meleeArea: {fileID: 8507161216502267023}
   collectedItem: {fileID: 0}
   knockback: {fileID: 7147059276842096835}
-  timeToMelee: 0.25
   animator: {fileID: 4483355761900938592}
 --- !u!114 &9153042883107652899
 MonoBehaviour:
@@ -262,6 +266,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cam: {fileID: 8180705985475151378, guid: c3e89993e371640149b260ad0e3ab338, type: 3}
   objectToRotate: {fileID: 0}
+--- !u!114 &4870324739392185486
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 833193759461314858}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0772ec83d5a5433a860ef97069e1268, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  meleeArea: {fileID: 2378761092907999619}
+  frontIndicator: {fileID: 8211006461055916884}
 --- !u!1 &2060872873663126492
 GameObject:
   m_ObjectHideFlags: 0
@@ -339,7 +357,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 1
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 1, g: 0, b: 0, a: 0.54509807}
+  m_Color: {r: 1, g: 0, b: 0, a: 0}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -587,7 +605,7 @@ BoxCollider2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8507161216502267023}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Density: 1
   m_Material: {fileID: 0}

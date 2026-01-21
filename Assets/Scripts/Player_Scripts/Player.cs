@@ -6,6 +6,8 @@ using UnityEngine.Tilemaps;
 
 public class Player : MonoBehaviour
 {
+    public delegate void Attack();
+    public static event Attack OnAttack;
     
     private const string ITEM_TAG = "Item";
     private const string ENEMY_TAG = "Enemy";
@@ -16,21 +18,30 @@ public class Player : MonoBehaviour
     [SerializeField] private Vector2 moveDir;
     [SerializeField] private bool isMeleeing = false;
     [SerializeField] private GameObject meleeArea;
-    [SerializeField] private BaseItem collectedItem;
+    // [SerializeField] private BaseItem collectedItem;
     [SerializeField] private Knockback knockback;
-    [SerializeField] private float timeToMelee;
+    // [SerializeField] private float timeToMelee;
     [SerializeField] private Animator animator;
 
     private bool enableMovement = true;
-    private float meleeTimer;
+    // private float meleeTimer;
     private bool isMoving;
 
     private void Start()
     {
-        meleeTimer = 0f;
-        meleeArea.SetActive(false);
+        // meleeTimer = 0f;
+        // meleeArea.SetActive(false);
         RoomExits.OnRoomExit += DisableMovement;
         LevelExit.OnLevelExit += DisableMovement;
+        BaseItem.OnItemCollected += ItemCollected;
+    }
+
+    /**
+     * Parse through itemData object to apply stat changes if applicable
+     */
+    private void ItemCollected(ItemData itemData)
+    {
+        
     }
 
     private void Update()
@@ -40,17 +51,17 @@ public class Player : MonoBehaviour
         Animate();
 
         // Check if the player is meleeing and set the timer
-        if (isMeleeing)
-        {
-            meleeTimer += Time.deltaTime;
-
-            if (meleeTimer >= timeToMelee)
-            {
-                meleeTimer = 0f;
-                isMeleeing = false;
-                meleeArea.SetActive(isMeleeing);
-            }
-        }
+        // if (isMeleeing)
+        // {
+        //     meleeTimer += Time.deltaTime;
+        //
+        //     if (meleeTimer >= timeToMelee)
+        //     {
+        //         meleeTimer = 0f;
+        //         isMeleeing = false;
+        //         meleeArea.SetActive(isMeleeing);
+        //     }
+        // }
     }
 
     private void DisableMovement()
@@ -101,11 +112,13 @@ public class Player : MonoBehaviour
     /**
      * Handles melee when player attacks
      */
-    private void Melee()
-    {
-        isMeleeing = true;
-        meleeArea.SetActive(isMeleeing);
-    }
+    // private void Melee()
+    // {
+    //     isMeleeing = true;
+    //     meleeArea.SetActive(isMeleeing);
+    // }
+    
+    //attack method 
 
     
     /**
@@ -124,21 +137,22 @@ public class Player : MonoBehaviour
     {
         if (context.started)
         {
-            Melee();
+            // Melee();
+            OnAttack?.Invoke();
         }
     }
     
     private void OnCollisionEnter2D(Collision2D other)
     {
-        if (other.transform.TryGetComponent(out BaseItem item))
-        {
-            // Set collectedItem to anything that inherits the item base class
-            collectedItem = item;
-            // Call collectedItem.Collect(this)
-            collectedItem.Collect();
-            // Reset collectedItem back to null
-            collectedItem = null;
-        }
+        // if (other.transform.TryGetComponent(out BaseItem item))
+        // {
+        //     // Set collectedItem to anything that inherits the item base class
+        //     collectedItem = item;
+        //     // Call collectedItem.Collect(this)
+        //     collectedItem.Collect();
+        //     // Reset collectedItem back to null
+        //     collectedItem = null;
+        // }
 
         // Knockback player/this
         // TODO: add tags for things such as projectiles

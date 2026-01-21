@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9dc70aef54a764f5fbc72dc59116dde7, type: 3}
+  m_Name: TestWeaponPickup
+  m_EditorClassIdentifier: 
+  weaponPickupSprite: {fileID: 1717205412795700876, guid: 51fdb9c1d57ee4fe6acbb454dec81610, type: 3}
+  weaponPrefab: {fileID: 2459583449100561351, guid: a00fc3c8f425f47bf8df7828d47696d3, type: 3}
+  weaponName: TestWeapon
