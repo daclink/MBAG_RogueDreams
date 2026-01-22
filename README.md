@@ -1,5 +1,5 @@
 # Rogue Dreams (working title)
-Unity version: Unity 6 version 6000.0.34f1
+Unity version: Unity 6 version 6000.3.5f1
 
 ## Documents
 [Folder with design docs etc](https://drive.google.com/drive/folders/1xm3KBXomn7FhLXyPOoRf_2H_nCljgIJi)
