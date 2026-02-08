@@ -12,6 +12,22 @@ namespace DataSchemas.PackedItem.Editor
 
             var asset = (PackedItemAsset)target;
             if (asset == null) return;
+            
+            EditorGUILayout.Space(8);
+            EditorGUILayout.LabelField("Tables", EditorStyles.boldLabel);
+            EditorGUILayout.HelpBox("Assign Text Table and Sprite Table above, then enter display text and assign a sprite. Click the button to add them to the tables and set this item's keys.", MessageType.None);
+            if (GUILayout.Button("Add to tables & set keys"))
+            {
+                Undo.RecordObject(asset, "Add to tables & set keys");
+                if (asset.textTable != null) Undo.RecordObject(asset.textTable, "Add to tables & set keys");
+                if (asset.spriteTable != null) Undo.RecordObject(asset.spriteTable, "Add to tables & set keys");
+                if (asset.AddDisplayToTablesAndSetKeys())
+                {
+                    MarkDirtyAndRefresh();
+                    if (asset.textTable != null) EditorUtility.SetDirty(asset.textTable);
+                    if (asset.spriteTable != null) EditorUtility.SetDirty(asset.spriteTable);
+                }
+            }
 
             EditorGUILayout.Space(8);
             EditorGUILayout.LabelField("Pack / Unpack", EditorStyles.boldLabel);
