@@ -46,7 +46,7 @@ namespace DataSchemas.PackedItem
         public ulong block2;
 
         /// <summary>Runtime view of the packed data. Use this for inventory, tooltips, or saving.</summary>
-        public PackedItemData ToPackedItemData() => new PackedItemData(block0, block1, block2);
+        public PackedItemData ToPackedItemData() => new PackedItemData(block0, block1);
 
         // Encodes values from the inspector into allocated space
         public void PackFromFields()
@@ -78,7 +78,7 @@ namespace DataSchemas.PackedItem
         // unpacks encoded data for inspection
         public void UnpackToFields()
         {
-            var data = new PackedItemData(block0, block1, block2);
+            var data = new PackedItemData(block0, block1);
 
             itemType    = data.ItemType;
             aspectFlags = data.AspectFlags;

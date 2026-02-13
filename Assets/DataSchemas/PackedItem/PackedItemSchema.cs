@@ -143,17 +143,15 @@ namespace DataSchemas.PackedItem
         // Blocks as they were stored in asset form or save data
         public ulong Block0 { get; }
         public ulong Block1 { get; }
-        public ulong Block2 { get; }
         private readonly AspectFlags _aspectFlags;
         private readonly StatusFlags _statusFlags;
 
         // Constructor that takes three blocks and assigns them to the readonly fields as well as the flag cache
         // Only the constructor can set a field. Everything else is read only
-        public PackedItemData(ulong block0, ulong block1, ulong block2)
+        public PackedItemData(ulong block0, ulong block1)
         {
             Block0 = block0;
             Block1 = block1;
-            Block2 = block2;
             _aspectFlags = PackedItemSchema.GetAspectFlags(block0);
             _statusFlags = PackedItemSchema.GetStatusFlags(block0);
         }
