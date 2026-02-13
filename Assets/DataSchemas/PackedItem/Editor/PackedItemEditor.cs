@@ -1,5 +1,6 @@
 using UnityEditor;
 using UnityEngine;
+using DataSchemas.PackedItem;
 
 namespace DataSchemas.PackedItem.Editor
 {
@@ -12,7 +13,7 @@ namespace DataSchemas.PackedItem.Editor
 
             var asset = (PackedItemAsset)target;
             if (asset == null) return;
-            
+
             EditorGUILayout.Space(8);
             EditorGUILayout.LabelField("Tables", EditorStyles.boldLabel);
             EditorGUILayout.HelpBox("Assign Text Table and Sprite Table above, then enter display text and assign a sprite. Click the button to add them to the tables and set this item's keys.", MessageType.None);
