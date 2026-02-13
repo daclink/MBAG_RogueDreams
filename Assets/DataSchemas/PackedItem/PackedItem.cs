@@ -43,7 +43,6 @@ namespace DataSchemas.PackedItem
         [Header("Raw blocks (packed)")]
         public ulong block0;
         public ulong block1;
-        public ulong block2;
 
         /// <summary>Runtime view of the packed data. Use this for inventory, tooltips, or saving.</summary>
         public PackedItemData ToPackedItemData() => new PackedItemData(block0, block1);
