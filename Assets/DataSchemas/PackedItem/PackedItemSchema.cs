@@ -64,7 +64,7 @@ namespace DataSchemas.PackedItem
     // PackedItemSchema is a static helper theat defines the layout of three packed blocks.
     // The class provides method for packing and unpacking these blocks.
     // block0 contains metadata for the packed item.
-    // block1 and block2 contain numerical data fornthe item's stats.
+    // block1 contains numerical data fornthe item's stats.
     public static class PackedItemSchema
     {
         // Constant shift amounts to be reused across functions to land at the correct right bit
