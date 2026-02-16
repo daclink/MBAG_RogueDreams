@@ -2,6 +2,11 @@ using Unity.VisualScripting;
 using System.Collections;
 using UnityEngine;
 
+/**
+ * This needs to generate both a map grid using one tile per room (generate map shape in a 2d array)
+ * This also needs to generate each room, considering all entrances and exits to create paths.
+ * If room is a dead end, tiles can be all the same
+ */
 namespace WFC
 {
     // This will store all of the tile types to be marked on the first layer grid
@@ -35,6 +40,9 @@ namespace WFC
         private uint maxRoomHeight = 10;
         private uint minRoomWidth = 5;
         private uint minRoomHeight = 5;
+        
+        //list of each data tile: tiles that say 'dirt' 1, 'grass'2, etc
+        //once the data is generated, fill in the tilemap with the corresponding tiles.
         
 
         //Assign grid coordinates to the presetRooms
