@@ -50,15 +50,13 @@ namespace DataSchemas.PackedItem
         // Encodes values from the inspector into allocated space
         public void PackFromFields()
         {
-            // For now, reuse spriteKey for both sprite/icon and textKey for both name/desc
+            // visualBase and textBase; icon/desc derived at resolve time via stride
             block0 = PackedItemSchema.PackBlock0(
                 itemType,
                 aspectFlags,
                 statusFlags,
-                spriteKey,
-                spriteKey,
-                textKey,
-                textKey);
+                (ushort)spriteKey,
+                (ushort)textKey);
 
             // Only flagged stats contribute to block1; unflagged stats are packed as zero
             sbyte h = (aspectFlags & AspectFlags.Health)  != 0 ? (sbyte)health  : (sbyte)0;
@@ -83,8 +81,8 @@ namespace DataSchemas.PackedItem
             aspectFlags = data.AspectFlags;
             statusFlags = data.StatusFlags;
 
-            spriteKey = data.SpriteKey;
-            textKey   = data.TextKey;
+            spriteKey = (byte)System.Math.Min(255, data.VisualBase);
+            textKey   = (byte)System.Math.Min(255, data.TextBase);
 
             // Update preview sprite based on resolved key
             spritePreview = spriteTable != null ? spriteTable.Get(spriteKey) : null;
