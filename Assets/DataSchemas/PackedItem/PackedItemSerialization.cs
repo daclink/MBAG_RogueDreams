@@ -23,9 +23,14 @@ namespace DataSchemas.PackedItem
 
         private static byte CurrentVersion => Versioning.Pack(DataKindPackedItems, ProtocolV1, CompatibilityStrict, FormatV1);
 
+        /// <summary>
+        /// Unpack the version bytes. Throw if it is invalid or does not meet the expected standard.
+        /// </summary>
+        /// <param name="version">Written version to be tested against current standard.</param>
+        /// <exception cref="InvalidDataException">Thrown if version values are outside the expected range.</exception>
         private static void ValidateVersion(byte version)
         {
-            var (dataKind, protocol, compatibility, format) = Versioning.Unpack(version);
+            (byte dataKind, byte protocol, byte compatibility, byte format) = Versioning.Unpack(version);
 
             static void Require(bool ok, string message)
             {
@@ -76,8 +81,8 @@ namespace DataSchemas.PackedItem
             if (stream is null)
                 throw new ArgumentNullException(nameof(stream));
 
-            Span<byte> buf = stackalloc byte[1];
-            _ = stream.Read(buf) == 1 ? 0 : throw new EndOfStreamException("Expected version byte.");
+            Span<byte> buffer = stackalloc byte[1];
+            _ = stream.Read(buffer) == 1 ? 0 : throw new EndOfStreamException("Expected version byte.");
             byte version = buf[0];
             ValidateVersion(version);
 
