@@ -83,7 +83,7 @@ namespace DataSchemas.PackedItem
 
             Span<byte> buffer = stackalloc byte[1];
             _ = stream.Read(buffer) == 1 ? 0 : throw new EndOfStreamException("Expected version byte.");
-            byte version = buf[0];
+            byte version = buffer[0];
             ValidateVersion(version);
 
             int count = StandardizeLittleEndian.ReadInt32(stream);

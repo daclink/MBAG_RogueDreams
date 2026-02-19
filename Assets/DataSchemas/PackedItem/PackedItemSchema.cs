@@ -61,6 +61,33 @@ namespace DataSchemas.PackedItem
         Invisible = 1 << 7
     }
 
+    [Flags]
+    /// <summary>
+    /// RarityFlags for item rarity tiers or filtering. 8 bits. Stored in bits 47-40 of block0.
+    /// </summary>
+    public enum RarityFlags : byte
+    {
+        None = 0,
+        Common = 1 << 0,
+        Uncommon = 1 << 1,
+        Rare = 1 << 2,
+        Legendary = 1 << 3
+    }
+
+    [Flags]
+    /// <summary>
+    /// BiomeFlags for biomes where items can appear. 8 bits. Stored in bits 39-32 of block0.
+    /// </summary>
+    public enum BiomeFlags : byte
+    {
+        None = 0,
+        Forest = 1 << 0,
+        Desert = 1 << 1,
+        Cave = 1 << 2,
+        Snow = 1 << 3,
+        Swamp = 1 << 4
+    }
+
     // PackedItemSchema is a static helper theat defines the layout of three packed blocks.
     // The class provides method for packing and unpacking these blocks.
     // block0 contains metadata for the packed item.
@@ -81,17 +108,18 @@ namespace DataSchemas.PackedItem
         private const uint ShortMask = 0xFFFFu;
 
         /// <summary>
-        /// Packs item metadata into block0. visualBase and textBase are 16-bit lookup keys;
-        /// sprite = visualBase, icon = visualBase + stride; name = textBase, desc = textBase + stride.
-        /// Stride is defined per-table (e.g. 25% of table size) at resolve time.
+        /// Packs item metadata into block0. spriteKey and textKey are 8-bit lookup keys into 2D tables [type][key].
         /// </summary>
-        public static ulong PackBlock0(ItemType type, AspectFlags aspectFlags, StatusFlags statusFlags, ushort visualBase, ushort textBase)
+        public static ulong PackBlock0(ItemType type, AspectFlags aspectFlags, StatusFlags statusFlags,
+            BiomeFlags biomeFlags, RarityFlags rarityFlags, byte spriteKey, byte textKey)
         {
             return (ulong)type
                 | ((ulong)aspectFlags << SecondByte)
                 | ((ulong)statusFlags << ThirdByte)
-                | ((ulong)visualBase << FifthByte)
-                | ((ulong)textBase << SeventhByte);
+                | ((ulong)biomeFlags << FifthByte)
+                | ((ulong)rarityFlags << SixthByte)
+                | ((ulong)spriteKey << SeventhByte)
+                | ((ulong)textKey << EighthByte);
         }
 
         /*
@@ -103,8 +131,10 @@ namespace DataSchemas.PackedItem
         public static ItemType GetItemType(ulong block0) => (ItemType)(block0 & ByteMask);
         public static AspectFlags GetAspectFlags(ulong block0) => (AspectFlags)((block0 >> SecondByte) & ByteMask);
         public static StatusFlags GetStatusFlags(ulong block0) => (StatusFlags)((block0 >> ThirdByte) & ShortMask);
-        public static ushort GetVisualBase(ulong block0) => (ushort)((block0 >> FifthByte) & ShortMask);
-        public static ushort GetTextBase(ulong block0) => (ushort)((block0 >> SeventhByte) & ShortMask);
+        public static BiomeFlags GetBiomeFlags(ulong block0) => (BiomeFlags)((block0 >> FifthByte) & ByteMask);
+        public static RarityFlags GetRarityFlags(ulong block0) => (RarityFlags)((block0 >> SixthByte) & ByteMask);
+        public static byte GetSpriteKey(ulong block0) => (byte)((block0 >> SeventhByte) & ByteMask);
+        public static byte GetTextKey(ulong block0) => (byte)((block0 >> EighthByte) & ByteMask);
 
         // Block 1
         // PackBlock1 takes the numerical values of the aspectFlags and packs them into the ulong block1. 
@@ -123,14 +153,14 @@ namespace DataSchemas.PackedItem
         }
 
         // block1-specific getters
-        public static sbyte GetHealth(ulong block1)  => (sbyte)(block1 & ByteMask);
-        public static sbyte GetPower(ulong block1)   => (sbyte)((block1 >> SecondByte) & ByteMask);
-        public static sbyte GetArmor(ulong block1)   => (sbyte)((block1 >> ThirdByte) & ByteMask);
+        public static sbyte GetHealth(ulong block1) => (sbyte)(block1 & ByteMask);
+        public static sbyte GetPower(ulong block1) => (sbyte)((block1 >> SecondByte) & ByteMask);
+        public static sbyte GetArmor(ulong block1) => (sbyte)((block1 >> ThirdByte) & ByteMask);
         public static sbyte GetAgility(ulong block1) => (sbyte)((block1 >> FourthByte) & ByteMask);
-        public static sbyte GetVigor(ulong block1)   => (sbyte)((block1 >> FifthByte) & ByteMask);
+        public static sbyte GetVigor(ulong block1) => (sbyte)((block1 >> FifthByte) & ByteMask);
         public static sbyte GetFortune(ulong block1) => (sbyte)((block1 >> SixthByte) & ByteMask);
-        public static sbyte GetRange(ulong block1)   => (sbyte)((block1 >> SeventhByte) & ByteMask);
-        public static sbyte GetRarity(ulong block1)  => (sbyte)((block1 >> EighthByte) & ByteMask);
+        public static sbyte GetRange(ulong block1) => (sbyte)((block1 >> SeventhByte) & ByteMask);
+        public static sbyte GetRarity(ulong block1) => (sbyte)((block1 >> EighthByte) & ByteMask);
     }
 
     /// <summary>
@@ -158,10 +188,12 @@ namespace DataSchemas.PackedItem
         public ItemType ItemType => PackedItemSchema.GetItemType(Block0);
         public AspectFlags AspectFlags => _aspectFlags;
         public StatusFlags StatusFlags => _statusFlags;
-        /// <summary>Base key for sprite lookup. Icon key = VisualBase + spriteTableStride.</summary>
-        public ushort VisualBase => PackedItemSchema.GetVisualBase(Block0);
-        /// <summary>Base key for name lookup. Desc key = TextBase + textTableStride.</summary>
-        public ushort TextBase => PackedItemSchema.GetTextBase(Block0);
+        public BiomeFlags BiomeFlags => PackedItemSchema.GetBiomeFlags(Block0);
+        public RarityFlags RarityFlags => PackedItemSchema.GetRarityFlags(Block0);
+        /// <summary>Key into sprite table [type][spriteKey]. Icon = spriteKey + stride.</summary>
+        public byte SpriteKey => PackedItemSchema.GetSpriteKey(Block0);
+        /// <summary>Key into text table [type][textKey]. Desc = textKey + stride.</summary>
+        public byte TextKey => PackedItemSchema.GetTextKey(Block0);
 
         // Properties derived from block1. Values for unset flags default to zero
         public sbyte Health => (_aspectFlags & AspectFlags.Health) != 0 ? PackedItemSchema.GetHealth(Block1) : (sbyte)0;

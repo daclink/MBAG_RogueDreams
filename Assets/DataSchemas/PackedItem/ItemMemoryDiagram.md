@@ -1,34 +1,36 @@
-﻿This document describes how a single item is encoded into two 64‑bit blocks.
+This document describes how a single item is encoded into two 64‑bit blocks.
 
-- **Metadata block (Block0)**: type, which aspects/stats are present, status flags, and lookup keys into external tables (sprite, icon, name, description).
+- **Metadata block (Block0)**: type, aspect/status flags, 8-bit lookup keys (SpriteKey, TextKey) for 2D tables, plus RarityFlags and BiomeFlags.
 - **Stats block (Block1)**: up to eight signed stat values, each stored in one byte (Health, Power, Armor, etc.).
 
 ###  Metadata Block (64 bits)
 
-| **Bits** | **Byte index** | **Field** |
-|---------:|---------------:|----------|
-| 63–56    | 7              | Desc     |
-| 55–48    | 6              | Name     |
-| 47–40    | 5              | Icon     |
-| 39–32    | 4              | Sprite   |
-| 31–24    | 3              |          |
-| 23–16    | 2              | Status   |
-| 15–8     | 1              | Aspect   |
-| 7–0      | 0              | Type     |
+| **Bits** | **Byte index** | **Field**     |
+|---------:|---------------:|---------------|
+| 63–56    | 7              | TextKey       |
+| 55–48    | 6              | SpriteKey     |
+| 47–40    | 5              | RarityFlags   |
+| 39–32    | 4              | BiomeFlags    |
+| 31–16    | 2–3            | StatusFlags   |
+| 15–8     | 1              | AspectFlags   |
+| 7–0      | 0              | ItemType      |
 
 ```text
 Bits:
-    63       56 55      48 47      40 39      32 31      24 23      16 15       8 7        0
-    +__________+__________+__________+__________+__________+__________+__________+_________+
-    |   Desc   |  Name    |  Icon    |  Sprite  |       Status        |  Aspect  |  Type   |
-    |__________+__________+__________+__________+__________+__________+__________+_________|
+    63       56 55      48 47      40 39      32 31                 16 15       8 7        0
+    +__________+__________+__________+__________+_____________________+__________+_________+
+    | TextKey  |SpriteKey |  Rarity  |BiomeFlags|   StatusFlags (16)  |  Aspect  |  Type   |
+    |__________+__________+__________+__________+_____________________+__________+_________|
 ```
-Each field in this block is an 8‑ or 16‑bit identifier:
+Each field in this block:
 
-- **Type**: which kind of item this is (`ItemType` enum).
-- **Aspect**: which numeric stats are actually used for this item (`AspectFlags` bitfield).
-- **Status**: which status effects this item can apply or confer (`StatusFlags` bitfield, 16 bits total).
-- **Sprite/Icon/Name/Desc**: byte keys into separate lookup tables (e.g., for UI sprites and localized text).
+- **ItemType** (8b): kind of item (`ItemType` enum, Flags).
+- **AspectFlags** (8b): which numeric stats are present (`AspectFlags` bitfield).
+- **StatusFlags** (16b): status effects this item can apply (`StatusFlags` bitfield).
+- **BiomeFlags** (8b): biomes where this item can appear (`BiomeFlags` bitfield).
+- **RarityFlags** (8b): rarity tiers or filtering (`RarityFlags` bitfield).
+- **SpriteKey** (8b): key into sprite table [type][spriteKey]; icon = spriteKey + stride.
+- **TextKey** (8b): key into text table [type][textKey]; desc = textKey + stride.
 
 
 ### Item Stats Block (64 bits)
