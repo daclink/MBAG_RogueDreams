@@ -1,14 +1,27 @@
+using System;
 using UnityEngine;
 
 namespace WFC
 {
+    
     // All tyle types
     public enum TileType
     {
         Empty = -1,
         Grass = 0,
         Dirt = 1,
-        Path = 2
+        Path = 2,
+        Water = 3,
+        Wall = 4
+    }
+    
+    //All biome types
+    public enum BiomeType
+    {
+        Biome1 = 0,
+        Biome2 = 1,
+        Biome3 = 2,
+        Biome4 = 3
     }
 
     // All room types

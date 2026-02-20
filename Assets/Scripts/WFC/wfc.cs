@@ -1,5 +1,7 @@
+using System;
 using Unity.VisualScripting;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 /**
@@ -27,22 +29,34 @@ namespace WFC
         itemRoom
     }
     
-    public class wfc
+    [Serializable]
+    public class TileData
     {
-        // Need to decide on max grid size for each map
-        private uint gridWidth = 128;
-        private uint gridHeight = 128;
+        public TileType tileType;
+        public Sprite tileSprite;
+    }
+    
+    public class wfc : MonoBehaviour
+    {
+        //List of each tile and sprite to be used in wfc
+        [SerializeField] private List<TileData> tileData;
+
+        //Max grid size will be:
+        // Rooms 10x10
+        // Room size: 10x10
+        // Total for rooms without padding: 100x100
+        // With padding for walls 2 tiles thick: 122x122
+        
+        private uint gridWidth = 122;
+        private uint gridHeight = 122;
         private presetRooms startRoom;
         private presetRooms endRoom;
         private presetRooms itemRoom;
 
-        private uint maxRoomWidth = 10;
-        private uint maxRoomHeight = 10;
-        private uint minRoomWidth = 5;
-        private uint minRoomHeight = 5;
+        private int roomWidth = 10;
+        private int roomHeight = 10;
+        private int padding = 2;
         
-        //list of each data tile: tiles that say 'dirt' 1, 'grass'2, etc
-        //once the data is generated, fill in the tilemap with the corresponding tiles.
         
 
         //Assign grid coordinates to the presetRooms

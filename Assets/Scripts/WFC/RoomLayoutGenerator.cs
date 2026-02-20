@@ -35,7 +35,7 @@ namespace WFC
         /**
          * This is the driver method for this class that calls all necessary methods to generate the room grid
          */
-        public int[,] GenerateRoomGrid()
+        public int[,] GenerateRoomGrid(int mapWidth, int mapHeight, int minRooms, int maxRooms)
         {
             //Initialization
             roomGrid = new int[mapWidth, mapHeight];
@@ -77,7 +77,7 @@ namespace WFC
             placedRooms.Add(startPos);
             startRoomIndex = 0;
 
-            Debug.Log($"Start room was placed at {startPos}");
+            // Debug.Log($"Start room was placed at {startPos}");
         }
 
         /**
@@ -256,7 +256,7 @@ namespace WFC
                 }
             }
             
-            Debug.Log("Room layout marked with types");
+            // Debug.Log("Room layout marked with types");
         }
         
 

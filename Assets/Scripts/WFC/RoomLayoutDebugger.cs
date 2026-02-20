@@ -8,24 +8,38 @@ namespace WFC
      */
     public class RoomLayoutDebugger : MonoBehaviour
     {
+        [Header("Room Grid Values")]
+        [SerializeField] private int mapWidth;
+        [SerializeField] private int mapHeight;
+        [SerializeField] private int minRooms;
+        [SerializeField] private int maxRooms;
+        
+        [Header("Testing Values")]
+        [SerializeField] private int testAmount;
+        
+        
         private RoomLayoutGenerator generator;
 
         public void Start()
         {
-            TestRoomLayout();
+            for (int i = 0; i < testAmount; i++)
+            {
+                TestRoomLayout();    
+            }
+            
         }
         
         [ContextMenu("Test Room Layout")]
         public void TestRoomLayout()
         {
             generator = new RoomLayoutGenerator();
-            int[,] roomGrid = generator.GenerateRoomGrid();
+            int[,] roomGrid = generator.GenerateRoomGrid(mapWidth, mapHeight, minRooms, maxRooms);
             
             // Print to console
             PrintRoomGrid(roomGrid);
             
             // Print statistics
-            PrintStatistics(generator);
+            // PrintStatistics(generator);
         }
         
         private void PrintRoomGrid(int[,] grid)
