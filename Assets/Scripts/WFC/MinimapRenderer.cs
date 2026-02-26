@@ -6,58 +6,111 @@ namespace WFC
 {
     public class MinimapRenderer : MonoBehaviour
     {
-        [Header("UI References")]
-        [SerializeField] private RawImage minimapImage;
-        [SerializeField] private RectTransform minimapContainer;
+        // UI References (set via Initialize)
+        private RawImage minimapImage;
+        private RectTransform minimapContainer;
         
-        [Header("Minimap Settings")]
-        [SerializeField] private int pixelsPerRoom = 16;
-        [SerializeField] private int roomSpacing = 4;
-        [SerializeField] private int roomBorderSize = 2;
-        [SerializeField] private int paddingRooms = 1;  
+        // Minimap Settings (set via Initialize)
+        private int pixelsPerRoom = 16;
+        private int roomSpacing = 4;
+        private int roomBorderSize = 2;
+        private int paddingRooms = 1;  
         
-        [Header("Connection Settings")]
-        [SerializeField] private bool showConnections = true;
-        [SerializeField] private int connectionWidth = 2;
-        [SerializeField] private Color connectionColor = new Color(0.5f, 0.5f, 0.5f, 1f);
+        // Connection Settings (set via Initialize)
+        private bool showConnections = true;
+        private int connectionWidth = 2;
+        private Color connectionColor = new Color(0.5f, 0.5f, 0.5f, 1f);
         
-        [Header("Room Colors")]
-        [SerializeField] private Color emptyColor = new Color(0.1f, 0.1f, 0.1f, 1f);
-        [SerializeField] private Color normalRoomColor = Color.white;
-        [SerializeField] private Color startRoomColor = Color.green;
-        [SerializeField] private Color endRoomColor = Color.red;
-        [SerializeField] private Color itemRoomColor = Color.yellow;
-        [SerializeField] private Color borderColor = Color.black;
+        // Room Colors (set via Initialize)
+        private Color emptyColor = new Color(0.1f, 0.1f, 0.1f, 1f);
+        private Color normalRoomColor = Color.white;
+        private Color startRoomColor = Color.green;
+        private Color endRoomColor = Color.red;
+        private Color itemRoomColor = Color.yellow;
+        private Color borderColor = Color.black;
         
         private Texture2D minimapTexture;
         private int[,] currentRoomLayout;
         private Vector2Int boundingBoxMin;
         private Vector2Int boundingBoxMax;
-        
         private AspectRatioFitter aspectRatioFitter;
-
-        void Awake()
+        private bool isInitialized = false;
+        
+        /// <summary>
+        /// Initialize the MinimapRenderer with all configuration values
+        /// Call this immediately after creating the component
+        /// </summary>
+        public void Initialize(
+            RawImage image,
+            RectTransform container,
+            int pixelsPerRoom = 16,
+            int roomSpacing = 4,
+            int roomBorderSize = 2,
+            int paddingRooms = 1,
+            bool showConnections = true,
+            int connectionWidth = 2,
+            Color? connectionColor = null,
+            Color? emptyColor = null,
+            Color? normalRoomColor = null,
+            Color? startRoomColor = null,
+            Color? endRoomColor = null,
+            Color? itemRoomColor = null,
+            Color? borderColor = null)
         {
-            // Get or add AspectRatioFitter component
-            if (minimapImage != null)
+            // Set UI references
+            this.minimapImage = image;
+            this.minimapContainer = container;
+            
+            // Set minimap settings
+            this.pixelsPerRoom = pixelsPerRoom;
+            this.roomSpacing = roomSpacing;
+            this.roomBorderSize = roomBorderSize;
+            this.paddingRooms = paddingRooms;
+            
+            // Set connection settings
+            this.showConnections = showConnections;
+            this.connectionWidth = connectionWidth;
+            this.connectionColor = connectionColor ?? new Color(0.5f, 0.5f, 0.5f, 1f);
+            
+            // Set room colors
+            this.emptyColor = emptyColor ?? new Color(0.1f, 0.1f, 0.1f, 1f);
+            this.normalRoomColor = normalRoomColor ?? Color.white;
+            this.startRoomColor = startRoomColor ?? Color.green;
+            this.endRoomColor = endRoomColor ?? Color.red;
+            this.itemRoomColor = itemRoomColor ?? Color.yellow;
+            this.borderColor = borderColor ?? Color.black;
+            
+            // Setup AspectRatioFitter
+            if (this.minimapImage != null)
             {
-                aspectRatioFitter = minimapImage.GetComponent<AspectRatioFitter>();
+                aspectRatioFitter = this.minimapImage.GetComponent<AspectRatioFitter>();
                 if (aspectRatioFitter == null)
                 {
-                    aspectRatioFitter = minimapImage.gameObject.AddComponent<AspectRatioFitter>();
+                    aspectRatioFitter = this.minimapImage.gameObject.AddComponent<AspectRatioFitter>();
                 }
-                
                 aspectRatioFitter.aspectMode = AspectRatioFitter.AspectMode.FitInParent;
             }
+            
+            isInitialized = true;
+            Debug.Log("✓ MinimapRenderer initialized with custom settings");
         }
-
+        
+        
         /**
          * Driver method that takes in the roomlayour grid array and renders the minimap from it
          */
         public void RenderMinimap(int[,] roomLayout)
         {
+            
+            if (!isInitialized)
+            {
+                Debug.LogError("MinimapRenderer not initialized! Call Initialize() first.");
+                return;
+            }
+            
             if (roomLayout == null)
             {
+                Debug.LogError("Room layout is null!");
                 return;
             }
 
@@ -119,10 +172,8 @@ namespace WFC
             if (minimapImage != null)
             {
                 minimapImage.texture = minimapTexture;
-
                 UpdateAspectRatio();
             }
-            
         }
         
         /**
@@ -405,6 +456,14 @@ namespace WFC
             
             minimapTexture.SetPixels(pixels);
             minimapTexture.Apply();
+        }
+        
+        /// <summary>
+        /// Check if the MinimapRenderer has been initialized
+        /// </summary>
+        public bool IsInitialized()
+        {
+            return isInitialized;
         }
     }
 }
