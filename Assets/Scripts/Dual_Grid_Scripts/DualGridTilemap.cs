@@ -187,9 +187,33 @@ public class DualGridTilemap : MonoBehaviour {
 
 public enum TileType {
     Empty,
-    Dirt,
-    Grass,
-    Path,
-    Water,
-    Wall
-}
+    Dirt = 4,
+    Grass = 8,
+    Path = 12,
+    Water = 16,
+    Wall = 20
+} //updated enum values for the necessary bit shifting, it shouldn't affect anything in the meantime
+
+
+
+//Planning for serialization
+/*
+
+
+this should make it so that it sends a 64 bit string to a database that returns a tile to update
+the tilemap with
+
+| 0000 | 0000 | 0000 | 0000 | 0000 | 0000 | 0000 | 0000 |
+| Unused | Biome | Wall | Water | Path | Grass | Dirt | Empty |
+the enums for the tile types can be used to shift the bits over
+in the CalculateFloorTile function, we can create the 64 bit string by setting each value to
+| 1000 | 0100 | 0010 | 0001 |
+| top left | top right | bot left | bot right |
+and then shifting those bits by the enum values
+
+and then adding them together to get one final 64 bit string
+
+the biome value will have to also be added in, not sure how that will be accessed quite yet though
+
+
+*/
