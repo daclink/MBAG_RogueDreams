@@ -7,6 +7,9 @@ namespace WFC
 {
     public static class DungeonSetup
     {
+        /**
+         * All elements created in the dungeon setup to be returned
+         */
         public class SetupResult
         {
             public Grid grid;
@@ -17,10 +20,11 @@ namespace WFC
             public GameObject minimapRendererObject;
         }
 
-        /// <summary>
-        /// Main public method to setup complete dungeon hierarchy
-        /// Call this from your DungeonGeneration script
-        /// </summary>
+        // --------------------  DRIVER METHOD  ----------------------
+        /**
+         * Sets up the overall hierarchy for dungeon creation
+         * Sets up the grid, tilemap, canvas, panel, image, and minimap renderer
+         */
         public static SetupResult SetupDungeonHierarchy(Transform parentTransform = null)
         {
             SetupResult result = new SetupResult();
@@ -34,43 +38,25 @@ namespace WFC
             // Create MinimapRenderer GameObject
             result.minimapRendererObject = CreateMinimapRenderer();
 
-            Debug.Log("✓ Dungeon hierarchy setup complete");
             return result;
         }
 
-        /// <summary>
-        /// Creates Grid and Tilemap hierarchy under parent
-        /// </summary>
-        private static void SetupGridAndTilemap(Transform parent, out Grid grid, out Tilemap tilemap)
+        // --------------------  MINIMAP METHODS  ----------------------
+        /**
+         * Creates the minimap renderer object
+         */
+        private static GameObject CreateMinimapRenderer()
         {
-            // Create Grid GameObject
-            GameObject gridObj = new GameObject("MapGrid");
-            if (parent != null)
-            {
-                gridObj.transform.SetParent(parent);
-            }
-
-            grid = gridObj.AddComponent<Grid>();
-            grid.cellSize = new Vector3(1, 1, 0);
-            grid.cellLayout = GridLayout.CellLayout.Rectangle;
-
-            // Create Tilemap as child of Grid
-            GameObject tilemapObj = new GameObject("BaseLayerTilemap");
-            tilemapObj.transform.SetParent(gridObj.transform);
-
-            tilemap = tilemapObj.AddComponent<Tilemap>();
-            TilemapRenderer tilemapRenderer = tilemapObj.AddComponent<TilemapRenderer>();
-
-            // Configure renderer
-            tilemapRenderer.sortingOrder = 0;
-            tilemapRenderer.sortingLayerName = "Default";
-
-            Debug.Log("✓ Grid and Tilemap created");
+            GameObject rendererObj = new GameObject("MinimapRenderer");
+            rendererObj.AddComponent<MinimapRenderer>();
+            rendererObj.AddComponent<MinimapRenderer>();
+            
+            return rendererObj;
         }
-
-        /// <summary>
-        /// Creates or finds Canvas and sets up Minimap UI hierarchy
-        /// </summary>
+        
+                /**
+         * Creates the entirety of the minimap UI by adding components if necessary and setting values
+         */
         private static void SetupMinimapUI(out Canvas canvas, out RectTransform minimapPanel, out RawImage minimapImage)
         {
             // Find or create Canvas
@@ -116,12 +102,11 @@ namespace WFC
             aspectFitter.aspectMode = AspectRatioFitter.AspectMode.FitInParent;
             aspectFitter.aspectRatio = 1f;
 
-            Debug.Log("✓ Minimap UI created");
         }
 
-        /// <summary>
-        /// Creates a Canvas with proper configuration
-        /// </summary>
+        /**
+         * Creates the canvas object with the proper start values
+         */
         private static Canvas CreateCanvas()
         {
             GameObject canvasObj = new GameObject("Canvas");
@@ -131,6 +116,8 @@ namespace WFC
             // Add CanvasScaler for responsive UI
             CanvasScaler scaler = canvasObj.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            // Can adjust the reference res size to the actual screen size of 640 x 360.
+            // 1920 x 1080 is smaller and looks better
             scaler.referenceResolution = new Vector2(1920, 1080);
             scaler.matchWidthOrHeight = 0.5f;
 
@@ -143,37 +130,54 @@ namespace WFC
                 CreateEventSystem();
             }
 
-            Debug.Log("✓ Canvas created");
             return canvas;
         }
-
-        /// <summary>
-        /// Creates EventSystem for UI interaction
-        /// </summary>
+        
+        /**
+        * Creates the event system to allow for UI Interaction
+        * Most likely not needed in the future
+        */
         private static void CreateEventSystem()
         {
             GameObject eventSystemObj = new GameObject("EventSystem");
             eventSystemObj.AddComponent<UnityEngine.EventSystems.EventSystem>();
             eventSystemObj.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
-
-            Debug.Log("✓ EventSystem created");
         }
 
-        /// <summary>
-        /// Creates a GameObject with MinimapRenderer component
-        /// </summary>
-        private static GameObject CreateMinimapRenderer()
+        // ------------------------ GRID/TILEMAP -------------------------
+        /**
+         * Creates the grid and tilemap and sets the parent object to put under
+         */
+        private static void SetupGridAndTilemap(Transform parent, out Grid grid, out Tilemap tilemap)
         {
-            GameObject rendererObj = new GameObject("MinimapRenderer");
-            rendererObj.AddComponent<MinimapRenderer>();
+            // Create Grid GameObject
+            GameObject gridObj = new GameObject("MapGrid");
+            if (parent != null)
+            {
+                gridObj.transform.SetParent(parent);
+            }
 
-            Debug.Log("✓ MinimapRenderer GameObject created");
-            return rendererObj;
+            grid = gridObj.AddComponent<Grid>();
+            grid.cellSize = new Vector3(1, 1, 0);
+            grid.cellLayout = GridLayout.CellLayout.Rectangle;
+
+            // Create Tilemap as child of Grid
+            GameObject tilemapObj = new GameObject("BaseLayerTilemap");
+            tilemapObj.transform.SetParent(gridObj.transform);
+
+            tilemap = tilemapObj.AddComponent<Tilemap>();
+            TilemapRenderer tilemapRenderer = tilemapObj.AddComponent<TilemapRenderer>();
+
+            // Configure renderer
+            tilemapRenderer.sortingOrder = 0;
+            tilemapRenderer.sortingLayerName = "Default";
         }
 
-        /// <summary>
-        /// Optional: Cleans up existing hierarchy if re-running setup
-        /// </summary>
+        // ------------------------  HELPERS  ------------------------------
+        /**
+         * Cleans up the existing hierarchy if necessary by removing certain components before having them added back in
+         * Prevents duplicates
+         */
         public static void CleanupExistingHierarchy(Transform parent)
         {
             // Find and destroy existing Grid
@@ -181,7 +185,6 @@ namespace WFC
             if (existingGrid != null)
             {
                 GameObject.DestroyImmediate(existingGrid.gameObject);
-                Debug.Log("✓ Removed existing MapGrid");
             }
 
             // Find and destroy existing Minimap UI
@@ -192,7 +195,6 @@ namespace WFC
                 if (existingPanel != null)
                 {
                     GameObject.DestroyImmediate(existingPanel.gameObject);
-                    Debug.Log("✓ Removed existing MinimapPanel");
                 }
             }
 
@@ -201,7 +203,6 @@ namespace WFC
             if (existingRenderer != null)
             {
                 GameObject.DestroyImmediate(existingRenderer.gameObject);
-                Debug.Log("✓ Removed existing MinimapRenderer");
             }
         }
     }

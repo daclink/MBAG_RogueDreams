@@ -32,12 +32,18 @@ namespace WFC
             Vector2Int.right
         };
 
+        // --------------------------  DRIVER METHOD  --------------------------
         /**
          * This is the driver method for this class that calls all necessary methods to generate the room grid
          */
         public int[,] GenerateRoomGrid(int mapWidth, int mapHeight, int minRooms, int maxRooms)
         {
             //Initialization
+            this.mapWidth = mapWidth;
+            this.mapHeight = mapHeight;
+            this.minRooms = minRooms;
+            this.maxRooms = maxRooms;
+            
             roomGrid = new int[mapWidth, mapHeight];
             InitializeRoomGrid();
             placedRooms.Clear();
@@ -53,6 +59,9 @@ namespace WFC
             return roomGrid;
         }
         
+        
+        // -------------------------  MAIN METHODS  ----------------------------
+
         /**
          * This method initializes the room grid to empty tiles, all are -1 to start
          */
@@ -110,43 +119,14 @@ namespace WFC
         }
         
         /**
-         * This gets an empty position that is adjacent to the given room position from a random vector direction.
-         * This will be passed back to the GrowRooms Method and added to placedRooms if valid
-         */
-        private Vector2Int GetAdjacentEmptyPosition(Vector2Int baseRoomPos)
-        {
-            //shuffles the directions array to give randomness to growth
-            ShuffleArray(directions);
-            
-            foreach (Vector2Int dir in directions)
-            {
-                Vector2Int newRoomPos = baseRoomPos + dir;
-                if (IsValidPosition(newRoomPos) && !placedRooms.Contains(newRoomPos))
-                {
-                    return newRoomPos;
-                }
-            }
-            return Vector2Int.one * -1;
-        }
-
-        /**
-         * Simply checks if a newly selected position in in bounds of the map.
-         * If the position is valid, it will be added to the placedRooms
-         */
-        private bool IsValidPosition(Vector2Int pos)
-        {
-            return pos.x >= 0 && pos.x < mapWidth && pos.y >= 0 && pos.y < mapHeight;
-        }
-
-        /**
-         * This is a driver method to assign the special rooms we need which are item and boss rooms
-         * Utilizes other helper methods to accomplish the assignments
-         */
+        * This is a driver method to assign the special rooms we need which are item and boss rooms
+        * Utilizes other helper methods to accomplish the assignments
+        */
         private void AssignSpecialRooms()
         {
+            // This check ensures we have enough rooms generated to assign rooms
             if (placedRooms.Count < 3)
             {
-                Debug.LogError("Not enough rooms for special rooms");
                 return;
             }
             
@@ -164,8 +144,40 @@ namespace WFC
         }
         
         /**
-         * This is used to get the farthest room position from the start room which will become the boss room
-         */
+        * This method uses the placed rooms list to mark each room on the grid with its corresponding room type value.
+        * This needs to consider the specific room types which are defined in DungeonGeneration under the RoomType enum
+        */
+        private void MarkRoomsOnLayout()
+        {
+            for (int i = 0; i < placedRooms.Count; i++)
+            {
+                Vector2Int currPos = placedRooms[i];
+                
+                if (i == startRoomIndex)
+                {
+                    roomGrid[currPos.x, currPos.y] = (int)RoomType.Start;
+                }
+                else if (i == endRoomIndex)
+                {
+                    roomGrid[currPos.x, currPos.y] = (int)RoomType.End;
+                }
+                else if (i == itemRoomIndex)
+                {
+                    roomGrid[currPos.x, currPos.y] = (int)RoomType.Item;
+                }
+                else
+                {
+                    roomGrid[currPos.x, currPos.y] = (int)RoomType.Normal;
+                }
+            }
+            
+        }
+
+        
+        // -------------------------  HELPER METHODS  ----------------------------
+        /**
+        * This is used to get the farthest room position from the start room which will become the boss room
+        */
         private int GetFarthestRoomIndex(int fromIndex)
         {
             Vector2Int startRoom = placedRooms[fromIndex];
@@ -211,8 +223,41 @@ namespace WFC
 
             return -1;
         }
-
         
+        /**
+         * This gets an empty position that is adjacent to the given room position from a random vector direction.
+         * This will be passed back to the GrowRooms Method and added to placedRooms if valid
+         */
+        private Vector2Int GetAdjacentEmptyPosition(Vector2Int baseRoomPos)
+        {
+            //shuffles the directions array to give randomness to growth
+            // could have a separate directions array in this method or copy the original one here
+            //shuffling like this will shuffle the entire array which COULD cause issues but it doesn't yet
+            ShuffleArray(directions);
+            
+            foreach (Vector2Int dir in directions)
+            {
+                Vector2Int newRoomPos = baseRoomPos + dir;
+                if (IsValidPosition(newRoomPos) && !placedRooms.Contains(newRoomPos))
+                {
+                    return newRoomPos;
+                }
+            }
+            return Vector2Int.one * -1;
+        }
+
+        /**
+         * Simply checks if a newly selected position in in bounds of the map.
+         * If the position is valid, it will be added to the placedRooms
+         */
+        private bool IsValidPosition(Vector2Int pos)
+        {
+            return pos.x >= 0 && pos.x < mapWidth && pos.y >= 0 && pos.y < mapHeight;
+        }
+        
+        /**
+         * Counts the number of adjacent rooms to a specific room based on position on the grid
+         */
         private int GetAdjacentRoomCount(Vector2Int pos)
         {
             int count = 0;
@@ -228,38 +273,6 @@ namespace WFC
             return count;
         }
         
-        /**
-         * This method uses the placed rooms list to mark each room on the grid with its corresponding room type value.
-         * This needs to consider the specific room types which are defined in DungeonGeneration under the RoomType enum
-         */
-        private void MarkRoomsOnLayout()
-        {
-            for (int i = 0; i < placedRooms.Count; i++)
-            {
-                Vector2Int currPos = placedRooms[i];
-                
-                if (i == startRoomIndex)
-                {
-                    roomGrid[currPos.x, currPos.y] = (int)RoomType.Start;
-                }
-                else if (i == endRoomIndex)
-                {
-                    roomGrid[currPos.x, currPos.y] = (int)RoomType.End;
-                }
-                else if (i == itemRoomIndex)
-                {
-                    roomGrid[currPos.x, currPos.y] = (int)RoomType.Item;
-                }
-                else
-                {
-                    roomGrid[currPos.x, currPos.y] = (int)RoomType.Normal;
-                }
-            }
-            
-            // Debug.Log("Room layout marked with types");
-        }
-        
-
         /**
          * This is used to shuffle the directions array to provide randomness in the growth algorithm
          */

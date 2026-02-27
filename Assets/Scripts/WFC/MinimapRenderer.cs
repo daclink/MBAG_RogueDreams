@@ -36,10 +36,11 @@ namespace WFC
         private AspectRatioFitter aspectRatioFitter;
         private bool isInitialized = false;
         
-        /// <summary>
-        /// Initialize the MinimapRenderer with all configuration values
-        /// Call this immediately after creating the component
-        /// </summary>
+        // ---------------------------------  INITIALIZER METHOD  ------------------------------
+        
+        /**
+         * Same as monobehavior start but I can't use monobehavior here since I am calling it from the driver class
+         */
         public void Initialize(
             RawImage image,
             RectTransform container,
@@ -92,10 +93,10 @@ namespace WFC
             }
             
             isInitialized = true;
-            Debug.Log("✓ MinimapRenderer initialized with custom settings");
+            // Debug.Log("MinimapRenderer initialized");
         }
         
-        
+        // -----------------------------  DRIVER METHOD  --------------------------------
         /**
          * Driver method that takes in the roomlayour grid array and renders the minimap from it
          */
@@ -133,7 +134,7 @@ namespace WFC
             if (minimapTexture == null || minimapTexture.width != textureWidth || minimapTexture.height != textureHeight)
             {
                 minimapTexture = new Texture2D(textureWidth, textureHeight, TextureFormat.RGBA32, false);
-                minimapTexture.filterMode = FilterMode.Point; // Crisp pixels
+                minimapTexture.filterMode = FilterMode.Point; // Point ensures the pixels are non-blocky and clear even when viewed closely
             }
             
             // Clear to empty color
@@ -176,68 +177,13 @@ namespace WFC
             }
         }
         
-        /**
-         * Updates the aspect ratio on the aspectRatioFitter Component to match
-         */
-        private void UpdateAspectRatio()
-        {
-            if (minimapTexture != null && aspectRatioFitter != null)
-            {
-                float aspectRatio = (float)minimapTexture.width / minimapTexture.height;
-                aspectRatioFitter.aspectRatio = aspectRatio;
-            }
-        }
 
-        /**
-         * Calculates the bounding box that contains all the rooms on the map
-         */
-        private void CalculateBoundingBox(int[,] roomLayout, out Vector2Int min, out Vector2Int max)
-        {
-            int gridWidth = roomLayout.GetLength(0);
-            int gridHeight = roomLayout.GetLength(1);
-            
-            int minX = gridWidth;
-            int minY = gridHeight;
-            int maxX = -1;
-            int maxY = -1;
-            
-            // Find bounds of all rooms
-            for (int x = 0; x < gridWidth; x++)
-            {
-                for (int y = 0; y < gridHeight; y++)
-                {
-                    if (roomLayout[x, y] >= 0) // Room exists
-                    {
-                        if (x < minX) minX = x;
-                        if (x > maxX) maxX = x;
-                        if (y < minY) minY = y;
-                        if (y > maxY) maxY = y;
-                    }
-                }
-            }
-            
-            // Add padding
-            minX = Mathf.Max(0, minX - paddingRooms);
-            minY = Mathf.Max(0, minY - paddingRooms);
-            maxX = Mathf.Min(gridWidth - 1, maxX + paddingRooms);
-            maxY = Mathf.Min(gridHeight - 1, maxY + paddingRooms);
-            
-            min = new Vector2Int(minX, minY);
-            max = new Vector2Int(maxX, maxY);
-        }
 
-        /**
-         * Converts the grid coordinates to texture coordinates
-         */
-        private Vector2Int GridToTextureCoords(int gridX, int gridY)
-        {
-            int textureX = (gridX - boundingBoxMin.x) * pixelsPerRoom + (roomSpacing / 2);
-            int textureY = (gridY - boundingBoxMin.y) * pixelsPerRoom + (roomSpacing / 2);
-            return new Vector2Int(textureX, textureY);
-        }
-
+        
+        // -------------------------  ROOM DRAWING METHODS  -------------------------
         /**
          * Draws the room connection coridors
+         * Would like to see if I can condense this code and get rid of the drawHorizontal/Vertical
          */
         private void DrawConnections(Color[] pixels, int textureWidth, int textureHeight, int[,] roomLayout)
         {
@@ -374,6 +320,69 @@ namespace WFC
             }
         }
 
+        
+        // -----------------------------  HELPER METHODS  -----------------------------
+        
+        /**
+         * Updates the aspect ratio on the aspectRatioFitter Component to match
+        */
+        private void UpdateAspectRatio()
+        {
+            if (minimapTexture != null && aspectRatioFitter != null)
+            {
+                float aspectRatio = (float)minimapTexture.width / minimapTexture.height;
+                aspectRatioFitter.aspectRatio = aspectRatio;
+            }
+        }
+
+        /**
+         * Calculates the bounding box that contains all the rooms on the map
+         */
+        private void CalculateBoundingBox(int[,] roomLayout, out Vector2Int min, out Vector2Int max)
+        {
+            int gridWidth = roomLayout.GetLength(0);
+            int gridHeight = roomLayout.GetLength(1);
+            
+            int minX = gridWidth;
+            int minY = gridHeight;
+            int maxX = -1;
+            int maxY = -1;
+            
+            // Find bounds of all rooms
+            for (int x = 0; x < gridWidth; x++)
+            {
+                for (int y = 0; y < gridHeight; y++)
+                {
+                    if (roomLayout[x, y] >= 0) // Room exists
+                    {
+                        if (x < minX) minX = x;
+                        if (x > maxX) maxX = x;
+                        if (y < minY) minY = y;
+                        if (y > maxY) maxY = y;
+                    }
+                }
+            }
+            
+            // Add padding
+            minX = Mathf.Max(0, minX - paddingRooms);
+            minY = Mathf.Max(0, minY - paddingRooms);
+            maxX = Mathf.Min(gridWidth - 1, maxX + paddingRooms);
+            maxY = Mathf.Min(gridHeight - 1, maxY + paddingRooms);
+            
+            min = new Vector2Int(minX, minY);
+            max = new Vector2Int(maxX, maxY);
+        }
+
+        /**
+         * Converts the grid coordinates to texture coordinates
+         */
+        private Vector2Int GridToTextureCoords(int gridX, int gridY)
+        {
+            int textureX = (gridX - boundingBoxMin.x) * pixelsPerRoom + (roomSpacing / 2);
+            int textureY = (gridY - boundingBoxMin.y) * pixelsPerRoom + (roomSpacing / 2);
+            return new Vector2Int(textureX, textureY);
+        }
+        
         /**
          * retrieves the proper room color for a room
          */
@@ -412,7 +421,7 @@ namespace WFC
         }
 
         /**
-         * Highlights a room to be its necessary color
+         * Highlights a room to be its necessary color, unused for now
          */
         public void HighlightRoom(Vector2Int roomPosition, Color highlightColor)
         {
@@ -458,9 +467,10 @@ namespace WFC
             minimapTexture.Apply();
         }
         
-        /// <summary>
-        /// Check if the MinimapRenderer has been initialized
-        /// </summary>
+        /**
+         * Makes sure the minimapRenderer was initialized
+         * Returns bool value of isInitialized
+         */
         public bool IsInitialized()
         {
             return isInitialized;

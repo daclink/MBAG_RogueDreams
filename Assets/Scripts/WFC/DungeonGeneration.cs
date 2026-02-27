@@ -6,6 +6,7 @@ using UnityEngine.UI;
 namespace WFC
 {
     
+    // ---------------------  ENUMS  -----------------------
     // All tyle types
     public enum TileType
     {
@@ -53,8 +54,6 @@ namespace WFC
         [Tooltip("If true, will automatically create missing hierarchy on Start")]
         
         [Header("Tilemap References")]
-        // [SerializeField] private Tilemap baseLayerTilemap;
-        // [SerializeField] private Grid gridComponent;
         private Tilemap baseLayerTilemap;
         private Grid gridComponent;
 
@@ -67,9 +66,7 @@ namespace WFC
         [SerializeField] private TileBase wallTile;
 
         [Header("Minimap References")]
-        // [SerializeField] private MinimapRenderer minimapRenderer;
-        // [SerializeField] private RawImage minimapImage;
-        // [SerializeField] private RectTransform minimapPanel;
+
         private MinimapRenderer minimapRenderer;
         private RawImage minimapImage;
         private RectTransform minimapPanel;
@@ -103,12 +100,15 @@ namespace WFC
         [Header("WFC Settings")]
         [SerializeField] private int pathWidth = 2;
 
-        // private int inspectorPathWidth = 2;
         private RoomLayoutGenerator roomLayoutGen;
         private WFCTilemap wfcGen;
         private TileType[,] finalTilemap;
         private int[,] roomLayout;
 
+        
+        /**
+        * --------------------  MONOBEHAVIOR METHODS  ----------------------
+        */
         void Start()
         {
             // Auto-setup hierarchy if enabled and components are missing
@@ -122,33 +122,27 @@ namespace WFC
                 GenerateCompleteDungeon();
             }
         }
-
-        // Sync inspector value to internal pathWidth
-        // void OnValidate()
-        // {
-        //     pathWidth = inspectorPathWidth;
-        // }
-
         
         /**
          * --------------------  MAIN DRIVER METHOD  ----------------------
          */
         
-        
-        [ContextMenu("Generate New Dungeon")]
+        /**
+         * Generates the dungeon in multiple stages
+         */
         public void GenerateCompleteDungeon()
         {
             
             // Check if hierarchy is set up
             if (baseLayerTilemap == null || gridComponent == null)
             {
-                Debug.LogError("Hierarchy not set up! Attempting auto-setup...");
+                // Debug.LogError("Hierarchy not set up! Attempting auto-setup...");
                 CheckAndSetupHierarchy();
                 
                 // Check again after setup attempt
                 if (baseLayerTilemap == null || gridComponent == null)
                 {
-                    Debug.LogError("Auto-setup failed! Cannot generate dungeon.");
+                    // Debug.LogError("Auto-setup failed! Cannot generate dungeon.");
                     return;
                 }
             }
@@ -157,34 +151,27 @@ namespace WFC
             {
                 UnityEngine.Random.InitState(randomSeed);
             }
-
-            Debug.Log("=== Starting Dungeon Generation ===");
-
+            
             // Stage 1: Generate room layout
-            Debug.Log("Stage 1: Generating room layout...");
             roomLayoutGen = new RoomLayoutGenerator();
             roomLayout = roomLayoutGen.GenerateRoomGrid(mapWidth, mapHeight, minRooms, maxRooms);
 
             var roomPositions = roomLayoutGen.GetRoomPositions();
+            
+            // Could be useful for later on when needing to pass coordinates to the player and camera for spawn points
             // var startRoom = roomLayoutGen.GetStartRoomPosition();
             // var endRoom = roomLayoutGen.GetEndRoomPosition();
             // var itemRoom = roomLayoutGen.GetItemRoomPosition();
-
-            Debug.Log($"Room layout complete: {roomPositions.Count} rooms");
             
-            // Render minimap AFTER room layout generation
             if (minimapRenderer != null)
             {
-                
                 // Initialize if not already initialized
                 if (!minimapRenderer.IsInitialized())
                 {
-                    Debug.Log("Minimap not initialized - initializing now with Inspector values...");
                     InitializeMinimapRenderer();
                 }
-                
+                // Render the minimap
                 minimapRenderer.RenderMinimap(roomLayout);
-                Debug.Log("Minimap rendered!");
             }    
             else
             {
@@ -192,18 +179,13 @@ namespace WFC
             }
 
             // Stage 2: Generate tilemap using WFC
-            Debug.Log("Stage 2: Generating tilemap with WFC...");
             wfcGen = new WFCTilemap(roomLayout, roomPositions, roomLayoutGen, pathWidth);
             finalTilemap = wfcGen.Generate();
 
             Vector2Int tilemapSize = wfcGen.GetTilemapSize();
-            Debug.Log($"Tilemap complete: {tilemapSize.x}x{tilemapSize.y} tiles");
 
             // Stage 3: Build Unity Tilemap
-            Debug.Log("Stage 3: Building Unity Tilemap...");
             BuildUnityTilemap(finalTilemap);
-
-            Debug.Log("=== Dungeon Generation Complete ===");
         }
         
         /**
@@ -212,14 +194,11 @@ namespace WFC
          * These create the tilemap given information from the growth algorithm
          */
 
+        /**
+         * Builds the tilemap by setting tiles
+         */
         private void BuildUnityTilemap(TileType[,] tileData)
         {
-            if (baseLayerTilemap == null)
-            {
-                Debug.LogError("Base Layer Tilemap not assigned!");
-                return;
-            }
-
             baseLayerTilemap.ClearAllTiles();
 
             int width = tileData.GetLength(0);
@@ -242,9 +221,7 @@ namespace WFC
                     }
                 }
             }
-
-            Debug.Log($"Unity Tilemap built: {tilesPlaced} tiles placed");
-            CenterCameraOnTilemap(width, height);
+            // Can make method call here to move camera over the start room
         }
 
         private TileBase GetTileAsset(TileType type)
@@ -260,50 +237,32 @@ namespace WFC
                 default: return null;
             }
         }
-
-        private void CenterCameraOnTilemap(int width, int height)
-        {
-            if (Camera.main != null)
-            {
-                Camera.main.transform.position = new Vector3(width / 2f, height / 2f, -10f);
-            }
-        }
-        
         
         
         /**
-        * --------------------  HIERARCHY SETUP METHODS  -----------------------
+         * --------------------  HIERARCHY SETUP METHODS  -----------------------
          *
-         * These are used to setup the hierarchy including the canvas elements for the minimap and
+         * These are used to set up the hierarchy including the canvas elements for the minimap and
          * the grid/tilemap elements
         */
         
-        /// <summary>
-        /// Checks if hierarchy is set up, and creates it if missing
-        /// Safe to call multiple times - only creates what's missing
-        /// </summary>
+        /**
+        * Checks if hierarchy is set up, and creates it if missing
+        * Safe to call multiple times - only creates what's missing
+        */
         public void CheckAndSetupHierarchy()
         {
             bool needsSetup = IsSetupNeeded();
 
             if (needsSetup)
             {
-                Debug.Log("=== Auto-Setup: Missing components detected ===");
                 AutoSetupHierarchy();
-            }
-            else
-            {
-                Debug.Log("✓ Hierarchy already set up - skipping auto-setup");
-                // if (minimapRenderer != null && minimapImage != null && minimapPanel != null)
-                // {
-                //     InitializeMinimapRenderer();
-                // }
             }
         }
 
-        /// <summary>
-        /// Checks if any required components are missing
-        /// </summary>
+        /**
+         * Checks for missing components
+         */
         private bool IsSetupNeeded()
         {
             return baseLayerTilemap == null || 
@@ -313,15 +272,13 @@ namespace WFC
                    minimapPanel == null;
         }
 
-        /// <summary>
-        /// Public method to manually trigger hierarchy setup
-        /// Can be called from Inspector or from other scripts
-        /// </summary>
+        /**
+         *  Public method to manually trigger hierarchy setup
+         *  Can be called from Inspector or from other scripts
+         */
         [ContextMenu("Auto-Setup Hierarchy")]
         public void AutoSetupHierarchy()
         {
-            Debug.Log("=== Starting Auto-Setup ===");
-
             // Setup Grid and Tilemap if missing
             if (baseLayerTilemap == null || gridComponent == null)
             {
@@ -333,24 +290,21 @@ namespace WFC
             {
                 SetupMinimapUI();
             }
-
-            Debug.Log("=== Auto-Setup Complete ===");
-
+            
+            
 #if UNITY_EDITOR
             // Mark object as dirty so Unity saves the changes
             UnityEditor.EditorUtility.SetDirty(this);
 #endif
         }
         
-        /// <summary>
-        /// Force cleanup and recreate entire hierarchy
-        /// Use this if you want to start fresh
-        /// </summary>
+        /**
+         * Force a recreate of the hierarchy scene objects. Not used but could be useful later on when dealing
+         * with multiple maps in one run
+         */
         [ContextMenu("Force Recreate Hierarchy")]
         public void ForceRecreateHierarchy()
         {
-            Debug.Log("=== Force Recreating Hierarchy ===");
-
             // Clean up existing
             DungeonSetup.CleanupExistingHierarchy(transform);
 
@@ -365,9 +319,9 @@ namespace WFC
             AutoSetupHierarchy();
         }
         
-        /// <summary>
-        /// Setup Grid and Tilemap components
-        /// </summary>
+        /**
+         * Setup the grid and tilemap components
+         */
         private void SetupGridAndTilemap()
         {
             // Check if Grid already exists as child
@@ -381,7 +335,6 @@ namespace WFC
                 if (existingTilemap != null && existingTilemap.GetComponent<Tilemap>() != null)
                 {
                     baseLayerTilemap = existingTilemap.GetComponent<Tilemap>();
-                    Debug.Log("✓ Found existing Grid and Tilemap");
                     return;
                 }
             }
@@ -391,12 +344,12 @@ namespace WFC
             gridComponent = setup.grid;
             baseLayerTilemap = setup.baseTilemap;
 
-            Debug.Log("✓ Grid and Tilemap created");
+            Debug.Log("Grid and Tilemap created");
         }
 
-        /// <summary>
-        /// Setup Minimap UI components
-        /// </summary>
+        /**
+         * Setup minimap UI components
+         */
         private void SetupMinimapUI()
         {
             // Check if Canvas exists
@@ -444,12 +397,13 @@ namespace WFC
                 InitializeMinimapRenderer();
             }
 
-            Debug.Log("✓ Minimap UI components configured");
+            Debug.Log("Minimap UI components configured");
         }
         
-        /// <summary>
-        /// Initialize the MinimapRenderer with values from this script's Inspector
-        /// </summary>
+        /**
+         *  Initialize the MinimapRenderer with values from this script's Inspector
+         *  Calls the initialize method from minimapRenderer
+         */
         private void InitializeMinimapRenderer()
         {
             if (minimapRenderer == null || minimapImage == null || minimapPanel == null)
