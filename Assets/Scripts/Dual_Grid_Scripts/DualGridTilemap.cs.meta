@@ -1,0 +1,20 @@
+fileFormatVersion: 2
+guid: 7fcd3736f5a34b50a524c28d75029426
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - inputTilemap: {instanceID: 0}
+  - floorTilemap: {instanceID: 0}
+  - wallTilemap: {instanceID: 0}
+  - placeholderTilemap: {instanceID: 0}
+  - displayTilemap: {instanceID: 0}
+  - grassPlaceholderTile: {fileID: 11400000, guid: 9e4d4fe8ff265354c87be5d1660e8fa6, type: 2}
+  - dirtPlaceholderTile: {fileID: 11400000, guid: 5932b42feb0ec4b46b747191aab41a41, type: 2}
+  - emptyPlaceholderTile: {fileID: 11400000, guid: d718a9a5aa15395459a9f7d4315cc611, type: 2}
+  - pathPlaceholderTile: {fileID: 11400000, guid: 30ea27de52bf05d4f88e76b5f836a62f, type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
