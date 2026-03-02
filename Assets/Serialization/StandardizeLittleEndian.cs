@@ -52,6 +52,19 @@ namespace Serialization
             stream.Write(buffer);
         }
 
+        /// <summary>Reads exactly buffer.Length bytes; throws EndOfStreamException if not enough data.</summary>
+        private static void ReadExactly(Stream stream, Span<byte> buffer)
+        {
+            int totalRead = 0;
+            while (totalRead < buffer.Length)
+            {
+                int n = stream.Read(buffer.Slice(totalRead));
+                if (n == 0)
+                    throw new EndOfStreamException($"Expected {buffer.Length} bytes, got {totalRead}.");
+                totalRead += n;
+            }
+        }
+
         /// <summary>
         /// Allocate a 4-byte span (32-bits) on the stack.
         /// Then read exactly 4 bytes from the stream to the span and throw if less than 4 bytes are read.
@@ -64,7 +77,7 @@ namespace Serialization
             ValidateStream(stream);
 
             Span<byte> buffer = stackalloc byte[4];
-            _ = stream.Read(buffer) == 4 ? 0 : throw new EndOfStreamException("Expected 4 bytes for Int32.");
+            ReadExactly(stream, buffer);
             return BinaryPrimitives.ReadInt32LittleEndian(buffer);
         }
 
@@ -80,8 +93,9 @@ namespace Serialization
             ValidateStream(stream);
 
             Span<byte> buffer = stackalloc byte[8];
-            _ = stream.Read(buffer) == 8 ? 0 : throw new EndOfStreamException("Expected 8 bytes for UInt64.");
+            ReadExactly(stream, buffer);
             return BinaryPrimitives.ReadUInt64LittleEndian(buffer);
         }
+
     }
 }

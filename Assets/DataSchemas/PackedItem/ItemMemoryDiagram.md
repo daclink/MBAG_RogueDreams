@@ -1,4 +1,15 @@
-This document describes how a single item is encoded into two 64‑bit blocks.
+This document describes how a single item is encoded into two 64‑bit blocks and how the item table is laid out.
+
+### Slot Layout (PackedItemTableCore)
+
+| Constant | Value | Description |
+|----------|-------|-------------|
+| TypeCount | 256 | Item types (8 bits) |
+| BiomePartitionCount | 32 | Partitions = biome byte value 0–31 |
+| SlotsPerBiome | 32 | Keys 0–31 per partition |
+| TotalSlots | 262,144 | 256 × 32 × 32 |
+
+Extend `BiomeFlags` and `BiomePartitionCount` as development proceeds.
 
 - **Metadata block (Block0)**: type, aspect/status flags, 8-bit lookup keys (SpriteKey, TextKey) for 2D tables, plus RarityFlags and BiomeFlags.
 - **Stats block (Block1)**: up to eight signed stat values, each stored in one byte (Health, Power, Armor, etc.).
@@ -27,7 +38,7 @@ Each field in this block:
 - **ItemType** (8b): kind of item (`ItemType` enum, Flags).
 - **AspectFlags** (8b): which numeric stats are present (`AspectFlags` bitfield).
 - **StatusFlags** (16b): status effects this item can apply (`StatusFlags` bitfield).
-- **BiomeFlags** (8b): biomes where this item can appear (`BiomeFlags` bitfield).
+- **BiomeFlags** (8b): biome ID 0–31 (partition index). Extend enum as needed.
 - **RarityFlags** (8b): rarity tiers or filtering (`RarityFlags` bitfield).
 - **SpriteKey** (8b): key into sprite table [type][spriteKey]; icon = spriteKey + stride.
 - **TextKey** (8b): key into text table [type][textKey]; desc = textKey + stride.
