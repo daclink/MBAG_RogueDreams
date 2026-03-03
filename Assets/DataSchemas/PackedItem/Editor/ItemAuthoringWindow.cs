@@ -113,8 +113,14 @@ namespace DataSchemas.PackedItem.Editor
 
         void DrawGrid()
         {
-            EditorGUILayout.LabelField("Items by Type", EditorStyles.boldLabel);
-            _scrollPosition = EditorGUILayout.BeginScrollView(_scrollPosition, GUILayout.ExpandHeight(true));
+            int totalItems = 0;
+            for (int i = 0; i < PackedItemTableCore.TotalSlots; i++)
+                if (_table.HasEntryAt(i)) totalItems++;
+
+            EditorGUILayout.LabelField($"Items by Type ({totalItems} total)", EditorStyles.boldLabel);
+            if (totalItems == 0)
+                EditorGUILayout.HelpBox("No items yet. Add one above, or Load from file.", MessageType.Info);
+            _scrollPosition = EditorGUILayout.BeginScrollView(_scrollPosition, GUILayout.MinHeight(200), GUILayout.ExpandHeight(true));
 
             var types = new[] { ItemType.Weapon, ItemType.Armor, ItemType.Consumable, ItemType.KeyItem };
             foreach (ItemType type in types)
@@ -154,8 +160,17 @@ namespace DataSchemas.PackedItem.Editor
                     if (!data.HasValue) continue;
 
                     Sprite preview = _spriteTable.Get(type, data.Value.BiomeFlags, k);
-                    var content = preview != null && AssetPreview.GetAssetPreview(preview) != null
-                        ? new GUIContent(AssetPreview.GetAssetPreview(preview), $"{type} {PartitionLabel(p)} k{k}")
+                    Texture2D previewTex = null;
+                    if (preview != null && preview.texture != null)
+                    {
+                        var r = preview.textureRect;
+                        if ((int)r.width == preview.texture.width && (int)r.height == preview.texture.height)
+                            previewTex = preview.texture;
+                        if (previewTex == null)
+                            previewTex = AssetPreview.GetAssetPreview(preview);
+                    }
+                    var content = previewTex != null
+                        ? new GUIContent(previewTex, $"{type} {PartitionLabel(p)} k{k}")
                         : new GUIContent(k.ToString(), $"{type} {PartitionLabel(p)} k{k}");
 
                     bool isSelected = _selected.HasValue && _selected.Value.type == type && _selected.Value.partition == p && _selected.Value.key == k;
@@ -258,6 +273,8 @@ namespace DataSchemas.PackedItem.Editor
             _editTexture2D = (Texture2D)EditorGUILayout.ObjectField("Spritesheet (Texture2D)", _editTexture2D, typeof(Texture2D), false);
             if (_editTexture2D != null)
                 EditorGUILayout.HelpBox("Assign a Texture2D to replace. Sliced at 64×64. Max 16 frames (icon + 15 animation). Enable Read/Write.", MessageType.None);
+            else if (iconPreview != null)
+                EditorGUILayout.HelpBox("Loaded from saved pixel data. Assign a Texture2D here to replace the sprite.", MessageType.Info);
             _editName = EditorGUILayout.TextField("Name", _editName ?? "");
             _editDescription = EditorGUILayout.TextField("Description", _editDescription ?? "");
             _editBiomeFlags = (BiomeFlags)EditorGUILayout.EnumFlagsField("Biome Flags", _editBiomeFlags ?? d.BiomeFlags);
