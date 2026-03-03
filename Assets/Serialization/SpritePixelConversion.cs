@@ -21,13 +21,31 @@ public static class SpritePixelConversion
         if (width <= 0 || height <= 0)
             throw new ArgumentOutOfRangeException("Width and height must be positive.");
 
+        Texture2D tex = sprite.texture;
+        Rect rect = sprite.textureRect;
+        int x = Mathf.FloorToInt(rect.x);
+        int y = Mathf.FloorToInt(rect.y);
+        int bytesTotal = width * height * 4;
+
+        if (tex.isReadable)
+        {
+            Color[] colors = tex.GetPixels(x, y, width, height);
+            byte[] copy = new byte[bytesTotal];
+            for (int i = 0; i < colors.Length; i++)
+            {
+                Color c = colors[i];
+                int j = i * 4;
+                copy[j] = (byte)(Mathf.Clamp01(c.r) * 255f);
+                copy[j + 1] = (byte)(Mathf.Clamp01(c.g) * 255f);
+                copy[j + 2] = (byte)(Mathf.Clamp01(c.b) * 255f);
+                copy[j + 3] = (byte)(Mathf.Clamp01(c.a) * 255f);
+            }
+            return copy;
+        }
+
         Shader shader = Shader.Find("Sprites/Default") ?? Shader.Find("Unlit/Transparent");
         if (shader == null)
             throw new InvalidOperationException("No suitable shader found for sprite copy. Add Sprites/Default or Unlit/Transparent to the project.");
-
-        Texture2D tex = sprite.texture;
-        Rect rect = sprite.textureRect;
-        int bytesTotal = width * height * 4;
 
         RenderTexture rt = RenderTexture.GetTemporary(width, height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default);
         RenderTexture prev = RenderTexture.active;
@@ -44,15 +62,15 @@ public static class SpritePixelConversion
             Texture2D readTex = new Texture2D(width, height, TextureFormat.RGBA32, false);
             readTex.ReadPixels(new Rect(0, 0, width, height), 0, 0);
             readTex.Apply();
-            Color32[] colors = readTex.GetPixels32();
+            Color32[] rtColors = readTex.GetPixels32();
             byte[] copy = new byte[bytesTotal];
-            for (int i = 0; i < colors.Length; i++)
+            for (int i = 0; i < rtColors.Length; i++)
             {
                 int j = i * 4;
-                copy[j] = colors[i].r;
-                copy[j + 1] = colors[i].g;
-                copy[j + 2] = colors[i].b;
-                copy[j + 3] = colors[i].a;
+                copy[j] = rtColors[i].r;
+                copy[j + 1] = rtColors[i].g;
+                copy[j + 2] = rtColors[i].b;
+                copy[j + 3] = rtColors[i].a;
             }
             UnityEngine.Object.Destroy(readTex);
             return copy;
@@ -79,9 +97,17 @@ public static class SpritePixelConversion
         if (width <= 0 || height <= 0)
             throw new ArgumentOutOfRangeException("Width and height must be positive.");
 
+        Color32[] colors = new Color32[width * height];
+        for (int i = 0; i < colors.Length; i++)
+        {
+            int j = i * 4;
+            colors[i] = new Color32(pixels[j], pixels[j + 1], pixels[j + 2], pixels[j + 3]);
+        }
         Texture2D tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
-        tex.LoadRawTextureData(pixels);
-        tex.Apply();
+        tex.filterMode = FilterMode.Point;
+        tex.wrapMode = TextureWrapMode.Clamp;
+        tex.SetPixels32(colors);
+        tex.Apply(false, false);
         return Sprite.Create(tex, new Rect(0, 0, width, height), new Vector2(0.5f, 0.5f));
     }
 
