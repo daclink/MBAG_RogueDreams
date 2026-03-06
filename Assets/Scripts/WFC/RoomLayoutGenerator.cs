@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace WFC
 {
-    
+
     /**
      * This class will generate the room layout grid by picking the positions of the necessary rooms then connecting them together
      */
@@ -17,14 +17,16 @@ namespace WFC
 
         //This will store the final room layout in a 2dArray
         private int[,] roomGrid;
-        
-        //This will store the individual room positions (unsure if needed at the moment)
+
+        // Placed room positions (List for iteration order, HashSet for O(1) Contains)
         private List<Vector2Int> placedRooms = new List<Vector2Int>();
+        private HashSet<Vector2Int> placedRoomsSet = new HashSet<Vector2Int>();
+        private Dictionary<Vector2Int, int> roomIndexByPosition = new Dictionary<Vector2Int, int>();
 
         private int startRoomIndex = -1;
         private int endRoomIndex = -1;
         private int itemRoomIndex = -1;
-        
+
         private Vector2Int[] directions = {
             Vector2Int.up,
             Vector2Int.down,
@@ -43,23 +45,25 @@ namespace WFC
             this.mapHeight = mapHeight;
             this.minRooms = minRooms;
             this.maxRooms = maxRooms;
-            
+
             roomGrid = new int[mapWidth, mapHeight];
             InitializeRoomGrid();
             placedRooms.Clear();
-            
+            placedRoomsSet.Clear();
+            roomIndexByPosition.Clear();
+
             PlaceStartRoom();
-            
+
             GrowRoomsFromStartRoom(minRooms, maxRooms);
 
             AssignSpecialRooms();
-            
+
             MarkRoomsOnLayout();
-            
+
             return roomGrid;
         }
-        
-        
+
+
         // -------------------------  MAIN METHODS  ----------------------------
 
         /**
@@ -75,18 +79,17 @@ namespace WFC
                 }
             }
         }
-        
+
         /**
          * Randomly places the start room in the grid
          */
         private void PlaceStartRoom()
         {
-            
             Vector2Int startPos = new Vector2Int(Random.Range(0, mapWidth), Random.Range(0, mapHeight));
             placedRooms.Add(startPos);
+            placedRoomsSet.Add(startPos);
+            roomIndexByPosition[startPos] = 0;
             startRoomIndex = 0;
-
-            // Debug.Log($"Start room was placed at {startPos}");
         }
 
         /**
@@ -101,23 +104,24 @@ namespace WFC
             while (placedRooms.Count < roomCount && attempts < maxAttempts)
             {
                 attempts++;
-                
+
                 //Pick a random room from placedRooms and try to add an adjacent room
                 Vector2Int randRoom = placedRooms[Random.Range(0, placedRooms.Count)];
                 Vector2Int newRoomPos = GetAdjacentEmptyPosition(randRoom);
 
                 if (newRoomPos != Vector2Int.one * -1)
                 {
-                    //This checks if the newly selected position is valid
-                    if (IsValidPosition(newRoomPos) && !placedRooms.Contains(newRoomPos))
+                    if (IsValidPosition(newRoomPos) && !placedRoomsSet.Contains(newRoomPos))
                     {
                         placedRooms.Add(newRoomPos);
+                        placedRoomsSet.Add(newRoomPos);
+                        roomIndexByPosition[newRoomPos] = placedRooms.Count - 1;
                     }
                 }
-                
+
             }
         }
-        
+
         /**
         * This is a driver method to assign the special rooms we need which are item and boss rooms
         * Utilizes other helper methods to accomplish the assignments
@@ -129,10 +133,10 @@ namespace WFC
             {
                 return;
             }
-            
+
             //Find the furthest room from the start room to be used as the boss/end room
             endRoomIndex = GetFarthestRoomIndex(startRoomIndex);
-            
+
             //find a dead end for the item room. Will be assigned to any random room if no deadend found
             itemRoomIndex = GetRandomDeadEnd();
 
@@ -140,9 +144,9 @@ namespace WFC
             {
                 itemRoomIndex = Random.Range(0, placedRooms.Count);
             }
-            
+
         }
-        
+
         /**
         * This method uses the placed rooms list to mark each room on the grid with its corresponding room type value.
         * This needs to consider the specific room types which are defined in DungeonGeneration under the RoomType enum
@@ -152,7 +156,8 @@ namespace WFC
             for (int i = 0; i < placedRooms.Count; i++)
             {
                 Vector2Int currPos = placedRooms[i];
-                
+                roomIndexByPosition[currPos] = i;
+
                 if (i == startRoomIndex)
                 {
                     roomGrid[currPos.x, currPos.y] = (int)RoomType.Start;
@@ -170,10 +175,10 @@ namespace WFC
                     roomGrid[currPos.x, currPos.y] = (int)RoomType.Normal;
                 }
             }
-            
+
         }
 
-        
+
         // -------------------------  HELPER METHODS  ----------------------------
         /**
         * This is used to get the farthest room position from the start room which will become the boss room
@@ -187,7 +192,7 @@ namespace WFC
             for (int i = 0; i < placedRooms.Count; i++)
             {
                 if (i == fromIndex) continue;
-                
+
                 //calculate the distance between start room and current room in for loop
                 float distance = Vector2Int.Distance(startRoom, placedRooms[i]);
                 if (distance > maxDistance)
@@ -198,7 +203,7 @@ namespace WFC
             }
             return farthestRoomIndex;
         }
-        
+
         /**
          * This is used to get a random dead end which will be assigned as the item room
          */
@@ -223,25 +228,21 @@ namespace WFC
 
             return -1;
         }
-        
+
         /**
          * This gets an empty position that is adjacent to the given room position from a random vector direction.
          * This will be passed back to the GrowRooms Method and added to placedRooms if valid
          */
         private Vector2Int GetAdjacentEmptyPosition(Vector2Int baseRoomPos)
         {
-            //shuffles the directions array to give randomness to growth
-            // could have a separate directions array in this method or copy the original one here
-            //shuffling like this will shuffle the entire array which COULD cause issues but it doesn't yet
-            ShuffleArray(directions);
-            
-            foreach (Vector2Int dir in directions)
+            Vector2Int[] dirs = (Vector2Int[])directions.Clone();
+            ShuffleArray(dirs);
+
+            foreach (Vector2Int dir in dirs)
             {
                 Vector2Int newRoomPos = baseRoomPos + dir;
-                if (IsValidPosition(newRoomPos) && !placedRooms.Contains(newRoomPos))
-                {
+                if (IsValidPosition(newRoomPos) && !placedRoomsSet.Contains(newRoomPos))
                     return newRoomPos;
-                }
             }
             return Vector2Int.one * -1;
         }
@@ -254,39 +255,61 @@ namespace WFC
         {
             return pos.x >= 0 && pos.x < mapWidth && pos.y >= 0 && pos.y < mapHeight;
         }
-        
+
         /**
          * Counts the number of adjacent rooms to a specific room based on position on the grid
          */
         private int GetAdjacentRoomCount(Vector2Int pos)
         {
             int count = 0;
-
             foreach (Vector2Int dir in directions)
             {
-                Vector2Int checkPosition = pos + dir;
-                if (placedRooms.Contains(checkPosition))
-                {
+                if (placedRoomsSet.Contains(pos + dir))
                     count++;
-                }
             }
             return count;
         }
-        
+
         /**
          * This is used to shuffle the directions array to provide randomness in the growth algorithm
          */
-        private void ShuffleArray(Vector2Int[] vector2Ints)
+        private void ShuffleArray(Vector2Int[] arr)
         {
-            for (int i = vector2Ints.Length - 1; i > 0; i--)
+            for (int i = arr.Length - 1; i > 0; i--)
             {
                 int j = Random.Range(0, i + 1);
-                Vector2Int temp = vector2Ints[i];
-                vector2Ints[i] = vector2Ints[j];
-                vector2Ints[j] = temp;
+                (arr[i], arr[j]) = (arr[j], arr[i]);
             }
         }
-        
+
+        /// <summary>
+        /// Generates a sample room grid and prints it to the console for debugging.
+        /// S = Start, E = End, I = Item, . = Normal, - = Empty
+        /// </summary>
+        public static void DebugPrintRoomGrid(int mapWidth, int mapHeight, int minRooms, int maxRooms)
+        {
+            var gen = new RoomLayoutGenerator();
+            int[,] grid = gen.GenerateRoomGrid(mapWidth, mapHeight, minRooms, maxRooms);
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine($"Room layout {mapWidth}x{mapHeight} ({minRooms}-{maxRooms} rooms):");
+            for (int y = mapHeight - 1; y >= 0; y--)
+            {
+                for (int x = 0; x < mapWidth; x++)
+                {
+                    switch (grid[x, y])
+                    {
+                        case (int)RoomType.Start: sb.Append("S"); break;
+                        case (int)RoomType.End: sb.Append("E"); break;
+                        case (int)RoomType.Item: sb.Append("I"); break;
+                        case (int)RoomType.Normal: sb.Append("."); break;
+                        default: sb.Append("-"); break;
+                    }
+                }
+                sb.AppendLine();
+            }
+            UnityEngine.Debug.Log(sb.ToString());
+        }
+
         // getters
         public List<Vector2Int> GetRoomPositions() => placedRooms;
         public Vector2Int GetStartRoomPosition() => placedRooms[startRoomIndex];
@@ -294,7 +317,8 @@ namespace WFC
         public Vector2Int GetItemRoomPosition() => placedRooms[itemRoomIndex];
         public RoomType GetRoomType(Vector2Int pos)
         {
-            int index = placedRooms.IndexOf(pos);
+            if (!roomIndexByPosition.TryGetValue(pos, out int index))
+                return RoomType.Normal;
             if (index == startRoomIndex) return RoomType.Start;
             if (index == endRoomIndex) return RoomType.End;
             if (index == itemRoomIndex) return RoomType.Item;
