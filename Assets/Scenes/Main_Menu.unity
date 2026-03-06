@@ -545,6 +545,18 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4958252554729136833, guid: d2682ff4bdc8243198f8b488ce39097c, type: 3}
+      propertyPath: _itemsPath
+      value: C:/Users/rpala/AppData/LocalLow/DefaultCompany/RogueDreams\items.dat
+      objectReference: {fileID: 0}
+    - target: {fileID: 4958252554729136833, guid: d2682ff4bdc8243198f8b488ce39097c, type: 3}
+      propertyPath: _textsPath
+      value: C:/Users/rpala/AppData/LocalLow/DefaultCompany/RogueDreams\texts.dat
+      objectReference: {fileID: 0}
+    - target: {fileID: 4958252554729136833, guid: d2682ff4bdc8243198f8b488ce39097c, type: 3}
+      propertyPath: _spritesPath
+      value: C:/Users/rpala/AppData/LocalLow/DefaultCompany/RogueDreams\sprites.dat
+      objectReference: {fileID: 0}
     - target: {fileID: 7072794052203789318, guid: d2682ff4bdc8243198f8b488ce39097c, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

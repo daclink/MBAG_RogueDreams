@@ -1,0 +1,22 @@
+{
+    "name": "BiomeTiles.Editor",
+    "rootNamespace": "",
+    "references": [
+        "BiomeTiles",
+        "UnityEngine",
+        "UnityEditor"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "UNITY_EDITOR"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

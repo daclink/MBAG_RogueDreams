@@ -13,6 +13,8 @@ namespace DataSchemas.PackedItem
         public StatusFlags statusFlags;
         [Range(0, 255)] public byte spriteKey;
         [Range(0, 255)] public byte textKey;
+        public RarityFlags rarityFlags;
+        public BiomeFlags biomeFlags;
 
         [Header("Tables (add text & image, then use Add to tables & set keys)")]
         [Tooltip("Assign the text lookup table used by this project.")]
@@ -50,14 +52,14 @@ namespace DataSchemas.PackedItem
         // Encodes values from the inspector into allocated space
         public void PackFromFields()
         {
-            // For now, reuse spriteKey for both sprite/icon and textKey for both name/desc
+            // spriteKey and textKey; icon/desc derived at resolve time via stride
             block0 = PackedItemSchema.PackBlock0(
                 itemType,
                 aspectFlags,
                 statusFlags,
+                biomeFlags,
+                rarityFlags,
                 spriteKey,
-                spriteKey,
-                textKey,
                 textKey);
 
             // Only flagged stats contribute to block1; unflagged stats are packed as zero
@@ -85,6 +87,8 @@ namespace DataSchemas.PackedItem
 
             spriteKey = data.SpriteKey;
             textKey   = data.TextKey;
+            rarityFlags = data.RarityFlags;
+            biomeFlags  = data.BiomeFlags;
 
             // Update preview sprite based on resolved key
             spritePreview = spriteTable != null ? spriteTable.Get(spriteKey) : null;

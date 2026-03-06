@@ -4,6 +4,12 @@ Unity version: Unity 6 version 6000.3.5f1
 ## Documents
 [Folder with design docs etc](https://drive.google.com/drive/folders/1xm3KBXomn7FhLXyPOoRf_2H_nCljgIJi)
 
+## Procedural Generation (WFC + DualGrid)
+
+- `Assets/Scripts/Dual_Grid_Scripts/DualGrid_System_Explanation.md`: how the DualGrid canonical tiles + transforms work end-to-end.
+- `Assets/Scripts/WFC/WFC_DualGrid_Setup.md`: how to wire WFC → DualGrid using the BiomeTileRegistry / BiomeTileSet pipeline.
+- `Assets/Scripts/WFC/RoomTreeDungeon_Spec.md`: Room Tree demo design/spec (grid, doors, corridors, rendering).
+
 
 ## Info / Tutorials 
 

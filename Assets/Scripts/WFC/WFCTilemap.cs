@@ -1,10 +1,7 @@
 using System;
-using Unity.VisualScripting;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
-using Random = Unity.Mathematics.Random;
+using MBAG;
 
 /**
  * MAYBE:
@@ -18,7 +15,7 @@ using Random = Unity.Mathematics.Random;
 
 namespace WFC
 {
-    public class WFCTilemap : MonoBehaviour
+    public class WFCTilemap
     {
         //Grid values
         private int roomWidth;
@@ -43,13 +40,17 @@ namespace WFC
         //Room layout data
         private int[,] roomLayout;
         private List<Vector2Int> roomPositions;
+        private HashSet<Vector2Int> roomPositionsSet;  // O(1) lookup for GetRoomConnections
         private RoomLayoutGenerator layoutGenerator;
-        
+
+        private List<Vector2Int> _uncollapsedCells;  // Shrinks each collapse; scan only these instead of full grid
+
         //constructor
         public WFCTilemap(int[,] roomLayout, List<Vector2Int> roomPositions, RoomLayoutGenerator layoutGen, int pathWidth)
         {
             this.roomLayout = roomLayout;
             this.roomPositions = roomPositions;
+            this.roomPositionsSet = new HashSet<Vector2Int>(roomPositions);
             this.layoutGenerator = layoutGen;
             this.pathWidth = pathWidth;
 
@@ -61,7 +62,7 @@ namespace WFC
             tilemapWidth = (roomWidth * roomSize) + ((roomWidth + 1) * wallThickness);
             tilemapHeight = (roomHeight * roomSize) + ((roomHeight + 1) * wallThickness);
             
-            InitializeAdjacencyRules();
+            adjacencyRules = WFCCore.GetAdjacencyRules();
         }
         
         // --------------------------  DRIVER METHOD  ----------------------------
@@ -77,6 +78,9 @@ namespace WFC
             // Pre-place walls and paths
             PrePlaceStaticTiles();
 
+            // Build list of uncollapsed cells (scan only these for lowest entropy; shrinks each iteration)
+            BuildUncollapsedCellsList();
+
             // Run WFC on remaining tiles
             int iterations = 0;
             int maxIterations = tilemapWidth * tilemapHeight * 3;
@@ -88,169 +92,18 @@ namespace WFC
                 if (cell == null)
                     break;
 
-                CollapseCell(cell.Value);
-                Propagate(cell.Value);
+                WFCCore.CollapseCell(cell.Value, tilePossibilities, collapsedTilemap, tilemapWidth, tilemapHeight, adjacencyRules);
+                WFCCore.Propagate(cell.Value, tilePossibilities, isPrePlaced, adjacencyRules, IsInBounds);
+                _uncollapsedCells.Remove(cell.Value);
                 iterations++;
             }
 
+            WFCCore.FinalizeTilemap(tilePossibilities, collapsedTilemap, isPrePlaced, tilemapWidth, tilemapHeight);
             return collapsedTilemap;
         }
         
         // ----------------------------  WFC MAIN METHODS  --------------------------
-
-        private void InitializeAdjacencyRules()
-        {
-            adjacencyRules = new Dictionary<TileType, Dictionary<Direction, HashSet<TileType>>>();
-
-            // Path rules: Can only be adjacent to Dirt and Grass (and itself)
-            adjacencyRules[TileType.Path] = new Dictionary<Direction, HashSet<TileType>>
-            {
-                { Direction.North, new HashSet<TileType> { TileType.Path, TileType.Dirt, TileType.Grass } },
-                { Direction.South, new HashSet<TileType> { TileType.Path, TileType.Dirt, TileType.Grass } },
-                { Direction.East, new HashSet<TileType> { TileType.Path, TileType.Dirt, TileType.Grass } },
-                { Direction.West, new HashSet<TileType> { TileType.Path, TileType.Dirt, TileType.Grass } }
-            };
-
-            // Dirt rules: Can be adjacent to Path, Water, and Grass
-            adjacencyRules[TileType.Dirt] = new Dictionary<Direction, HashSet<TileType>>
-            {
-                { Direction.North, new HashSet<TileType> { TileType.Dirt, TileType.Path, TileType.Water, TileType.Grass } },
-                { Direction.South, new HashSet<TileType> { TileType.Dirt, TileType.Path, TileType.Water, TileType.Grass } },
-                { Direction.East, new HashSet<TileType> { TileType.Dirt, TileType.Path, TileType.Water, TileType.Grass } },
-                { Direction.West, new HashSet<TileType> { TileType.Dirt, TileType.Path, TileType.Water, TileType.Grass } }
-            };
-
-            // Grass rules: Can only be adjacent to Dirt and Water
-            adjacencyRules[TileType.Grass] = new Dictionary<Direction, HashSet<TileType>>
-            {
-                { Direction.North, new HashSet<TileType> { TileType.Grass, TileType.Dirt, TileType.Water } },
-                { Direction.South, new HashSet<TileType> { TileType.Grass, TileType.Dirt, TileType.Water } },
-                { Direction.East, new HashSet<TileType> { TileType.Grass, TileType.Dirt, TileType.Water } },
-                { Direction.West, new HashSet<TileType> { TileType.Grass, TileType.Dirt, TileType.Water } }
-            };
-
-            // Water rules: Can be adjacent to Dirt and Grass
-            adjacencyRules[TileType.Water] = new Dictionary<Direction, HashSet<TileType>>
-            {
-                { Direction.North, new HashSet<TileType> { TileType.Water, TileType.Dirt, TileType.Grass } },
-                { Direction.South, new HashSet<TileType> { TileType.Water, TileType.Dirt, TileType.Grass } },
-                { Direction.East, new HashSet<TileType> { TileType.Water, TileType.Dirt, TileType.Grass } },
-                { Direction.West, new HashSet<TileType> { TileType.Water, TileType.Dirt, TileType.Grass } }
-            };
-
-            // Wall rules: Can be adjacent to anything (walls don't constrain neighbors)
-            adjacencyRules[TileType.Wall] = new Dictionary<Direction, HashSet<TileType>>
-            {
-                { Direction.North, new HashSet<TileType> { TileType.Wall, TileType.Path, TileType.Dirt, TileType.Grass, TileType.Water } },
-                { Direction.South, new HashSet<TileType> { TileType.Wall, TileType.Path, TileType.Dirt, TileType.Grass, TileType.Water } },
-                { Direction.East, new HashSet<TileType> { TileType.Wall, TileType.Path, TileType.Dirt, TileType.Grass, TileType.Water } },
-                { Direction.West, new HashSet<TileType> { TileType.Wall, TileType.Path, TileType.Dirt, TileType.Grass, TileType.Water } }
-            };
-
-            // Empty rules (for areas outside the map, if any)
-            adjacencyRules[TileType.Empty] = new Dictionary<Direction, HashSet<TileType>>
-            {
-                { Direction.North, new HashSet<TileType> { TileType.Empty } },
-                { Direction.South, new HashSet<TileType> { TileType.Empty } },
-                { Direction.East, new HashSet<TileType> { TileType.Empty } },
-                { Direction.West, new HashSet<TileType> { TileType.Empty } }
-            };
-        }
         
-        /**
-         * Ensures that neighbor cells are aware of what tile is picked in order to constrain tile types to follow the adjacency rules
-         */
-        private void Propagate(Vector2Int startPos)
-        {
-            Queue<Vector2Int> queue = new Queue<Vector2Int>();
-            queue.Enqueue(startPos);
-
-            HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
-
-            while (queue.Count > 0)
-            {
-                Vector2Int current = queue.Dequeue();
-
-                if (visited.Contains(current))
-                    continue;
-
-                visited.Add(current);
-
-                Vector2Int[] neighbors = {
-                    current + Vector2Int.up,
-                    current + Vector2Int.down,
-                    current + Vector2Int.left,
-                    current + Vector2Int.right
-                };
-
-                Direction[] directions = {
-                    Direction.North,
-                    Direction.South,
-                    Direction.West,
-                    Direction.East
-                };
-
-                for (int i = 0; i < neighbors.Length; i++)
-                {
-                    Vector2Int neighbor = neighbors[i];
-
-                    if (!IsInBounds(neighbor))
-                        continue;
-
-                    // Skip pre-placed tiles
-                    if (isPrePlaced[neighbor.x, neighbor.y])
-                        continue;
-
-                    if (ConstrainCell(neighbor, current, directions[i]))
-                    {
-                        queue.Enqueue(neighbor);
-                    }
-                }
-            }
-        }
-        
-        /**
-         * Constrains a cells neighbor tile possiblities to follow adjacency rules
-         */
-        private bool ConstrainCell(Vector2Int cell, Vector2Int neighbor, Direction directionToNeighbor)
-        {
-            HashSet<TileType> cellPoss = tilePossibilities[cell.x, cell.y];
-            HashSet<TileType> neighborPoss = tilePossibilities[neighbor.x, neighbor.y];
-
-            if (cellPoss.Count <= 1)
-                return false;
-
-            bool changed = false;
-            HashSet<TileType> validStates = new HashSet<TileType>();
-
-            foreach (TileType neighborType in neighborPoss)
-            {
-                Direction oppositeDir = GetOppositeDirection(directionToNeighbor);
-
-                if (adjacencyRules[neighborType].ContainsKey(oppositeDir))
-                {
-                    validStates.UnionWith(adjacencyRules[neighborType][oppositeDir]);
-                }
-            }
-
-            List<TileType> toRemove = new List<TileType>();
-            foreach (TileType type in cellPoss)
-            {
-                if (!validStates.Contains(type))
-                {
-                    toRemove.Add(type);
-                    changed = true;
-                }
-            }
-
-            foreach (TileType type in toRemove)
-            {
-                cellPoss.Remove(type);
-            }
-
-            return changed;
-        }
-
         // --------------------------- WFC HELPER METHODS  ---------------------------------
 
         /**
@@ -259,168 +112,32 @@ namespace WFC
         private bool[] GetRoomConnections(Vector2Int roomPos)
         {
             bool[] connections = new bool[4]; // [North, East, South, West]
-
-            connections[0] = roomPositions.Contains(roomPos + Vector2Int.up);    // North
-            connections[1] = roomPositions.Contains(roomPos + Vector2Int.right); // East
-            connections[2] = roomPositions.Contains(roomPos + Vector2Int.down);  // South
-            connections[3] = roomPositions.Contains(roomPos + Vector2Int.left);  // West
-
+            connections[0] = roomPositionsSet.Contains(roomPos + Vector2Int.up);
+            connections[1] = roomPositionsSet.Contains(roomPos + Vector2Int.right);
+            connections[2] = roomPositionsSet.Contains(roomPos + Vector2Int.down);
+            connections[3] = roomPositionsSet.Contains(roomPos + Vector2Int.left);
             return connections;
         }
 
-/**
-         * Skips pre-placed tiles, finding the lowest entropy cell on the grid
-         */
-        private Vector2Int? FindLowestEntropyCell()
+        private void BuildUncollapsedCellsList()
         {
-            int lowestEntropy = int.MaxValue;
-            List<Vector2Int> candidates = new List<Vector2Int>();
-
+            _uncollapsedCells = new List<Vector2Int>(tilemapWidth * tilemapHeight);
             for (int x = 0; x < tilemapWidth; x++)
             {
                 for (int y = 0; y < tilemapHeight; y++)
                 {
-                    // Skip pre-placed tiles
-                    if (isPrePlaced[x, y])
-                        continue;
-
-                    int entropy = tilePossibilities[x, y].Count;
-
-                    if (entropy <= 1) continue;
-
-                    if (entropy < lowestEntropy)
-                    {
-                        lowestEntropy = entropy;
-                        candidates.Clear();
-                        candidates.Add(new Vector2Int(x, y));
-                    }
-                    else if (entropy == lowestEntropy)
-                    {
-                        candidates.Add(new Vector2Int(x, y));
-                    }
+                    if (!isPrePlaced[x, y])
+                        _uncollapsedCells.Add(new Vector2Int(x, y));
                 }
             }
-
-            if (candidates.Count > 0)
-                return candidates[UnityEngine.Random.Range(0, candidates.Count)];
-
-            return null;
         }
 
-        /**
-         * Retrieves the tile possiblities at the position, checks for contradiction, and chooses the weighted tile for
-         * the position before adding to the final collapsed tilemap
+/**
+         * Skips pre-placed tiles, finding the lowest entropy cell. Scans only uncollapsed cells (shrinks each iteration).
          */
-        private void CollapseCell(Vector2Int pos)
+        private Vector2Int? FindLowestEntropyCell()
         {
-            HashSet<TileType> possibilities = tilePossibilities[pos.x, pos.y];
-
-            if (possibilities.Count == 0)
-            {
-                // Fallback to grass if contradiction
-                possibilities.Add(TileType.Grass);
-            }
-
-            TileType chosen = ChooseWeightedTile(possibilities, pos);
-
-            tilePossibilities[pos.x, pos.y].Clear();
-            tilePossibilities[pos.x, pos.y].Add(chosen);
-            collapsedTilemap[pos.x, pos.y] = chosen;
-        }
-
-        /**
-         * given the position and the possibilities of tiles, chooses a tiletype based on weight
-         */
-        private TileType ChooseWeightedTile(HashSet<TileType> possibilities, Vector2Int pos)
-        {
-            // Weight tiles based on neighbors (clustering effect)
-            Dictionary<TileType, float> weights = new Dictionary<TileType, float>();
-
-            foreach (TileType type in possibilities)
-            {
-                // Base weight
-                weights[type] = GetBaseWeight(type);
-
-                // Increase weight if neighbors are same type (clustering)
-                int sameTypeNeighbors = CountNeighborsOfType(pos, type);
-                weights[type] += sameTypeNeighbors * 1.2f;
-            }
-
-            // Weighted random selection
-            float totalWeight = weights.Values.Sum();
-            float roll = UnityEngine.Random.Range(0, totalWeight);
-            float cumulative = 0;
-
-            foreach (var kvp in weights)
-            {
-                cumulative += kvp.Value;
-                if (roll <= cumulative)
-                    return kvp.Key;
-            }
-
-            return possibilities.First();
-        }
-
-        /**
-         * Sets the weight of tiles
-         */
-        private float GetBaseWeight(TileType type)
-        {
-            switch (type)
-            {
-                case TileType.Grass:
-                    return 4.0f; // Most common
-                case TileType.Dirt:
-                    return 3.0f; // Common
-                case TileType.Water:
-                    return 1.0f; // Rare
-                case TileType.Path:
-                    return 2.0f; // Medium (though mostly pre-placed)
-                default:
-                    return 1.0f;
-            }
-        }
-
-        /**
-         * Counts the neighboring tiles that are the same tile type
-         */
-        private int CountNeighborsOfType(Vector2Int pos, TileType type)
-        {
-            int count = 0;
-            Vector2Int[] neighbors = {
-                pos + Vector2Int.up,
-                pos + Vector2Int.down,
-                pos + Vector2Int.left,
-                pos + Vector2Int.right
-            };
-
-            foreach (Vector2Int neighbor in neighbors)
-            {
-                if (IsInBounds(neighbor) &&
-                    tilePossibilities[neighbor.x, neighbor.y].Count == 1 &&
-                    tilePossibilities[neighbor.x, neighbor.y].Contains(type))
-                {
-                    count++;
-                }
-            }
-
-            return count;
-        }
-
-
-        /**
-         * Simply returns opposite directions from what is passed in
-         */
-        private Direction GetOppositeDirection(Direction dir)
-        {
-            switch (dir)
-            {
-                case Direction.North: return Direction.South;
-                case Direction.South: return Direction.North;
-                case Direction.East: return Direction.West;
-                case Direction.West: return Direction.East;
-                default: return Direction.North;
-            }
+            return WFCCore.FindLowestEntropyCell(tilePossibilities, isPrePlaced, _uncollapsedCells);
         }
 
         /**
@@ -680,7 +397,8 @@ namespace WFC
             }
 
             // Place path through center of room if it has connections
-            int connectionCount = connections.Count(c => c);
+            int connectionCount = 0;
+            for (int c = 0; c < 4; c++) if (connections[c]) connectionCount++;
             if (connectionCount > 0)
             {
                 PlaceRoomCenterPaths(roomTileX, roomTileY, connections);

@@ -111,5 +111,13 @@ Temporary Items
 # End of https://www.toptal.com/developers/gitignore/api/macos
 
 .idea/
+.vscode/
+.cursor/
 
 .vsconfig
+
+# Unity crash/autosave recovery
+Assets/_Recovery/
+
+# macOS zip archive artifacts
+**/__MACOSX/
