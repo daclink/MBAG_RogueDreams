@@ -4,7 +4,9 @@
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "DualGrid.Runtime"
+        "DualGrid.Runtime",
+        "MBAG.Shared",
+        "BiomeTiles"
     ],
     "includePlatforms": [
         "Editor"

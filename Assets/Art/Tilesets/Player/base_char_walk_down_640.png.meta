@@ -54,7 +54,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 640
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -106,20 +106,20 @@ TextureImporter:
       name: base_char_walk_down_640_0
       rect:
         serializedVersion: 2
-        x: 180
+        x: 179
         y: 0
-        width: 290
-        height: 630
+        width: 292
+        height: 631
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 241ec41b0635743c5aa6ade7f1ffbbda
-      internalID: 2120246004
+      spriteID: 81ea0fc937d8cd0e0800000000000000
+      internalID: -2243762986643575272
       vertices: []
       indices: 
       edges: []
@@ -128,20 +128,20 @@ TextureImporter:
       name: base_char_walk_down_640_1
       rect:
         serializedVersion: 2
-        x: 820
+        x: 819
         y: 0
-        width: 290
-        height: 630
+        width: 282
+        height: 621
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 2ee5efddfcfa84124a9dfb2c8da78e70
-      internalID: 1590557769
+      spriteID: 3ff3a8a7ceb33d080800000000000000
+      internalID: -9163914929914626061
       vertices: []
       indices: 
       edges: []
@@ -150,7 +150,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 32069bd7a0b8b410ba40555e9130e4df
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -158,12 +158,10 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries:
-      - key: SpriteEditor.SliceSettings
-        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":292.0,"y":632.0},"gridSpriteOffset":{"x":20.0,"y":40.0},"gridSpritePadding":{"x":28.0,"y":0.0},"pivot":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
+      entries: []
     nameFileIdTable:
-      base_char_walk_down_640_0: 2120246004
-      base_char_walk_down_640_1: 1590557769
+      base_char_walk_down_640_0: -2243762986643575272
+      base_char_walk_down_640_1: -9163914929914626061
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -23,7 +23,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Canvas UICanvasPrefab;
     [SerializeField] private GameObject meleeEnemyPrefab;
     [SerializeField] private GameObject rangedEnemyPrefab;
+    [Header("Optional - leave unassigned or disable to use PackedItemPickup placed in scene")]
     [SerializeField] private GameObject healingItemPrefab;
+    [SerializeField] private bool spawnHealingItem = false;
 
     private int sceneNumber;
     
@@ -126,7 +128,8 @@ public class GameManager : MonoBehaviour
             Instantiate(playerPrefab, new Vector3(-10, 23, 0), Quaternion.identity);
             Instantiate(meleeEnemyPrefab, new Vector3(-5, 23, 0), Quaternion.identity);
             Instantiate(rangedEnemyPrefab, new Vector3(12, 21, 0), Quaternion.identity);
-            Instantiate(healingItemPrefab, new Vector3(12, 12, 0), Quaternion.identity);
+            if (spawnHealingItem && healingItemPrefab != null)
+                Instantiate(healingItemPrefab, new Vector3(12, 12, 0), Quaternion.identity);
             OnCameraInstantiated?.Invoke();
         }
     }

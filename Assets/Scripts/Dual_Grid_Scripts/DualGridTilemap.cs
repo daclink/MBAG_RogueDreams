@@ -1,18 +1,15 @@
-using System;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
-using static TileType;
+using MBAG;
 
-///currently just copied over from Jesshammer while I figure this out
-
-
-
+/// <summary>
+/// Dual-grid tilemap using 8-bit corner keys. 55 canonical tiles per biome (rotation + reflection).
+/// Reads input tilemap, maps to 4 types, computes key, looks up canonical tile + transform.
+/// </summary>
+[DefaultExecutionOrder(100)]
 public class DualGridTilemap : MonoBehaviour
 {
-    /// <summary>
-    /// This is going to remain the same as the original for now
-    /// </summary>
+    // NEIGHBOURS: [0]=botLeft(0,0), [1]=botRight(1,0), [2]=topLeft(0,1), [3]=topRight(1,1)
     protected static readonly Vector3Int[] NEIGHBOURS = {
         new Vector3Int(0, 0, 0),
         new Vector3Int(1, 0, 0),
@@ -20,262 +17,185 @@ public class DualGridTilemap : MonoBehaviour
         new Vector3Int(1, 1, 0)
     };
 
-    /// <summary>
-    /// Part of the original, making a slightly different version to account for Biomes
-    /// </summary>
-    // original
-    protected static Dictionary<Tuple<TileType, TileType, TileType, TileType>, Tile> neighbourTupleToTile;
-    // idea for biome inclusion
-    // private static Dictionary<Tuple<TileType, TileType, TileType, TileType, Biome>, Tile> neighbourTupleToTile;
-
-
-    /// <summary>
-    /// input tile map, and gonna need the dimensions of it if there isn't fixed dimensions
-    /// </summary>
-    // Provide references to each tilemap in the inspector
-    public Tilemap inputTilemap; //input tile map
+    public Tilemap inputTilemap;
     public BoundsInt bounds;
     public int inputHeight;
     public int inputWidth;
     public Vector3Int origin;
 
-
-    /// <summary>
-    /// part of the original, using a slightly different system so I am adjusting it
-    /// </summary>
-    // public Tilemap displayTilemap; 
-
     public Tilemap floorTilemap;
     public Tilemap wallTilemap;
 
-    // Add the placeholder and display tilemaps that the logic uses
-    // public Tilemap placeholderTilemap;
-    // public Tilemap displayTilemap;
+    [Header("Placeholders (match WFC tile assets by reference)")]
+    [SerializeField] private Tile grassPlaceholderTile;
+    [SerializeField] private Tile dirtPlaceholderTile;
+    [SerializeField] private Tile emptyPlaceholderTile;
+    [SerializeField] private Tile pathPlaceholderTile;
+    [SerializeField] private Tile waterPlaceholderTile;
+    [SerializeField] private Tile wallPlaceholderTile;
 
+    /// <summary>Set placeholder tiles from WFC (must match DungeonGeneration tile assets by reference).</summary>
+    public void SetPlaceholderTiles(Tile empty, Tile grass, Tile dirt, Tile path, Tile water, Tile wall)
+    {
+        emptyPlaceholderTile = empty;
+        grassPlaceholderTile = grass;
+        dirtPlaceholderTile = dirt;
+        pathPlaceholderTile = path;
+        waterPlaceholderTile = water;
+        wallPlaceholderTile = wall;
+    }
 
-    // Provide the dirt and grass placeholder tiles in the inspector
-    [SerializeField] public Tile grassPlaceholderTile;
-    [SerializeField] public Tile dirtPlaceholderTile;
-    /// <summary>
-    /// Extra placeholders
-    /// </summary>
-    public Tile emptyPlaceholderTile;
-    public Tile pathPlaceholderTile;
-    public Tile waterPlaceholderTile;
-    public Tile wallPlaceholderTile;
+    [Header("Biome tiles (55 canonical tiles, set by bridge or Inspector)")]
+    [SerializeField] private BiomeTileSet tileSet;
 
+    [Header("Diagnostics (enable to log gaps and missing tiles)")]
+    [SerializeField] private bool logDualGridDiagnostics;
 
-    /// <summary>
-    /// Grab the tiles
-    /// </summary>
-    public Tile[] tiles;
+    [Header("Interpretation")]
+    [Tooltip("If enabled, the Empty placeholder tile (and null tiles) are treated as Wall for DualGrid key-building. " +
+             "This only affects DualGrid rendering (not the underlying WFC TileType logic).")]
+    [SerializeField] private bool treatEmptyPlaceholderAsWall = true;
 
-    /// <summary>
-    /// need to update the tiles list ;-;
-    /// mainly need to see how the tiles are collected and what entry in the tile list will be what
-    /// likely going to need one massive tile palette for this
-    /// just not fully sure how this will work yet
-    /// </summary>
-    // void Start() {
-    //     inputTilemap.CompressBounds();
-    //     bounds = inputTilemap.cellBounds;
-    //     inputHeight = bounds.size.y;
-    //     inputWidth = bounds.size.x;
-    //     origin = bounds.position;
+    public BiomeTileSet TileSet
+    {
+        get => tileSet;
+        set => tileSet = value;
+    }
 
-    //     // This dictionary stores the "rules", each 4-neighbour configuration corresponds to a tile
-    //     // |_1_|_2_|
-    //     // |_3_|_4_|
-    //     // current enum values are 0, 1, 2 , 3 for empty, grass, dirt, path respectively
-    //     // should iterate through that list starting with the bottom right
-    //     // plan accordingly when setting up the tile list which has to have enough tiles
-    //     // create mapping for every 4-tuple of TileType (4^4 = 256 combinations)
-    //     neighbourTupleToTile = new Dictionary<Tuple<TileType, TileType, TileType, TileType>, Tile>();
-
-    //     // used ai for this one
-    //     int enumCount = Enum.GetValues(typeof(TileType)).Length;
-    //     int required = enumCount * enumCount * enumCount * enumCount;
-
-    //     if (tiles == null || tiles.Length < required) {
-    //         Debug.LogError($"tiles array must contain at least {required} entries (has {tiles?.Length ?? 0}).");
-    //     } else {
-    //         for (int tl = 0; tl < enumCount; tl++) {
-    //             for (int tr = 0; tr < enumCount; tr++) {
-    //                 for (int bl = 0; bl < enumCount; bl++) {
-    //                     for (int br = 0; br < enumCount; br++) {
-    //                         int idx = ((tl * enumCount + tr) * enumCount + bl) * enumCount + br;
-    //                         var key = Tuple.Create((TileType)tl, (TileType)tr, (TileType)bl, (TileType)br);
-    //                         neighbourTupleToTile[key] = tiles[idx];
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-
-    //     RefreshFloorTilemap();
-    // }
-
-    // got a "safe" version from gpt going to try this out in testing
     void Start()
     {
+        if (inputTilemap == null)
+        {
+            Debug.LogError("DualGridTilemap: inputTilemap is null.");
+            return;
+        }
+
         inputTilemap.CompressBounds();
         bounds = inputTilemap.cellBounds;
         inputHeight = bounds.size.y;
         inputWidth = bounds.size.x;
         origin = bounds.position;
 
-        neighbourTupleToTile =
-            new Dictionary<Tuple<TileType, TileType, TileType, TileType>, Tile>();
-
-        // Get the ACTUAL enum values (0,4,8,12,16,20)
-        TileType[] values = (TileType[])Enum.GetValues(typeof(TileType));
-        int enumCount = values.Length;
-        int required = enumCount * enumCount * enumCount * enumCount;
-
-        if (tiles == null || tiles.Length < required)
+        if (tileSet == null)
         {
-            Debug.LogError(
-                $"tiles array must contain at least {required} entries (has {tiles?.Length ?? 0})."
-            );
+            Debug.LogError("DualGridTilemap: BiomeTileSet not assigned.");
             return;
-        }
-
-        int index = 0;
-
-        // IMPORTANT: iterate using enum values, not 0..N casting
-        for (int tl = 0; tl < enumCount; tl++)
-        {
-            for (int tr = 0; tr < enumCount; tr++)
-            {
-                for (int bl = 0; bl < enumCount; bl++)
-                {
-                    for (int br = 0; br < enumCount; br++)
-                    {
-                        var key = Tuple.Create(
-                            values[tl],
-                            values[tr],
-                            values[bl],
-                            values[br]
-                        );
-
-                        neighbourTupleToTile[key] = tiles[index];
-                        index++;
-                    }
-                }
-            }
         }
 
         RefreshFloorTilemap();
     }
 
-    /// <summary>
-    /// This seems to be used in the example for updating a specific cell tile, might be useful later
-    /// for now im just going to comment it out as it isn't needed for the initial render
-    /// </summary>
-    // public void SetCell(Vector3Int coords, Tile tile) {
-    //     placeholderTilemap.SetTile(coords, tile);
-    //     SetFloorTile(coords);
-    // }
-
-    // gets placeholder tile type at specific coordinates
     private TileType GetInputTileTypeAt(Vector3Int coords)
     {
-        if (inputTilemap.GetTile(coords) == grassPlaceholderTile)
-            return Grass;
-        else if (inputTilemap.GetTile(coords) == dirtPlaceholderTile)
-            return Dirt;
-        else if (inputTilemap.GetTile(coords) == emptyPlaceholderTile)
-            return Empty;
-        else if (inputTilemap.GetTile(coords) == pathPlaceholderTile)
-            return Path;
-        else if (inputTilemap.GetTile(coords) == waterPlaceholderTile)
-            return Water;
-        else if (inputTilemap.GetTile(coords) == wallPlaceholderTile)
-            return Wall;
-        else
-            return Empty; // default to empty if no tile is found
+        var t = inputTilemap.GetTile(coords);
+        if (t == null) return treatEmptyPlaceholderAsWall ? TileType.Wall : TileType.Empty;
+        if (t == grassPlaceholderTile) return TileType.Grass;
+        if (t == dirtPlaceholderTile) return TileType.Dirt;
+        if (t == emptyPlaceholderTile) return treatEmptyPlaceholderAsWall ? TileType.Wall : TileType.Empty;
+        if (t == pathPlaceholderTile) return TileType.Path;
+        if (t == waterPlaceholderTile) return TileType.Water;
+        if (t == wallPlaceholderTile) return TileType.Wall;
+        return TileType.Empty;
     }
 
-    // uses given coordinates of the floor tile to create a tuple of the associated neighbor tile types
+    protected (Tile tile, int rotation, bool reflected) CalculateFloorTileAndRotation(Vector3Int coords, out int key, out int canonicalIndex, out bool usedFallback)
+    {
+        TileType tr = GetInputTileTypeAt(coords + NEIGHBOURS[3]);
+        TileType tl = GetInputTileTypeAt(coords + NEIGHBOURS[2]);
+        TileType br = GetInputTileTypeAt(coords + NEIGHBOURS[1]);
+        TileType bl = GetInputTileTypeAt(coords + NEIGHBOURS[0]);
+
+        var dgBl = DualGridTileTypeMapping.FromTileType(bl);
+        var dgBr = DualGridTileTypeMapping.FromTileType(br);
+        var dgTl = DualGridTileTypeMapping.FromTileType(tl);
+        var dgTr = DualGridTileTypeMapping.FromTileType(tr);
+
+        key = DualGridCanonicalKeys.BuildKey(dgBl, dgBr, dgTl, dgTr);
+        var (idx, rotation, reflected) = DualGridCanonicalKeys.GetCanonicalIndexRotationAndReflection(key);
+        canonicalIndex = idx;
+
+        Tile tile = tileSet.GetTile(canonicalIndex);
+        usedFallback = false;
+        if (tile == null)
+        {
+            usedFallback = true;
+            if (logDualGridDiagnostics)
+                Debug.LogWarning($"[DualGrid] GAP at {coords}: key=0x{key:X2} bl={bl} br={br} tl={tl} tr={tr} -> canonical={canonicalIndex} rot={rotation} refl={reflected} (using fallback).");
+            else
+                Debug.LogWarning($"DualGrid: No tile for canonical {canonicalIndex} at {coords}, using fallback.");
+            return (grassPlaceholderTile != null ? grassPlaceholderTile : null, 0, false);
+        }
+
+        return (tile, rotation, reflected);
+    }
+
     protected Tile CalculateFloorTile(Vector3Int coords)
     {
-        // 4 neighbours
-        TileType topRight = GetInputTileTypeAt(coords + NEIGHBOURS[3]);
-        TileType topLeft = GetInputTileTypeAt(coords + NEIGHBOURS[2]);
-        TileType botRight = GetInputTileTypeAt(coords + NEIGHBOURS[1]);
-        TileType botLeft = GetInputTileTypeAt(coords + NEIGHBOURS[0]);
-
-        var neighbourTuple = Tuple.Create(topLeft, topRight, botLeft, botRight);
-
-        return neighbourTupleToTile[neighbourTuple];
+        return CalculateFloorTileAndRotation(coords, out _, out _, out _).tile;
     }
 
-    /// <summary>
-    /// This one takes a position on the placeholder/input tilemap and updates the floor map based on
-    /// the listed neighbors - going to need multiple of these to implement the "layer" idea
-    /// </summary>
-    /// <param name="pos"></param>
-    /// <returns></returns>
-    protected void SetFloorTile(Vector3Int pos)
+    /// <summary>Build transform to display canonical tile as the cell's key.
+    /// GetCanonicalIndexRotationAndReflection finds r such that Rotate90^r(key) = min.
+    /// Rotate90 on a key ≡ rotating the sprite 90° CW. We have 'min' and want 'key',
+    /// so we undo r CW rotations → r CCW rotations → Euler(0, 0, +r*90).
+    /// For reflected: key = Reflect(Rotate90^(4-r)(min)), so reflect first then rotate.
+    /// Matrix = Scale * Rotate applies rotate first (CCW), then scale (reflect).</summary>
+    private static Matrix4x4 BuildTileTransform(int rotation, bool reflected)
+    {
+        Quaternion rot = Quaternion.Euler(0f, 0f, rotation * 90f);
+        Vector3 scale = new Vector3(reflected ? -1f : 1f, 1f, 1f);
+        return Matrix4x4.Scale(scale) * Matrix4x4.Rotate(rot);
+    }
+
+    protected void SetFloorTile(Vector3Int pos, System.Collections.Generic.HashSet<int> missingCanonicalIndices, ref int gapCount, ref int sampleLogged)
     {
         for (int i = 0; i < NEIGHBOURS.Length; i++)
         {
             Vector3Int newPos = pos + NEIGHBOURS[i];
-            floorTilemap.SetTile(newPos, CalculateFloorTile(newPos));
+            var (tile, rotation, reflected) = CalculateFloorTileAndRotation(newPos, out int key, out int canonicalIndex, out bool usedFallback);
+            if (tile == null) continue;
+            if (missingCanonicalIndices != null && usedFallback)
+            {
+                missingCanonicalIndices.Add(canonicalIndex);
+                gapCount++;
+            }
+            if (missingCanonicalIndices != null && sampleLogged < 8)
+            {
+                Debug.Log($"[DualGrid] Sample {sampleLogged}: pos={newPos} key=0x{key:X2} canon={canonicalIndex} rot={rotation} refl={reflected}");
+                sampleLogged++;
+            }
+            if (floorTilemap != null)
+            {
+                floorTilemap.SetTile(newPos, tile);
+                floorTilemap.SetTransformMatrix(newPos, BuildTileTransform(rotation, reflected));
+            }
         }
     }
 
-    // The tiles on the floor tilemap will recalculate themselves based on the input tilemap
-    /// <summary>
-    /// My understanding is that this scans through the existing tiles within a specific area
-    /// and calls the update funciton separately
-    ///
-    ///
-    /// This has been updated to scan through a number of coordinates equivalent to the "input" tilemap
-    /// </summary>
-    /// <returns></returns>
     public void RefreshFloorTilemap()
     {
+        if (tileSet == null || floorTilemap == null) return;
+
+        var missingCanonical = logDualGridDiagnostics ? new System.Collections.Generic.HashSet<int>() : null;
+        int gapCount = 0;
+        int totalCells = 0;
+        int sampleLogged = 0;
+
         for (int x = bounds.xMin - 1; x < bounds.xMax; x++)
         {
             for (int y = bounds.yMin - 1; y < bounds.yMax; y++)
             {
-                SetFloorTile(new Vector3Int(x, y, 0));
+                SetFloorTile(new Vector3Int(x, y, 0), missingCanonical, ref gapCount, ref sampleLogged);
+                totalCells += 4;
             }
+        }
+
+        if (logDualGridDiagnostics)
+        {
+            if (gapCount > 0)
+                Debug.Log($"[DualGrid] Summary: {totalCells} dual cell lookups, {gapCount} gaps (fallback used). Missing canonical indices in BiomeTileSet: {string.Join(", ", missingCanonical ?? new System.Collections.Generic.HashSet<int>())}. Fix by assigning tiles for those indices.");
+            else
+                Debug.Log($"[DualGrid] Summary: {totalCells} dual cell lookups, no gaps. Compare sample lines above with Aseprite/Lua key order (bl|br<<2|tl<<4|tr<<6).");
         }
     }
 }
-
-public enum TileType
-{
-    Empty,
-    Dirt = 4,
-    Grass = 8,
-    Path = 12,
-    Water = 16,
-    Wall = 20
-} //updated enum values for the necessary bit shifting, it shouldn't affect anything in the meantime
-
-
-
-//Planning for serialization 
-/*
-
-
-this should make it so that it sends a 64 bit string to a database that returns a tile to update
-the tilemap with
-
-| 0000 | 0000 | 0000 | 0000 | 0000 | 0000 | 0000 | 0000 |
-| Unused | Biome | Wall | Water | Path | Grass | Dirt | Empty |
-the enums for the tile types can be used to shift the bits over
-in the CalculateFloorTile function, we can create the 64 bit string by setting each value to
-| 1000 | 0100 | 0010 | 0001 |
-| top left | top right | bot left | bot right |
-and then shifting those bits by the enum values
-
-and then adding them together to get one final 64 bit string
-
-the biome value will have to also be added in, not sure how that will be accessed quite yet though
-
-
-*/

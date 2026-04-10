@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Tilemaps;
+using UnityEngine.InputSystem.UI;
 
 
 namespace WFC
@@ -49,8 +50,7 @@ namespace WFC
         {
             GameObject rendererObj = new GameObject("MinimapRenderer");
             rendererObj.AddComponent<MinimapRenderer>();
-            rendererObj.AddComponent<MinimapRenderer>();
-            
+
             return rendererObj;
         }
         
@@ -60,7 +60,7 @@ namespace WFC
         private static void SetupMinimapUI(out Canvas canvas, out RectTransform minimapPanel, out RawImage minimapImage)
         {
             // Find or create Canvas
-            canvas = GameObject.FindObjectOfType<Canvas>();
+            canvas = Object.FindFirstObjectByType<Canvas>();
             if (canvas == null)
             {
                 canvas = CreateCanvas();
@@ -125,7 +125,7 @@ namespace WFC
             canvasObj.AddComponent<GraphicRaycaster>();
 
             // Create EventSystem if needed
-            if (GameObject.FindObjectOfType<UnityEngine.EventSystems.EventSystem>() == null)
+            if (Object.FindFirstObjectByType<UnityEngine.EventSystems.EventSystem>() == null)
             {
                 CreateEventSystem();
             }
@@ -141,7 +141,7 @@ namespace WFC
         {
             GameObject eventSystemObj = new GameObject("EventSystem");
             eventSystemObj.AddComponent<UnityEngine.EventSystems.EventSystem>();
-            eventSystemObj.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
+            eventSystemObj.AddComponent<InputSystemUIInputModule>();
         }
 
         // ------------------------ GRID/TILEMAP -------------------------
@@ -188,7 +188,7 @@ namespace WFC
             }
 
             // Find and destroy existing Minimap UI
-            Canvas canvas = GameObject.FindObjectOfType<Canvas>();
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
             if (canvas != null)
             {
                 Transform existingPanel = canvas.transform.Find("MinimapPanel");
@@ -199,7 +199,7 @@ namespace WFC
             }
 
             // Find and destroy existing MinimapRenderer
-            MinimapRenderer existingRenderer = GameObject.FindObjectOfType<MinimapRenderer>();
+            MinimapRenderer existingRenderer = Object.FindFirstObjectByType<MinimapRenderer>();
             if (existingRenderer != null)
             {
                 GameObject.DestroyImmediate(existingRenderer.gameObject);
