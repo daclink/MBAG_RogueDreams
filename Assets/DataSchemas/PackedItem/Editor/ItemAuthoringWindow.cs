@@ -113,16 +113,27 @@ namespace DataSchemas.PackedItem.Editor
 
         void DrawGrid()
         {
+            var types = new[] { ItemType.Weapon, ItemType.Armor, ItemType.Consumable, ItemType.KeyItem };
+
             int totalItems = 0;
-            for (int i = 0; i < PackedItemTableCore.TotalSlots; i++)
-                if (_table.HasEntryAt(i)) totalItems++;
+            foreach (ItemType t in types)
+            {
+                for (int p = 0; p < PackedItemTableCore.BiomePartitionCount; p++)
+                {
+                    BiomeFlags biome = ToBiomeFlags(p);
+                    for (byte k = 0; k < PackedItemTableCore.SlotsPerBiome; k++)
+                    {
+                        if (_table.Get(t, biome, k).HasValue)
+                            totalItems++;
+                    }
+                }
+            }
 
             EditorGUILayout.LabelField($"Items by Type ({totalItems} total)", EditorStyles.boldLabel);
             if (totalItems == 0)
                 EditorGUILayout.HelpBox("No items yet. Add one above, or Load from file.", MessageType.Info);
             _scrollPosition = EditorGUILayout.BeginScrollView(_scrollPosition, GUILayout.MinHeight(200), GUILayout.ExpandHeight(true));
 
-            var types = new[] { ItemType.Weapon, ItemType.Armor, ItemType.Consumable, ItemType.KeyItem };
             foreach (ItemType type in types)
             {
                 DrawRow(type);
@@ -152,10 +163,8 @@ namespace DataSchemas.PackedItem.Editor
                 EditorGUILayout.LabelField(PartitionLabel(p), EditorStyles.miniLabel, GUILayout.Height(16));
                 EditorGUILayout.BeginHorizontal(EditorStyles.helpBox, GUILayout.MinHeight(52));
 
-                int baseIdx = ((byte)type) * PackedItemTableCore.KeysPerType + p * PackedItemTableCore.SlotsPerBiome;
                 for (byte k = 0; k < PackedItemTableCore.SlotsPerBiome; k++)
                 {
-                    if (!_table.HasEntryAt(baseIdx + k)) continue;
                     var data = _table.Get(type, ToBiomeFlags(p), k);
                     if (!data.HasValue) continue;
 
