@@ -19,7 +19,7 @@ public class Central_Sound_Script : MonoBehaviour
     private void JumpSound()
     {
         // Debug.Log("Playing the player jump sound");
-        soundManager.Play("Player_Jump");
+        soundManager.PlayOneShot("Player_Jump");
     }
 
     private void WalkSound()
