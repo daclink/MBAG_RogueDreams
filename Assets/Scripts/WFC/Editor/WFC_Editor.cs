@@ -66,14 +66,15 @@ namespace WFC.Editor
                 so.FindProperty("biomeTileRegistry").objectReferenceValue = biomeRegistry;
             so.ApplyModifiedPropertiesWithoutUndo();
 
-            var pathfindingDriver = root.AddComponent<RoomTreeRoomPathfindingDriver>();
+            var enemyPathfinding = root.AddComponent<WFC.RoomTreeEnemyPathfindingSystem>();
             var npcPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Pathfinding_Demo/NPC.prefab");
             if (npcPrefab != null)
             {
-                var driverSo = new SerializedObject(pathfindingDriver);
-                driverSo.FindProperty("_dungeon").objectReferenceValue = comp;
-                driverSo.FindProperty("_testNpcPrefab").objectReferenceValue = npcPrefab;
-                driverSo.ApplyModifiedPropertiesWithoutUndo();
+                var enemyPathfindingSo = new SerializedObject(enemyPathfinding);
+                enemyPathfindingSo.FindProperty("_dungeon").objectReferenceValue = comp;
+                enemyPathfindingSo.FindProperty("_npcPrefab").objectReferenceValue = npcPrefab;
+                enemyPathfindingSo.FindProperty("_enemiesPerRoom").intValue = 2;
+                enemyPathfindingSo.ApplyModifiedPropertiesWithoutUndo();
             }
 
             // Spawn the Player prefab at the dungeon center so the demo has a collider-equipped Player
@@ -94,8 +95,8 @@ namespace WFC.Editor
                     : $"Player prefab not found at {PlayerPrefabPath}; add a Player-tagged object manually.") +
                 "\n\n" +
                 (npcPrefab != null
-                    ? "Room pathfinding test: NPC prefab wired; NPC will chase Player when they share a room."
-                    : "Optional: assign NPC prefab on RoomTreeRoomPathfindingDriver for room-local chase demo."),
+                    ? "Room enemies: 2 pooled NPCs per room; active room enemies chase Player when they share a room."
+                    : "Optional: assign NPC prefab on RoomTreeEnemyPathfindingSystem for room-local enemies."),
                 "OK");
         }
 
