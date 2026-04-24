@@ -11,6 +11,7 @@ namespace WFC.Editor
     {
         private const string WfcTilesPath = "Assets/Art/Tiles/World/WFC_Tiles";
         private const string BiomeTileRegistryPath = "Assets/ScriptableObjects/BiomeTileRegistry.asset";
+        private const string PlayerPrefabPath = "Assets/Prefabs/Player_Prefabs/Player.prefab";
 
         [MenuItem("Tools/WFC/Create New WFC Demo Scene")]
         public static void CreateWFCDemoScene()
@@ -39,7 +40,7 @@ namespace WFC.Editor
             EditorUtility.DisplayDialog(
                 "WFC Demo Scene Created",
                 "DungeonGeneration + DualGrid ready.\n\n" +
-                "Enter Play Mode to generate. WASD/Arrows = pan, Scroll = zoom.\n" +
+                "Enter Play Mode to generate. Camera follows Player (tag); scroll = zoom.\n" +
                 "Press G to toggle raw WFC grid visibility.",
                 "OK");
         }
@@ -65,6 +66,20 @@ namespace WFC.Editor
                 so.FindProperty("biomeTileRegistry").objectReferenceValue = biomeRegistry;
             so.ApplyModifiedPropertiesWithoutUndo();
 
+            var pathfindingDriver = root.AddComponent<RoomTreeRoomPathfindingDriver>();
+            var npcPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Pathfinding_Demo/NPC.prefab");
+            if (npcPrefab != null)
+            {
+                var driverSo = new SerializedObject(pathfindingDriver);
+                driverSo.FindProperty("_dungeon").objectReferenceValue = comp;
+                driverSo.FindProperty("_testNpcPrefab").objectReferenceValue = npcPrefab;
+                driverSo.ApplyModifiedPropertiesWithoutUndo();
+            }
+
+            // Spawn the Player prefab at the dungeon center so the demo has a collider-equipped Player
+            // that walls can actually block (Dynamic Rigidbody2D + non-trigger Collider2D).
+            bool playerSpawned = TrySpawnPlayerPrefab(new Vector3(26f, 26f, 0f));
+
             SetupCamera(26, 26, 30); // Center on Room Tree dungeon (4×4 grid, 52×52 bounds)
             EditorSceneManager.MarkSceneDirty(scene);
             Selection.activeGameObject = root;
@@ -73,7 +88,14 @@ namespace WFC.Editor
                 "Room Tree Demo Scene Created",
                 "RoomTreeDungeon ready!\n\n" +
                 "Enter Play Mode to generate the 4×4 room-tree dungeon.\n\n" +
-                "WASD/Arrows = pan, Scroll = zoom.",
+                "Camera follows Player (tag); scroll = zoom.\n\n" +
+                (playerSpawned
+                    ? "Player spawned at dungeon center; walls will block movement via TilemapCollider2D."
+                    : $"Player prefab not found at {PlayerPrefabPath}; add a Player-tagged object manually.") +
+                "\n\n" +
+                (npcPrefab != null
+                    ? "Room pathfinding test: NPC prefab wired; NPC will chase Player when they share a room."
+                    : "Optional: assign NPC prefab on RoomTreeRoomPathfindingDriver for room-local chase demo."),
                 "OK");
         }
 
@@ -112,6 +134,21 @@ namespace WFC.Editor
         public static void DebugRoomLayout()
         {
             RoomLayoutGenerator.DebugPrintRoomGrid(10, 10, 8, 16);
+        }
+
+        private static bool TrySpawnPlayerPrefab(Vector3 position)
+        {
+            var playerPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(PlayerPrefabPath);
+            if (playerPrefab == null) return false;
+
+            // Skip if a Player-tagged object is already in the scene (user may have added their own).
+            if (GameObject.FindGameObjectWithTag("Player") != null) return true;
+
+            var instance = (GameObject)PrefabUtility.InstantiatePrefab(playerPrefab);
+            if (instance == null) return false;
+
+            instance.transform.position = position;
+            return true;
         }
 
         private static void SetupCamera(float centerX, float centerY, float orthoSize = 30f)

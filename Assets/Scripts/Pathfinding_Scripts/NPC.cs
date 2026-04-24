@@ -1,80 +1,88 @@
 using System;
-using System.Collections;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public class NPC : MonoBehaviour
 {
     [SerializeField] private float moveSpeed = 1f;
-    [SerializeField] private float turnSpeed = 720f; // in degrees per second
-    [SerializeField] private float arrivedDistance = 0.02f; // how close do you need to be to count as "arrived"
+    [SerializeField] private float turnSpeed = 720f;
+    [SerializeField] private float arrivedDistance = 0.02f;
+    [SerializeField] private float collisionRadius = 0.22f;
     public Vector2 debugMove = new Vector2(10f, 10f);
 
     private Vector2 _targetPos;
     private bool _hasTarget;
+    private Rigidbody2D _rigidbody2D;
 
-    public event Action<NPC> Arrived; // event that passes the NPC that arrived
-    
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    public event Action<NPC> Arrived;
+
+    void Awake()
+    {
+        _rigidbody2D = GetComponent<Rigidbody2D>();
+        if (_rigidbody2D == null)
+            _rigidbody2D = gameObject.AddComponent<Rigidbody2D>();
+
+        // Dynamic (not Kinematic) so static TilemapCollider2D walls actually block MovePosition.
+        // Kinematic bodies ignore static contacts and pass through walls.
+        _rigidbody2D.bodyType = RigidbodyType2D.Dynamic;
+        _rigidbody2D.gravityScale = 0f;
+        _rigidbody2D.constraints = RigidbodyConstraints2D.FreezeRotation;
+        _rigidbody2D.linearDamping = 10f;
+
+        if (GetComponent<Collider2D>() == null)
+        {
+            var c = gameObject.AddComponent<CircleCollider2D>();
+            c.radius = collisionRadius;
+        }
+    }
+
     void Start()
     {
         _hasTarget = false;
         if (debugMove != Vector2.zero)
-        {
-            SetMoveTarget(debugMove); 
-        }
+            SetMoveTarget(debugMove);
     }
 
-    // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         UpdateMove();
     }
+
     private void UpdateMove()
     {
         if (!_hasTarget)
-        {
             return;
-        }
 
-        float z = transform.position.z; // shouldn't ever change
-        Vector2 currentPos = transform.position;
-        // vector points from current position to target position
-        Vector2 posToTarget = _targetPos - currentPos; 
-
-        // direct distance to target
+        float z = transform.position.z;
+        Vector2 currentPos = _rigidbody2D != null ? _rigidbody2D.position : (Vector2)transform.position;
+        Vector2 posToTarget = _targetPos - currentPos;
         float dist = posToTarget.magnitude;
 
-        if (dist <= arrivedDistance) // if we're close enough to our target
+        if (dist <= arrivedDistance)
         {
-            transform.position = new Vector3(_targetPos.x, _targetPos.y, z); // snap to target (maybe not needed)
+            if (_rigidbody2D != null)
+                _rigidbody2D.MovePosition(new Vector2(_targetPos.x, _targetPos.y));
+            else
+                transform.position = new Vector3(_targetPos.x, _targetPos.y, z);
             _hasTarget = false;
             Arrived?.Invoke(this);
             return;
         }
-        
-        // posToTarget vector to get the direction
-        Vector2 dir = posToTarget / dist; 
-        
-        // Moving
-        float step = moveSpeed * Time.deltaTime;
-        // use built in function for moving
-        Vector2 nextPos = Vector2.MoveTowards(currentPos, _targetPos, step); 
-        transform.position = new Vector3(nextPos.x, nextPos.y, z);
-        
-        // Rotate to face dir
-        // convert direction vector to angle in degrees, -90 because default faces up
-        float destAngle = (Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg) - 90f; 
 
-        // get the current z rotation angle (apparently z for 2D)
+        Vector2 dir = posToTarget / dist;
+        float step = moveSpeed * Time.fixedDeltaTime;
+        Vector2 nextPos = Vector2.MoveTowards(currentPos, _targetPos, step);
+
+        if (_rigidbody2D != null)
+            _rigidbody2D.MovePosition(nextPos);
+        else
+            transform.position = new Vector3(nextPos.x, nextPos.y, z);
+
+        float destAngle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg - 90f;
         float currentAngle = transform.eulerAngles.z;
-        // use built in function to turn smoothly
-        float newAngle = Mathf.MoveTowardsAngle(currentAngle, destAngle, turnSpeed * Time.deltaTime);
-        // Quaternion things, idk
+        float newAngle = Mathf.MoveTowardsAngle(currentAngle, destAngle, turnSpeed * Time.fixedDeltaTime);
         transform.rotation = Quaternion.Euler(0f, 0f, newAngle);
     }
 
-    
     public void SetMoveTarget(Vector2 dest)
     {
         _targetPos = dest;
@@ -90,5 +98,4 @@ public class NPC : MonoBehaviour
     {
         return _hasTarget;
     }
-
 }

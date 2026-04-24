@@ -2,14 +2,18 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// Simple 2D pan/zoom camera for inspecting WFC demo. Uses new Input System (Keyboard/Mouse).
-/// WASD or Arrows = pan. Scroll = zoom. Attach to Main Camera.
+/// 2D demo camera: follows the Player (tag <c>Player</c> or optional <see cref="followTarget"/>).
+/// Scroll = zoom. Attach to Main Camera. No keyboard pan.
 /// </summary>
 [RequireComponent(typeof(Camera))]
 public class WFC_DemoCameraController : MonoBehaviour
 {
-    [Header("Pan")]
-    [SerializeField] private float panSpeed = 20f;
+    [Header("Follow")]
+    [Tooltip("If set, this transform is followed instead of searching for tag Player.")]
+    [SerializeField] private Transform followTarget;
+    [SerializeField] private Vector3 followOffset;
+    [Tooltip("0 = snap to target each frame; higher = smoother follow.")]
+    [SerializeField] private float smoothTime = 0.12f;
 
     [Header("Zoom")]
     [SerializeField] private float zoomSpeed = 5f;
@@ -17,6 +21,8 @@ public class WFC_DemoCameraController : MonoBehaviour
     [SerializeField] private float maxOrthoSize = 50f;
 
     private Camera _cam;
+    private Transform _resolvedFollow;
+    private Vector3 _followVelocity;
 
     private void Awake()
     {
@@ -25,27 +31,21 @@ public class WFC_DemoCameraController : MonoBehaviour
             _cam.orthographic = true;
     }
 
-    private void Update()
+    private void LateUpdate()
     {
         if (_cam == null) return;
 
-        // Pan
-        Vector3 move = Vector3.zero;
-        if (UnityEngine.InputSystem.Keyboard.current != null)
+        ResolveFollow();
+        if (_resolvedFollow != null)
         {
-            var k = UnityEngine.InputSystem.Keyboard.current;
-            if (k.wKey.isPressed || k.upArrowKey.isPressed) move.y += 1;
-            if (k.sKey.isPressed || k.downArrowKey.isPressed) move.y -= 1;
-            if (k.dKey.isPressed || k.rightArrowKey.isPressed) move.x += 1;
-            if (k.aKey.isPressed || k.leftArrowKey.isPressed) move.x -= 1;
-        }
-        if (move.sqrMagnitude > 0)
-        {
-            move = move.normalized * (panSpeed * Time.deltaTime);
-            transform.Translate(move, Space.World);
+            Vector3 target = _resolvedFollow.position + followOffset;
+            target.z = transform.position.z;
+            if (smoothTime <= 0f)
+                transform.position = target;
+            else
+                transform.position = Vector3.SmoothDamp(transform.position, target, ref _followVelocity, smoothTime);
         }
 
-        // Zoom
         if (Mouse.current != null)
         {
             float scroll = Mouse.current.scroll.ReadValue().y;
@@ -56,4 +56,26 @@ public class WFC_DemoCameraController : MonoBehaviour
             }
         }
     }
+
+    private void ResolveFollow()
+    {
+        if (followTarget != null)
+        {
+            _resolvedFollow = followTarget;
+            return;
+        }
+
+        if (_resolvedFollow != null && !_resolvedFollow.gameObject.activeInHierarchy)
+            _resolvedFollow = null;
+
+        if (_resolvedFollow == null)
+        {
+            GameObject go = GameObject.FindGameObjectWithTag("Player");
+            if (go != null)
+                _resolvedFollow = go.transform;
+        }
+    }
+
+    /// <summary>Clear cached follow so a respawned player is picked up (optional call from game code).</summary>
+    public void ClearFollowCache() => _resolvedFollow = null;
 }
