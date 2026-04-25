@@ -23,6 +23,9 @@ public class Player : MonoBehaviour
     // [SerializeField] private float timeToMelee;
     [SerializeField] private Animator animator;
 
+    /// <summary>Latest move input (WASD / stick), for facing and animation.</summary>
+    public Vector2 MoveDirection => moveDir;
+
     private bool enableMovement = true;
     // private float meleeTimer;
     private bool isMoving;

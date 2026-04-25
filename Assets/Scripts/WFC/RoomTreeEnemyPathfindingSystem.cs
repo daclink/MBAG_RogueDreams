@@ -32,6 +32,7 @@ namespace WFC
         private Vector2Int _lastRoomKey = new Vector2Int(int.MinValue, int.MinValue);
         private int _lastGoalBit = -2;
         private int _lastLayoutVer = -1;
+        private readonly HashSet<Vector2Int> _activeRoomKeys = new HashSet<Vector2Int>();
 
         private void Awake()
         {
@@ -86,6 +87,7 @@ namespace WFC
             _cache.Clear();
             ClearAllEnemies();
             _currentRoom = null;
+            _activeRoomKeys.Clear();
             ResetDistanceCache();
 
             if (_dungeon?.Generator?.Nodes != null)
@@ -94,17 +96,38 @@ namespace WFC
 
         private void UpdateCurrentRoom(RoomTreeNode playerRoom, Vector3Int playerCell)
         {
-            if (SameRoom(_currentRoom, playerRoom))
+            _currentRoom = playerRoom;
+            SyncActiveRoomsAroundPlayer(playerCell);
+            ResetDistanceCache();
+        }
+
+        private void SyncActiveRoomsAroundPlayer(Vector3Int playerCell)
+        {
+            if (_dungeon?.Generator?.Nodes == null)
                 return;
 
-            if (_currentRoom != null)
-                DeactivateRoomEnemies(_currentRoom.GridPosition);
+            var desired = new HashSet<Vector2Int>(_dungeon.LoadedRoomKeys);
 
-            _currentRoom = playerRoom;
-            ResetDistanceCache();
+            // Deactivate rooms that fell out of the streamed set.
+            foreach (Vector2Int key in _activeRoomKeys)
+            {
+                if (!desired.Contains(key))
+                    DeactivateRoomEnemies(key);
+            }
 
-            if (_currentRoom != null)
-                ActivateOrSpawnRoomEnemies(_currentRoom, playerCell);
+            // Activate/spawn rooms that entered the streamed set.
+            foreach (Vector2Int key in desired)
+            {
+                if (_activeRoomKeys.Contains(key))
+                    continue;
+
+                if (_dungeon.Generator.Nodes.TryGetValue(key, out RoomTreeNode room) && room != null)
+                    ActivateOrSpawnRoomEnemies(room, playerCell);
+            }
+
+            _activeRoomKeys.Clear();
+            foreach (Vector2Int key in desired)
+                _activeRoomKeys.Add(key);
         }
 
         private void ActivateOrSpawnRoomEnemies(RoomTreeNode room, Vector3Int playerCell)
