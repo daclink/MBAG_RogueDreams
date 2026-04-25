@@ -22,6 +22,14 @@ namespace Tables
 
         [System.NonSerialized] private Sprite[][] _spritesheets;
 
+        // Git-friendly path: keep the spritesheet source texture (project asset) and rebuild runtime Sprite[] frames on load.
+        // This avoids baking raw pixels into sprites.dat.
+        [SerializeField] private Texture2D[] _sourceTextures;
+        [Min(1)]
+        [SerializeField] private int _frameWidth = 64;
+        [Min(1)]
+        [SerializeField] private int _frameHeight = 64;
+
         /// <summary>Number of non-null slots. Used by custom inspector.</summary>
         public int GetUsedSlotCount()
         {
@@ -35,6 +43,10 @@ namespace Tables
         void OnEnable()
         {
             EnsureCapacity();
+            EnsureSourceArrayCapacity();
+            // Don't rebuild if we have no imported source textures; legacy loads populate runtime sprites from sprites.dat instead.
+            if (HasAnySourceTexture())
+                RebuildRuntimeSpritesFromSourceTextures();
         }
 
         void EnsureCapacity()
@@ -46,6 +58,25 @@ namespace Tables
                 if (prev != null)
                     Array.Copy(prev, _spritesheets, Math.Min(prev.Length, TotalSlots));
             }
+        }
+
+        void EnsureSourceArrayCapacity()
+        {
+            if (_sourceTextures == null || _sourceTextures.Length < TotalSlots)
+            {
+                var prev = _sourceTextures;
+                _sourceTextures = new Texture2D[TotalSlots];
+                if (prev != null)
+                    Array.Copy(prev, _sourceTextures, Math.Min(prev.Length, TotalSlots));
+            }
+        }
+
+        bool HasAnySourceTexture()
+        {
+            if (_sourceTextures == null) return false;
+            for (int i = 0; i < _sourceTextures.Length; i++)
+                if (_sourceTextures[i] != null) return true;
+            return false;
         }
 
         /// <summary>Returns frame 0 (icon) at [type][partition from biomeFlags][key].</summary>
@@ -92,7 +123,10 @@ namespace Tables
             int partition = PackedItemTableCore.GetPartitionIndex(biomeFlags);
             int i = PackedItemTableCore.GetFlatIndex(type, partition, key);
             if (i >= 0 && i < _spritesheets.Length)
+            {
                 _spritesheets[i] = frames != null && frames.Length > 0 ? frames : null;
+                TryAssignSourceFromFrames(i, frames);
+            }
         }
 
         /// <summary>Clears spritesheet at (type, partition, key).</summary>
@@ -103,7 +137,12 @@ namespace Tables
             int partition = PackedItemTableCore.GetPartitionIndex(biomeFlags);
             int i = PackedItemTableCore.GetFlatIndex(type, partition, key);
             if (i >= 0 && i < _spritesheets.Length)
+            {
                 _spritesheets[i] = null;
+                EnsureSourceArrayCapacity();
+                if (i < _sourceTextures.Length)
+                    _sourceTextures[i] = null;
+            }
         }
 
         /// <summary>True if the slot has a non-empty spritesheet.</summary>
@@ -184,6 +223,94 @@ namespace Tables
                 if (idx >= 0 && idx < _spritesheets.Length)
                     _spritesheets[idx] = frames;
             }
+        }
+
+        /// <summary>
+        /// Re-slices <see cref="_sourceTextures"/> into the runtime <see cref="_spritesheets"/> cache.
+        /// Safe to call at runtime; requires readable textures and dimensions divisible by the frame size.
+        /// </summary>
+        public void RebuildRuntimeSpritesFromSourceTextures()
+        {
+            EnsureCapacity();
+            EnsureSourceArrayCapacity();
+
+            for (int i = 0; i < TotalSlots; i++)
+            {
+                Texture2D tex = i < _sourceTextures.Length ? _sourceTextures[i] : null;
+                if (tex == null)
+                {
+                    _spritesheets[i] = null;
+                    continue;
+                }
+
+                _spritesheets[i] = SliceTextureToSprites(tex, _frameWidth, _frameHeight);
+            }
+        }
+
+        /// <summary>Copies the Texture reference from the first frame (if any) into the serialized source table.</summary>
+        public void SyncSourceTexturesFromRuntimeSprites()
+        {
+            EnsureCapacity();
+            EnsureSourceArrayCapacity();
+            for (int i = 0; i < TotalSlots; i++)
+                TryAssignSourceFromFrames(i, _spritesheets[i]);
+        }
+
+        void TryAssignSourceFromFrames(int slotIndex, Sprite[] frames)
+        {
+            if (slotIndex < 0 || slotIndex >= TotalSlots) return;
+            EnsureSourceArrayCapacity();
+            if (frames == null || frames.Length == 0 || frames[0] == null)
+            {
+                _sourceTextures[slotIndex] = null;
+                return;
+            }
+
+            _sourceTextures[slotIndex] = frames[0].texture;
+        }
+
+        static Sprite[] SliceTextureToSprites(Texture2D texture, int frameWidth, int frameHeight)
+        {
+            if (texture == null) return null;
+            if (frameWidth <= 0 || frameHeight <= 0) return null;
+            if (texture.width % frameWidth != 0 || texture.height % frameHeight != 0)
+            {
+                Debug.LogWarning(
+                    $"SpriteTable2D: texture '{texture.name}' size {texture.width}×{texture.height} is not divisible by frame {frameWidth}×{frameHeight}.");
+                return null;
+            }
+
+            if (!texture.isReadable)
+            {
+                Debug.LogWarning(
+                    $"SpriteTable2D: texture '{texture.name}' is not readable. Enable Read/Write in the Texture importer.");
+                return null;
+            }
+
+            int cols = texture.width / frameWidth;
+            int rows = texture.height / frameHeight;
+            int totalFrames = cols * rows;
+            int frameCount = Math.Min(totalFrames, SpriteTableSerialization.MaxFramesPerItem);
+            if (totalFrames > frameCount)
+            {
+                Debug.LogWarning(
+                    $"SpriteTable2D: texture '{texture.name}' has {totalFrames} frames; using first {frameCount} (capped).");
+            }
+
+            var sprites = new Sprite[frameCount];
+            Vector2 pivot = new Vector2(0.5f, 0.5f);
+
+            int idx = 0;
+            for (int row = 0; row < rows && idx < frameCount; row++)
+            {
+                for (int col = 0; col < cols && idx < frameCount; col++)
+                {
+                    var rect = new Rect(col * frameWidth, texture.height - (row + 1) * frameHeight, frameWidth, frameHeight);
+                    sprites[idx++] = Sprite.Create(texture, rect, pivot);
+                }
+            }
+
+            return sprites;
         }
     }
 }

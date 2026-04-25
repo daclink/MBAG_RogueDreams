@@ -98,4 +98,7 @@ public class NPC : MonoBehaviour
     {
         return _hasTarget;
     }
+
+    /// <summary>Room-tree pathfinding may add NPC at runtime (e.g. on melee enemy prefab); use this to match chase feel.</summary>
+    public void SetMoveSpeedForPathfinding(float speed) => moveSpeed = Mathf.Max(0.01f, speed);
 }

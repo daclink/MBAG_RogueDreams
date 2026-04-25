@@ -15,10 +15,6 @@ public class PlayerRotator : Rotator
     /// <summary>Legacy prefab field name; YAML still assigns this when <see cref="meleePivotTransform"/> is empty.</summary>
     [SerializeField, HideInInspector] private GameObject objectToRotate;
 
-    [Header("Debug (aim)")]
-    [Tooltip("Logs cursor screen position, mouse world on player plane, aim angle, and head rotation each LateUpdate. Disable when done troubleshooting.")]
-    [SerializeField] private bool logAimDiagnostics;
-
     private bool _hasLookScreen;
     private Vector2 _lookScreen;
 
@@ -68,24 +64,6 @@ public class PlayerRotator : Rotator
             ApplyWorldLookZAsLocalRelativeToParent(headTransform, lookZ);
         if (meleePivotTransform != null)
             ApplyWorldLookZAsLocalRelativeToParent(meleePivotTransform, lookZ);
-
-        if (logAimDiagnostics)
-        {
-            Debug.DrawLine(pivot, mouseWorld, Color.yellow);
-            if (headTransform != null)
-                Debug.DrawRay(headTransform.position, headTransform.right * 1.0f, Color.cyan);
-
-            Vector2 headForward2D = headTransform != null
-                ? new Vector2(headTransform.right.x, headTransform.right.y)
-                : Vector2.zero;
-            float headWorldZ = headTransform != null ? headTransform.eulerAngles.z : float.NaN;
-            float headLocalZ = headTransform != null ? headTransform.localEulerAngles.z : float.NaN;
-            Debug.Log(
-                $"[PlayerRotator Aim] screen={screen} mouseWorld=({mouseWorld.x:F3},{mouseWorld.y:F3},{mouseWorld.z:F3}) " +
-                $"pivot=({pivot.x:F3},{pivot.y:F3},{pivot.z:F3}) lookZ={lookZ:F1}° " +
-                $"headWorldZ={headWorldZ:F1}° headLocalZ={headLocalZ:F1}° headRight2D=({headForward2D.x:F3},{headForward2D.y:F3}) " +
-                $"cam={(cam != null ? cam.name : "null")} headAssigned={(headTransform != null)}");
-        }
     }
 
     /// <summary>

@@ -16,6 +16,19 @@ namespace WFC
         [SerializeField] private GameObject _npcPrefab;
         [Min(0)]
         [SerializeField] private int _enemiesPerRoom = 2;
+        [Tooltip("When > 0, applied to NPC on each spawn. Use with prefabs that need NPC added at runtime (e.g. Melee_Enemy). 0 = do not override move speed.")]
+        [Min(0f)]
+        [SerializeField] private float _pathNpcMoveSpeed;
+
+        [Header("Off-room idle (enemies in streamed neighbors)")]
+        [Tooltip("When not in the player’s room, enemies pick random walkable cells; min time between new wander targets per NPC.")]
+        [Min(0.05f)]
+        [SerializeField] private float _idleWanderMinInterval = 0.6f;
+        [Tooltip("Max time between wander retargets when the previous path finished.")]
+        [Min(0.05f)]
+        [SerializeField] private float _idleWanderMaxInterval = 1.6f;
+
+        private readonly Dictionary<NPC, float> _nextIdleWanderTime = new Dictionary<NPC, float>();
 
         private sealed class RoomEnemyState
         {
@@ -27,6 +40,7 @@ namespace WFC
         private readonly Dictionary<Vector2Int, RoomEnemyState> _roomEnemies =
             new Dictionary<Vector2Int, RoomEnemyState>();
         private readonly int[] _dist = new int[RoomBitGrid64.CellCount];
+        private readonly int[] _distIdleWander = new int[RoomBitGrid64.CellCount];
 
         private RoomTreeNode _currentRoom;
         private Vector2Int _lastRoomKey = new Vector2Int(int.MinValue, int.MinValue);
@@ -72,10 +86,10 @@ namespace WFC
             RoomTreeNode playerRoom = FindRoomContainingCell(playerCell);
             UpdateCurrentRoom(playerRoom, playerCell);
 
-            if (_currentRoom == null)
-                return;
+            if (_currentRoom != null)
+                MoveActiveRoomEnemies(playerCell);
 
-            MoveActiveRoomEnemies(playerCell);
+            MoveStreamedEnemiesIdleOutsidePlayerRoom();
         }
 
         private void OnDungeonGenerated(RoomTreeDungeonComponent dungeon)
@@ -163,6 +177,7 @@ namespace WFC
 
                 state.SavedPositions[i] = npc.transform.position;
                 npc.ClearTarget();
+                _nextIdleWanderTime.Remove(npc);
                 npc.gameObject.SetActive(false);
             }
         }
@@ -185,13 +200,18 @@ namespace WFC
                 GameObject go = Instantiate(_npcPrefab, world, Quaternion.identity, transform);
                 go.name = $"RoomEnemy_{room.GridPosition.x}_{room.GridPosition.y}_{i}";
 
+                // Melee (and other BaseEnemy) prefabs use their own AI; we drive movement with NPC instead.
+                foreach (MonoBehaviour mb in go.GetComponents<MonoBehaviour>())
+                {
+                    if (mb is BaseEnemy) mb.enabled = false;
+                }
+
                 NPC npc = go.GetComponent<NPC>();
                 if (npc == null)
-                {
-                    DestroyGameObject(go);
-                    Debug.LogWarning("RoomTreeEnemyPathfindingSystem: NPC prefab needs an NPC component.");
-                    continue;
-                }
+                    npc = go.AddComponent<NPC>();
+
+                if (_pathNpcMoveSpeed > 0f)
+                    npc.SetMoveSpeedForPathfinding(_pathNpcMoveSpeed);
 
                 // Disable the legacy demo target so this system fully owns room-local movement.
                 npc.debugMove = Vector2.zero;
@@ -244,6 +264,86 @@ namespace WFC
             }
         }
 
+        /// <summary>
+        /// Enemies in streamed rooms other than the player’s use random walkable targets (same mask + greedy steps as chase).
+        /// </summary>
+        private void MoveStreamedEnemiesIdleOutsidePlayerRoom()
+        {
+            if (_dungeon?.Generator?.Nodes == null || _grid == null)
+                return;
+
+            int ver = _dungeon.LayoutVersion;
+            float minT = Mathf.Min(_idleWanderMinInterval, _idleWanderMaxInterval);
+            float maxT = Mathf.Max(_idleWanderMinInterval, _idleWanderMaxInterval);
+
+            foreach (Vector2Int key in _activeRoomKeys)
+            {
+                if (_currentRoom != null && key == _currentRoom.GridPosition)
+                    continue;
+
+                if (!_roomEnemies.TryGetValue(key, out RoomEnemyState state))
+                    continue;
+                if (!_dungeon.Generator.Nodes.TryGetValue(key, out RoomTreeNode room) || room?.TileData == null)
+                    continue;
+
+                ulong mask = _cache.GetOrBuild(key, ver, room.TileData);
+                Vector3Int origin = RoomWalkMaskBuilder.RoomOriginCell(room.WorldPosition);
+
+                for (int i = 0; i < state.Enemies.Count; i++)
+                {
+                    NPC npc = state.Enemies[i];
+                    if (npc == null || !npc.gameObject.activeInHierarchy)
+                        continue;
+                    if (npc.HasTarget())
+                        continue;
+
+                    if (_nextIdleWanderTime.TryGetValue(npc, out float nextTime) && Time.time < nextTime)
+                        continue;
+
+                    int goalBit = PickRandomWalkableBit(mask);
+                    if (goalBit < 0)
+                        continue;
+
+                    RoomBitGrid64.ComputeDistancesFromGoal(mask, goalBit, _distIdleWander);
+                    Vector3Int npcCell = _grid.WorldToCell(npc.transform.position);
+                    if (!RoomWalkMaskBuilder.TryWorldCellToInteriorBitIndex(origin, npcCell, out int npcBit))
+                    {
+                        _nextIdleWanderTime[npc] = Time.time + Random.Range(minT, maxT);
+                        continue;
+                    }
+
+                    if (!RoomBitGrid64.TryGreedyTowardGoal(mask, _distIdleWander, npcBit, out int nextBit))
+                    {
+                        _nextIdleWanderTime[npc] = Time.time + Random.Range(minT, maxT);
+                        continue;
+                    }
+
+                    Vector3Int nextCell = RoomWalkMaskBuilder.InteriorBitIndexToWorldCell(origin, nextBit);
+                    Vector3 world = _grid.GetCellCenterWorld(nextCell);
+                    npc.SetMoveTarget(new Vector2(world.x, world.y));
+                    _nextIdleWanderTime[npc] = Time.time + Random.Range(minT, maxT);
+                }
+            }
+        }
+
+        private static int PickRandomWalkableBit(ulong mask)
+        {
+            for (int k = 0; k < 40; k++)
+            {
+                int b = Random.Range(0, RoomBitGrid64.CellCount);
+                if (RoomBitGrid64.IsWalkable(mask, b))
+                    return b;
+            }
+
+            for (int i = 0; i < RoomBitGrid64.CellCount; i++)
+            {
+                if (RoomBitGrid64.IsWalkable(mask, i))
+                    return i;
+            }
+
+            return -1;
+        }
+
         private List<int> PickSpawnBits(ulong mask, int playerBit, int count)
         {
             var candidates = new List<int>(RoomBitGrid64.CellCount);
@@ -274,6 +374,7 @@ namespace WFC
 
         private void ClearAllEnemies()
         {
+            _nextIdleWanderTime.Clear();
             foreach (RoomEnemyState state in _roomEnemies.Values)
             {
                 foreach (NPC npc in state.Enemies)

@@ -16,6 +16,7 @@ namespace DataSchemas.PackedItem.Editor
 
         [SerializeField] SpriteTable2D _spriteTable;
         [SerializeField] TextTable2D _textTable;
+        [SerializeField] private ItemSpriteStorageMode _spriteStorageMode = ItemSpriteStorageMode.ProjectAssetTextures;
         [SerializeField] string _itemsPath = "";
         [SerializeField] string _spritesPath = "";
         [SerializeField] string _textsPath = "";
@@ -25,9 +26,10 @@ namespace DataSchemas.PackedItem.Editor
         (ItemType type, int partition, byte key)? _selected;
         ItemType? _addModeForType;
 
-        string ItemsPath => !string.IsNullOrEmpty(_itemsPath) ? _itemsPath : Path.Combine(Application.persistentDataPath, PackedItemStorage.DefaultFileName);
-        string SpritesPath => !string.IsNullOrEmpty(_spritesPath) ? _spritesPath : Path.Combine(Application.persistentDataPath, SpriteTableStorage.DefaultFileName);
-        string TextsPath => !string.IsNullOrEmpty(_textsPath) ? _textsPath : Path.Combine(Application.persistentDataPath, TextTableStorage.DefaultFileName);
+        private static string ProjectDataDir => Path.Combine(Application.dataPath, "GameData", "Items");
+        string ItemsPath => !string.IsNullOrEmpty(_itemsPath) ? _itemsPath : Path.Combine(ProjectDataDir, PackedItemStorage.DefaultFileName);
+        string SpritesPath => !string.IsNullOrEmpty(_spritesPath) ? _spritesPath : Path.Combine(ProjectDataDir, SpriteTableStorage.DefaultFileName);
+        string TextsPath => !string.IsNullOrEmpty(_textsPath) ? _textsPath : Path.Combine(ProjectDataDir, TextTableStorage.DefaultFileName);
 
         void OnEnable()
         {
@@ -64,14 +66,24 @@ namespace DataSchemas.PackedItem.Editor
             EditorGUILayout.LabelField("Setup", EditorStyles.boldLabel);
             _spriteTable = (SpriteTable2D)EditorGUILayout.ObjectField("Sprite Table 2D", _spriteTable, typeof(SpriteTable2D), false);
             _textTable = (TextTable2D)EditorGUILayout.ObjectField("Text Table 2D", _textTable, typeof(TextTable2D), false);
+            _spriteStorageMode = (ItemSpriteStorageMode)EditorGUILayout.EnumPopup("Sprite storage", _spriteStorageMode);
+            if (_spriteStorageMode == ItemSpriteStorageMode.ProjectAssetTextures)
+                EditorGUILayout.HelpBox(
+                    "Project textures: stores Texture2D references on the SpriteTable2D asset (commit-friendly) and rebuilds Sprite frames at load. " +
+                    "Does not write/read sprites.dat.",
+                    MessageType.Info);
+            else
+                EditorGUILayout.HelpBox(
+                    "Legacy: bakes pixels into sprites.dat (old pipeline).",
+                    MessageType.Warning);
             _itemsPath = EditorGUILayout.TextField("Items path", _itemsPath);
             _spritesPath = EditorGUILayout.TextField("Sprites path", _spritesPath);
             _textsPath = EditorGUILayout.TextField("Texts path", _textsPath);
-            if (GUILayout.Button("Use persistentDataPath + default names"))
+            if (GUILayout.Button("Use project Assets/GameData/Items + default names"))
             {
-                _itemsPath = Path.Combine(Application.persistentDataPath, PackedItemStorage.DefaultFileName);
-                _spritesPath = Path.Combine(Application.persistentDataPath, SpriteTableStorage.DefaultFileName);
-                _textsPath = Path.Combine(Application.persistentDataPath, TextTableStorage.DefaultFileName);
+                _itemsPath = Path.Combine(ProjectDataDir, PackedItemStorage.DefaultFileName);
+                _spritesPath = Path.Combine(ProjectDataDir, SpriteTableStorage.DefaultFileName);
+                _textsPath = Path.Combine(ProjectDataDir, TextTableStorage.DefaultFileName);
             }
         }
 
@@ -83,11 +95,14 @@ namespace DataSchemas.PackedItem.Editor
             {
                 try
                 {
-                    _table.LoadFromFiles(ItemsPath, SpritesPath, TextsPath);
+                    bool loadSpritesFromBinary = _spriteStorageMode == ItemSpriteStorageMode.LegacyPixelBinary;
+                    _table.LoadFromFiles(ItemsPath, SpritesPath, TextsPath, loadSpritesFromBinary);
                     _selected = null;
                     _addModeForType = null;
                     _editPopulated = false;
-                    Debug.Log($"Loaded from {ItemsPath}, {SpritesPath}, {TextsPath}");
+                    Debug.Log(loadSpritesFromBinary
+                        ? $"Loaded from {ItemsPath}, {SpritesPath}, {TextsPath}"
+                        : $"Loaded from {ItemsPath}, {TextsPath} (sprites=SpriteTable2D project textures; skipped {SpritesPath})");
                 }
                 catch (Exception ex)
                 {
@@ -98,10 +113,26 @@ namespace DataSchemas.PackedItem.Editor
             {
                 try
                 {
+                    Directory.CreateDirectory(Path.GetDirectoryName(ItemsPath) ?? ProjectDataDir);
+                    Directory.CreateDirectory(Path.GetDirectoryName(SpritesPath) ?? ProjectDataDir);
+                    Directory.CreateDirectory(Path.GetDirectoryName(TextsPath) ?? ProjectDataDir);
                     _table.SaveToFile(ItemsPath);
-                    _spriteTable.SaveFromFile(SpritesPath);
+                    if (_spriteStorageMode == ItemSpriteStorageMode.LegacyPixelBinary)
+                    {
+                        _spriteTable.SaveFromFile(SpritesPath);
+                    }
+                    else
+                    {
+                        // Persist commit-friendly texture references on the ScriptableObject (plus items.dat for packed blocks).
+                        _spriteTable.SyncSourceTexturesFromRuntimeSprites();
+                        EditorUtility.SetDirty(_spriteTable);
+                    }
                     _textTable.SaveFromFile(TextsPath);
-                    Debug.Log($"Saved to {ItemsPath}, {SpritesPath}, {TextsPath}");
+                    AssetDatabase.SaveAssets();
+                    AssetDatabase.Refresh();
+                    Debug.Log(_spriteStorageMode == ItemSpriteStorageMode.LegacyPixelBinary
+                        ? $"Saved to {ItemsPath}, {SpritesPath}, {TextsPath}"
+                        : $"Saved to {ItemsPath}, {TextsPath} + SpriteTable2D project textures (skipped {SpritesPath})");
                 }
                 catch (Exception ex)
                 {
@@ -339,7 +370,7 @@ namespace DataSchemas.PackedItem.Editor
                         ConcatenateNameDesc(_editName, _editDescription));
                     if (success)
                     {
-                        EditorUtility.SetDirty(_spriteTable);
+                        AfterSpriteTableEdit();
                         EditorUtility.SetDirty(_textTable);
                         _editPopulated = false;
                         if (newKeyIfMoved.HasValue)
@@ -358,7 +389,7 @@ namespace DataSchemas.PackedItem.Editor
             if (GUILayout.Button("Delete", GUILayout.Height(24)))
             {
                 _table.Remove(type, biomeFlags, key);
-                EditorUtility.SetDirty(_spriteTable);
+                AfterSpriteTableEdit();
                 EditorUtility.SetDirty(_textTable);
                 _selected = null;
                 _editPopulated = false;
@@ -442,7 +473,7 @@ namespace DataSchemas.PackedItem.Editor
                         ConcatenateNameDesc(_addName, _addDescription));
                     if (key >= 0)
                     {
-                        EditorUtility.SetDirty(_spriteTable);
+                        AfterSpriteTableEdit();
                         EditorUtility.SetDirty(_textTable);
                         _addModeForType = null;
                         ResetAddForm();
@@ -481,6 +512,17 @@ namespace DataSchemas.PackedItem.Editor
             _addRarityFlags = RarityFlags.None;
             _addBiomeFlags = BiomeFlags.Forest;
             _addHealth = _addPower = _addArmor = _addAgility = _addVigor = _addFortune = _addRange = _addRarity = 0;
+        }
+
+        void AfterSpriteTableEdit()
+        {
+            if (_spriteTable == null) return;
+            if (_spriteStorageMode == ItemSpriteStorageMode.ProjectAssetTextures)
+            {
+                _spriteTable.SyncSourceTexturesFromRuntimeSprites();
+                _spriteTable.RebuildRuntimeSpritesFromSourceTextures();
+            }
+            EditorUtility.SetDirty(_spriteTable);
         }
     }
 }

@@ -20,6 +20,7 @@ namespace DataSchemas.PackedItem
         private readonly PackedItemTableCore _core;
         private SpriteTable2D _spriteTable;
         private TextTable2D _textTable;
+        private List<PackedItemReference> _usedReferenceCache;
 
         public PackedItemTable(SpriteTable2D spriteTable, TextTable2D textTable)
         {
@@ -69,6 +70,7 @@ namespace DataSchemas.PackedItem
 
             WriteItemAt(type, partition, keyByte, data);
             WriteSpriteAndText(type, biomeFlags, keyByte, spritesheet, text);
+            InvalidateUsedReferenceCache();
 
             return key;
         }
@@ -141,6 +143,28 @@ namespace DataSchemas.PackedItem
             return _items[idx];
         }
 
+        /// <summary>Randomly picks a reference to a slot that currently holds an item. Returns false if none.</summary>
+        public bool TryPickRandomReference(out PackedItemReference reference)
+        {
+            reference = default;
+            if (_usedReferenceCache == null)
+            {
+                _usedReferenceCache = new List<PackedItemReference>(64);
+                for (int i = 0; i < _items.Length; i++)
+                {
+                    if (!_items[i].HasValue) continue;
+                    PackedItemData d = _items[i].Value;
+                    _usedReferenceCache.Add(new PackedItemReference(d.ItemType, d.BiomeFlags, d.SpriteKey));
+                }
+            }
+
+            if (_usedReferenceCache.Count == 0) return false;
+            reference = _usedReferenceCache[UnityEngine.Random.Range(0, _usedReferenceCache.Count)];
+            return true;
+        }
+
+        void InvalidateUsedReferenceCache() => _usedReferenceCache = null;
+
         /// <summary>Saves used slots to items.dat (block0, block1 only). Caller should also save sprites to sprites.dat.</summary>
         public void SaveToFile(string itemsPath)
         {
@@ -159,17 +183,26 @@ namespace DataSchemas.PackedItem
             PackedItemData[] items = PackedItemStorage.LoadItemsFromFile(itemsPath);
             Array.Clear(_items, 0, _items.Length);
             _core.ResetAllFree();
+            InvalidateUsedReferenceCache();
 
             foreach (PackedItemData data in items)
                 ApplyLoadedEntry(data);
         }
 
         /// <summary>Loads items, then sprites, then texts. Paths must match saved (type, partition, key).</summary>
-        public void LoadFromFiles(string itemsPath, string spritesPath, string textsPath = null)
+        public void LoadFromFiles(string itemsPath, string spritesPath, string textsPath = null, bool loadSpritesFromBinary = true)
         {
             LoadFromFile(itemsPath);
-            if (!string.IsNullOrWhiteSpace(spritesPath))
-                _spriteTable.LoadFromFile(spritesPath);
+            if (loadSpritesFromBinary)
+            {
+                if (!string.IsNullOrWhiteSpace(spritesPath))
+                    _spriteTable.LoadFromFile(spritesPath);
+            }
+            else
+            {
+                // Project-asset path: sprite frames are derived from Texture2D sources stored on the SpriteTable2D asset.
+                _spriteTable.RebuildRuntimeSpritesFromSourceTextures();
+            }
             if (!string.IsNullOrWhiteSpace(textsPath))
                 _textTable.LoadFromFile(textsPath);
         }
@@ -219,6 +252,7 @@ namespace DataSchemas.PackedItem
             _spriteTable.ClearAt(type, biomeFlags, key);
             _textTable.ClearAt(type, biomeFlags, key);
             _core.Remove(type, biomeFlags, key);
+            InvalidateUsedReferenceCache();
         }
 
         private void ApplyLoadedEntry(PackedItemData data)
@@ -242,5 +276,20 @@ namespace DataSchemas.PackedItem
             }
             return items;
         }
+    }
+
+    /// <summary>
+    /// Controls how item sprite data is stored/loaded alongside <c>items.dat</c>.
+    /// </summary>
+    public enum ItemSpriteStorageMode
+    {
+        /// <summary>
+        /// Store spritesheet source textures on the <see cref="Tables.SpriteTable2D"/> asset and rebuild
+        /// <see cref="UnityEngine.Sprite"/> frames at runtime. Does not use <c>sprites.dat</c>.
+        /// </summary>
+        ProjectAssetTextures = 0,
+
+        /// <summary>Legacy: bake pixels into <c>sprites.dat</c>.</summary>
+        LegacyPixelBinary = 1,
     }
 }
