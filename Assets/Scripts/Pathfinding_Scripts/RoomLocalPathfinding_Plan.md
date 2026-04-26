@@ -132,10 +132,11 @@ After this file lands, implementation work can proceed against this checklist.
 | Piece | Location |
 |--------|-----------|
 | Core BFS + greedy + corner diagonals | `Assets/Scripts/Pathfinding_Scripts/RoomBitGrid64.cs` (`MBAG.Pathfinding`) |
-| 8×8 mask from `TileType[,]` + cell helpers | `Assets/Scripts/WFC/RoomWalkMaskBuilder.cs` |
-| Per-room mask cache | `Assets/Scripts/WFC/RoomWalkMaskCache.cs` |
-| Demo driver (player goal, one NPC, same-room chase) | `Assets/Scripts/WFC/RoomTreeRoomPathfindingDriver.cs` |
-| `LayoutVersion`, `DungeonGrid`, `OnRoomTreeGenerated` | `RoomTreeDungeonComponent.cs` |
-| Room tree menu wires driver + NPC prefab when present | `WFC/Editor/WFC_Editor.cs` → **Tools/WFC/Create Room Tree Demo Scene** |
+| 8×8 mask from `TileType[,]` + cell helpers | `Assets/Scripts/RoomTree/RoomWalkMaskBuilder.cs` |
+| Per-room mask cache | `Assets/Scripts/RoomTree/RoomWalkMaskCache.cs` |
+| Room enemy pathfinding (player goal, Melee NPC per room, off-room idle) | `Assets/Scripts/RoomTree/RoomTreeEnemyPathfindingSystem.cs` |
+| World cell → `RoomTreeNode` query | `Assets/Scripts/RoomTree/RoomTreeGrid.cs` |
+| `LayoutVersion`, `DungeonGrid`, `OnRoomTreeGenerated` | `Assets/Scripts/RoomTree/RoomTreeDungeonComponent.cs` |
+| Room tree menu wires `RoomTreeEnemyPathfindingSystem` + Melee prefab when present | `Assets/Scripts/Editor/WFC/WFC_Editor.cs` → **Tools/WFC/Create Room Tree Demo Scene** |
 
-**Setup:** Add `RoomTreeRoomPathfindingDriver` next to `RoomTreeDungeonComponent`, assign **NPC** prefab (e.g. `Assets/Prefabs/Pathfinding_Demo/NPC.prefab`). Scene needs a **Player**-tagged object in a room’s **8×8 interior** for the test NPC to chase (same room only in v1).
+**Setup:** `RoomTreeEnemyPathfindingSystem` on the `RoomTreeDungeon` root, **Melee_Enemy** (or any prefab with `NPC`) assigned. **Player**-tag required for both streaming and pathfinding. Cell→room resolution uses `RoomTreeGrid.FindRoomContainingCell`.

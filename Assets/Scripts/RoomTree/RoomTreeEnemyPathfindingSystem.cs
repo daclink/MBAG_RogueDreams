@@ -83,7 +83,7 @@ namespace WFC
                 return;
 
             Vector3Int playerCell = _grid.WorldToCell(playerGo.transform.position);
-            RoomTreeNode playerRoom = FindRoomContainingCell(playerCell);
+            RoomTreeNode playerRoom = RoomTreeGrid.FindRoomContainingCell(_dungeon.Generator, playerCell);
             UpdateCurrentRoom(playerRoom, playerCell);
 
             if (_currentRoom != null)
@@ -387,21 +387,6 @@ namespace WFC
             _roomEnemies.Clear();
         }
 
-        private RoomTreeNode FindRoomContainingCell(Vector3Int cell)
-        {
-            if (_dungeon?.Generator?.Nodes == null) return null;
-            foreach (RoomTreeNode n in _dungeon.Generator.Nodes.Values)
-            {
-                if (n == null) continue;
-                Vector3Int o = RoomWalkMaskBuilder.RoomOriginCell(n.WorldPosition);
-                if (cell.x >= o.x && cell.x < o.x + RoomTreeLayout.RoomSize &&
-                    cell.y >= o.y && cell.y < o.y + RoomTreeLayout.RoomSize)
-                    return n;
-            }
-
-            return null;
-        }
-
         private bool NeedsDistanceRebuild(int version, Vector2Int roomKey, int goalBit)
         {
             return version != _lastLayoutVer ||
@@ -414,13 +399,6 @@ namespace WFC
             _lastLayoutVer = -1;
             _lastRoomKey = new Vector2Int(int.MinValue, int.MinValue);
             _lastGoalBit = -2;
-        }
-
-        private static bool SameRoom(RoomTreeNode a, RoomTreeNode b)
-        {
-            if (a == null || b == null)
-                return a == b;
-            return a.GridPosition == b.GridPosition;
         }
 
         private static void Shuffle<T>(IList<T> list)

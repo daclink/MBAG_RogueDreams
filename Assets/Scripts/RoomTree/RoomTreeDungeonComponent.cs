@@ -298,7 +298,7 @@ namespace WFC
             if (playerGo == null)
                 return;
 
-            RoomTreeNode room = FindRoomContainingCell(grid.WorldToCell(playerGo.transform.position));
+            RoomTreeNode room = RoomTreeGrid.FindRoomContainingCell(_generator, grid.WorldToCell(playerGo.transform.position));
             if (room == null)
                 return;
 
@@ -316,7 +316,7 @@ namespace WFC
             GameObject playerGo = GameObject.FindGameObjectWithTag("Player");
             if (playerGo != null && grid != null)
             {
-                RoomTreeNode playerRoom = FindRoomContainingCell(grid.WorldToCell(playerGo.transform.position));
+                RoomTreeNode playerRoom = RoomTreeGrid.FindRoomContainingCell(_generator, grid.WorldToCell(playerGo.transform.position));
                 if (playerRoom != null)
                     return playerRoom;
             }
@@ -558,21 +558,6 @@ namespace WFC
 
             tileType = TileType.Empty;
             return false;
-        }
-
-        private RoomTreeNode FindRoomContainingCell(Vector3Int cell)
-        {
-            if (_generator?.Nodes == null) return null;
-            foreach (RoomTreeNode node in _generator.Nodes.Values)
-            {
-                if (node == null) continue;
-                Vector2Int wp = node.WorldPosition;
-                if (cell.x >= wp.x && cell.x < wp.x + RoomTreeLayout.RoomSize &&
-                    cell.y >= wp.y && cell.y < wp.y + RoomTreeLayout.RoomSize)
-                    return node;
-            }
-
-            return null;
         }
 
         private RoomTreeNode GetRoom(Vector2Int key)
