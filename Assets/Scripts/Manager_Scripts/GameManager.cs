@@ -30,6 +30,10 @@ public class GameManager : MonoBehaviour
     private int sceneNumber;
     
     public int targetFrameRate = 60;
+
+    const int MAIN_MENU_SCENE = 0;
+    const int SIDE_VIEW_SCENE = 1;
+    const int TOP_DOWN_SCENE = 2;
     
     private void Awake()
     {
@@ -48,11 +52,11 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         sceneNumber = SceneManager.GetActiveScene().buildIndex;
-        LevelExit.OnLevelExit += LoadNextScene;
+        LevelExit.OnLevelExit += () => LoadScene(SIDE_VIEW_SCENE);
         
         // Temporary for now until save game stuff is setup
-        UI_Btn_Manager.OnNewGamePress += LoadNextScene;
-        UI_Btn_Manager.OnLoadGamePress += LoadNextScene;
+        UI_Btn_Manager.OnNewGamePress += () => LoadScene(SIDE_VIEW_SCENE);
+        UI_Btn_Manager.OnLoadGamePress += () => LoadScene(SIDE_VIEW_SCENE);
         SceneManager.sceneLoaded += OnSceneLoaded;
         PlayerHealthManager.OnPlayerDeath += PlayerDeath;
 
@@ -81,22 +85,6 @@ public class GameManager : MonoBehaviour
     }
 
     /**
-     * Loads the next available scene - hard coded for now with just 2 scenes
-     */
-    private void LoadNextScene()
-    {
-        if (sceneNumber == 0 || sceneNumber == 1)
-        {
-            sceneNumber++;
-        }
-        else
-        {
-            sceneNumber = 0;
-        }
-        LoadScene(sceneNumber);
-    }
-
-    /**
      * Loads a scene based on the passed in scene index
      */
     private void LoadScene(int sceneNumber)
@@ -110,17 +98,17 @@ public class GameManager : MonoBehaviour
      */
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        if (scene.buildIndex == 0)
+        if (scene.buildIndex == MAIN_MENU_SCENE)
         {
             Instantiate(postProcessingGlobalVolumePrefab, new Vector3(0,0,0), Quaternion.identity);
         }
-        if (scene.buildIndex == 1)
+        if (scene.buildIndex == SIDE_VIEW_SCENE)
         {
             Instantiate(mainCameraPrefab, new Vector3(0, 0, -10), Quaternion.identity);
             Instantiate(postProcessingGlobalVolumePrefab, new Vector3(0,0,0), Quaternion.identity);
             Instantiate(playerSideViewPrefab, new Vector3(0, -2.45f, 0), Quaternion.identity);
         } 
-        else if (scene.buildIndex == 2)
+        else if (scene.buildIndex == TOP_DOWN_SCENE)
         {
             Instantiate(UICanvasPrefab, new Vector3(0, 0, -10), Quaternion.identity);
             Instantiate(mainCameraPrefab, new Vector3(-10, 23, -10), Quaternion.identity);
