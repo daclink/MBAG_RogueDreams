@@ -23,9 +23,18 @@ public class Player : MonoBehaviour
     // [SerializeField] private float timeToMelee;
     [SerializeField] private Animator animator;
 
+    /// <summary>Latest move input (WASD / stick), for facing and animation.</summary>
+    public Vector2 MoveDirection => moveDir;
+
     private bool enableMovement = true;
     // private float meleeTimer;
     private bool isMoving;
+    private Rigidbody2D _rigidbody2D;
+
+    private void Awake()
+    {
+        _rigidbody2D = GetComponent<Rigidbody2D>();
+    }
 
     private void Start()
     {
@@ -47,7 +56,8 @@ public class Player : MonoBehaviour
     private void Update()
     {
         if (!enableMovement) return;
-        Move();
+        if (_rigidbody2D == null)
+            Move();
         Animate();
 
         // Check if the player is meleeing and set the timer
@@ -62,6 +72,13 @@ public class Player : MonoBehaviour
         //         meleeArea.SetActive(isMeleeing);
         //     }
         // }
+    }
+
+    private void FixedUpdate()
+    {
+        if (!enableMovement || _rigidbody2D == null) return;
+        Vector2 delta = moveDir * (speed * Time.fixedDeltaTime);
+        _rigidbody2D.MovePosition(_rigidbody2D.position + delta);
     }
 
     private void DisableMovement()
@@ -97,15 +114,15 @@ public class Player : MonoBehaviour
 
     
     /**
-     * Handles movement with a Vector2 move direction and a float speed variable
+     * Handles movement with a Vector2 move direction and a float speed variable.
+     * Used only when no <see cref="Rigidbody2D"/> is present; otherwise <see cref="FixedUpdate"/> uses <see cref="Rigidbody2D.MovePosition"/> so tilemap colliders block movement.
      */
     private void Move()
     {
-        // Store current position
         Vector3 pos = transform.position;
-        // Create new position to update with
-        Vector2 newPos = new Vector2(pos.x + (moveDir.x * speed * Time.deltaTime), pos.y + (moveDir.y * speed * Time.deltaTime));
-        // Change current position to new position
+        Vector2 newPos = new Vector2(
+            pos.x + moveDir.x * speed * Time.deltaTime,
+            pos.y + moveDir.y * speed * Time.deltaTime);
         transform.position = new Vector3(newPos.x, newPos.y, pos.z);
     }
     

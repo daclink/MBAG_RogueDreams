@@ -24,7 +24,8 @@ public abstract class BaseEnemy : MonoBehaviour
     protected float distanceToPlayer;
     protected float dmgTaken;
     protected bool isAgroed;
-    protected bool enableMovement;
+    /// <summary>False while knockback/stun; must default true so <see cref="TakeDamage"/> works if <see cref="Start"/> never ran (e.g. script disabled).</summary>
+    protected bool enableMovement = true;
     protected bool playerDead;
     protected float validIdleRange;
     
@@ -55,6 +56,14 @@ public abstract class BaseEnemy : MonoBehaviour
     public void ExitKnockback()
     {
         enableMovement = true;
+    }
+
+    /// <summary>Resolves the player when <see cref="Start"/> did not run (e.g. this component is disabled).</summary>
+    void EnsurePlayerTransform()
+    {
+        if (playerTransform != null) return;
+        GameObject p = GameObject.FindGameObjectWithTag("Player");
+        if (p != null) playerTransform = p.transform;
     }
 
     /**
@@ -121,12 +130,22 @@ public abstract class BaseEnemy : MonoBehaviour
         }
         health -= dmgAmount;
         enableMovement = false;
-        knockback.KnockbackObject(gameObject, playerTransform.gameObject);
+
+        if (knockback == null)
+            knockback = GetComponent<Knockback>();
+        EnsurePlayerTransform();
+
+        if (knockback != null && playerTransform != null)
+            knockback.KnockbackObject(gameObject, playerTransform.gameObject);
+        else
+            enableMovement = true; // no knockback coroutine; avoid permanent stun
+
         if (health <= 0)
         {
             ChangeState(EnemyState.Dead);
+            // Must run here: when this component is disabled (e.g. room-tree + NPC), Update never calls HandleState → HandleDead.
+            HandleDead();
             return;
-            // Add any other code to kill the enemy gameObject
         }
         Debug.Log("Enemy health is " + health);
         ChangeState(EnemyState.Idle);

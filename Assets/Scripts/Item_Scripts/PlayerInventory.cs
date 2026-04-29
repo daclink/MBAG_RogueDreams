@@ -15,7 +15,16 @@ public class PlayerInventory : MonoBehaviour
         public int Count => _slots.Count;
         public int MaxSlots => _maxSlots;
 
-        public bool Add(PackedItemReference reference)
+        /// <summary>Invoked after any add or remove that changes the slot list.</summary>
+        public event System.Action InventoryChanged;
+
+        /// <summary>Invoked only when the item was added from a world pickup (e.g. <see cref="PackedItemPickup"/>), not from equipment/merge logic.</summary>
+        public event System.Action<PackedItemReference> ItemPickedUp;
+
+        public bool Add(PackedItemReference reference) => Add(reference, fromWorldPickup: false);
+
+        /// <param name="fromWorldPickup">True for pickups so listeners can auto-equip on first grab without reacting to items returned from equipment.</param>
+        public bool Add(PackedItemReference reference, bool fromWorldPickup)
         {
             if (_slots.Count >= _maxSlots)
             {
@@ -24,6 +33,8 @@ public class PlayerInventory : MonoBehaviour
             }
             _slots.Add(reference);
             Debug.Log($"[PlayerInventory] Added ({reference.Type},{reference.BiomeFlags},{reference.Key}), count={_slots.Count}");
+            if (fromWorldPickup) ItemPickedUp?.Invoke(reference);
+            InventoryChanged?.Invoke();
             return true;
         }
 
@@ -31,6 +42,7 @@ public class PlayerInventory : MonoBehaviour
         {
             if (index < 0 || index >= _slots.Count) return false;
             _slots.RemoveAt(index);
+            InventoryChanged?.Invoke();
             return true;
         }
 
@@ -49,6 +61,7 @@ public class PlayerInventory : MonoBehaviour
                 {
                     _slots.RemoveAt(i);
                     removedIndex = i;
+                    InventoryChanged?.Invoke();
                     return true;
                 }
             }
