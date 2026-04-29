@@ -14,7 +14,7 @@ Extend `BiomeFlags` and `BiomePartitionCount` as development proceeds.
 - **Metadata block (Block0)**: type, aspect/status flags, 8-bit lookup keys (SpriteKey, TextKey) for 2D tables, plus RarityFlags and BiomeFlags.
 - **Stats block (Block1)**: up to eight signed stat values, each stored in one byte (Health, Power, Armor, etc.).
 
-###  Metadata Block (64 bits)
+### Metadata Block (64 bits)
 
 | **Bits** | **Byte index** | **Field**     |
 |---------:|---------------:|---------------|
@@ -33,6 +33,7 @@ Bits:
     | TextKey  |SpriteKey |  Rarity  |BiomeFlags|   StatusFlags (16)  |  Aspect  |  Type   |
     |__________+__________+__________+__________+_____________________+__________+_________|
 ```
+
 Each field in this block:
 
 - **ItemType** (8b): kind of item (`ItemType` enum, Flags).
@@ -42,7 +43,6 @@ Each field in this block:
 - **RarityFlags** (8b): rarity tiers or filtering (`RarityFlags` bitfield).
 - **SpriteKey** (8b): key into sprite table [type][spriteKey]; icon = spriteKey + stride.
 - **TextKey** (8b): key into text table [type][textKey]; desc = textKey + stride.
-
 
 ### Item Stats Block (64 bits)
 
@@ -64,8 +64,13 @@ Bits:
     |  Rarity  |  Range   |  Fortune |  Vigor   |  Agility  |  Armor  |   Power  |  Health |
     |__________+__________+__________+__________+__________+__________+__________+_________|
 ```
+
 Each byte in this block is a signed stat (`sbyte`, -128..127):
 
 - If an aspect flag is **set** for a stat (e.g. `AspectFlags.Power`), the corresponding byte in this block is meaningful.
 - If an aspect flag is **not set**, that byte is ignored and treated as 0 at runtime.
 - This keeps all numeric stats tightly packed in one 64‑bit value while still letting you enable/disable them via `AspectFlags`.
+
+### File format (persistence)
+
+Items are saved as a list of **(block0, block1)** only. Slot (ItemType, partition, key) is not stored; it is derived from block0 when loading (ItemType, BiomeFlags→partition, SpriteKey→key). Format: `[version][count][per item: block0, block1]` (V3). Legacy V1 and V2 files are still supported on read.

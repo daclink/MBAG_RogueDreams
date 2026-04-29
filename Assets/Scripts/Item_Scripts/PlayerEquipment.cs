@@ -4,12 +4,12 @@ using UnityEngine.InputSystem;
 using DataSchemas.PackedItem;
 
 /// <summary>
-/// Equipment slots that hold packed item references. Press Tab to equip first available weapon/armor from inventory.
+/// Equipment slots for weapon and armor. Equip from <see cref="PlayerInventory"/> via
+/// <see cref="TryEquipFromInventoryIndex"/> (e.g. from the tab inventory screen). U unequips weapon.
 /// </summary>
 public class PlayerEquipment : MonoBehaviour
 {
     [SerializeField] PlayerInventory _inventory;
-    [SerializeField] Key _equipKey = Key.Tab;
     [SerializeField] Key _unequipKey = Key.U;
 
     PackedItemReference? _weaponSlot;
@@ -26,69 +26,82 @@ public class PlayerEquipment : MonoBehaviour
             _inventory = GetComponent<PlayerInventory>();
     }
 
+    void OnEnable()
+    {
+        if (_inventory == null)
+            _inventory = GetComponent<PlayerInventory>();
+        if (_inventory != null)
+            _inventory.ItemPickedUp += OnItemPickedUp;
+    }
+
+    void OnDisable()
+    {
+        if (_inventory != null)
+            _inventory.ItemPickedUp -= OnItemPickedUp;
+    }
+
+    void OnItemPickedUp(PackedItemReference picked)
+    {
+        if (_inventory == null) return;
+        if (_inventory.Count == 0) return;
+        int last = _inventory.Count - 1;
+        if (!picked.Equals(_inventory.Slots[last])) return;
+        if (picked.Type == ItemType.Weapon && !_weaponSlot.HasValue)
+            TryEquipFromInventoryIndex(last);
+        else if (picked.Type == ItemType.Armor && !_armorSlot.HasValue)
+            TryEquipFromInventoryIndex(last);
+    }
+
     void Update()
     {
         if (_inventory == null) return;
         var k = Keyboard.current;
         if (k == null) return;
-        // Tab can be consumed by UI; I is fallback for equip
-        if (k[_equipKey].wasPressedThisFrame || k[Key.I].wasPressedThisFrame)
-        {
-            Debug.Log("[PlayerEquipment] Equip key pressed");
-            TryEquipFirst();
-        }
-        // U to unequip weapon
-        else if (k[_unequipKey].wasPressedThisFrame)
+        if (k[_unequipKey].wasPressedThisFrame)
         {
             if (Unequip(ItemType.Weapon)) Debug.Log("[PlayerEquipment] Unequipped weapon");
         }
     }
 
-        /// <summary>Equips the first Weapon or Armor from inventory into the matching slot.</summary>
-        public bool TryEquipFirst()
+    /// <summary>Equips the item at a bag index if it is a Weapon or Armor. Otherwise false.</summary>
+    public bool TryEquipFromInventoryIndex(int inventoryIndex)
+    {
+        if (_inventory == null) return false;
+        if (inventoryIndex < 0 || inventoryIndex >= _inventory.Count) return false;
+        var r = _inventory.GetAt(inventoryIndex);
+        if (!r.HasValue) return false;
+        if (r.Value.Type == ItemType.Weapon)
         {
-            if (_inventory == null) { Debug.LogWarning("[PlayerEquipment] TryEquipFirst: _inventory is null"); return false; }
-            if (_inventory.Count == 0) { Debug.Log("[PlayerEquipment] TryEquipFirst: inventory empty"); return false; }
-
-            for (int i = 0; i < _inventory.Count; i++)
-            {
-                var r = _inventory.GetAt(i);
-                if (!r.HasValue) continue;
-
-                if (r.Value.Type == ItemType.Weapon)
-                {
-                    EquipFromInventory(i, ItemType.Weapon);
-                    return true;
-                }
-                if (r.Value.Type == ItemType.Armor)
-                {
-                    EquipFromInventory(i, ItemType.Armor);
-                    return true;
-                }
-            }
-            Debug.Log("[PlayerEquipment] TryEquipFirst: no Weapon or Armor in inventory");
-            return false;
+            EquipFromInventory(inventoryIndex, ItemType.Weapon);
+            return true;
         }
-
-        void EquipFromInventory(int inventoryIndex, ItemType slotType)
+        if (r.Value.Type == ItemType.Armor)
         {
-            var r = _inventory.GetAt(inventoryIndex);
-            if (!r.HasValue) return;
-
-            PackedItemReference? oldEquipped = slotType == ItemType.Weapon ? _weaponSlot : _armorSlot;
-            if (oldEquipped.HasValue)
-                _inventory.Add(oldEquipped.Value);
-
-            _inventory.RemoveAt(inventoryIndex);
-
-            if (slotType == ItemType.Weapon)
-                _weaponSlot = r.Value;
-            else
-                _armorSlot = r.Value;
-
-            Debug.Log($"[PlayerEquipment] Equipped {slotType}: ({r.Value.Type},{r.Value.BiomeFlags},{r.Value.Key})");
-            OnEquipmentChanged?.Invoke(slotType, r);
+            EquipFromInventory(inventoryIndex, ItemType.Armor);
+            return true;
         }
+        return false;
+    }
+
+    void EquipFromInventory(int inventoryIndex, ItemType slotType)
+    {
+        var r = _inventory.GetAt(inventoryIndex);
+        if (!r.HasValue) return;
+
+        PackedItemReference? oldEquipped = slotType == ItemType.Weapon ? _weaponSlot : _armorSlot;
+        if (oldEquipped.HasValue)
+            _inventory.Add(oldEquipped.Value);
+
+        _inventory.RemoveAt(inventoryIndex);
+
+        if (slotType == ItemType.Weapon)
+            _weaponSlot = r.Value;
+        else
+            _armorSlot = r.Value;
+
+        Debug.Log($"[PlayerEquipment] Equipped {slotType}: ({r.Value.Type},{r.Value.BiomeFlags},{r.Value.Key})");
+        OnEquipmentChanged?.Invoke(slotType, r);
+    }
 
     public bool Unequip(ItemType slotType)
     {

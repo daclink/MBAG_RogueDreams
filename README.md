@@ -1,20 +1,28 @@
 # Rogue Dreams (working title)
+
 Unity version: Unity 6 version 6000.3.5f1
 
 ## Documents
+
 [Folder with design docs etc](https://drive.google.com/drive/folders/1xm3KBXomn7FhLXyPOoRf_2H_nCljgIJi)
 
 ## Procedural Generation (WFC + DualGrid)
 
 - `Assets/Scripts/Dual_Grid_Scripts/DualGrid_System_Explanation.md`: how the DualGrid canonical tiles + transforms work end-to-end.
 - `Assets/Scripts/WFC/WFC_DualGrid_Setup.md`: how to wire WFC → DualGrid using the BiomeTileRegistry / BiomeTileSet pipeline.
-- `Assets/Scripts/WFC/RoomTreeDungeon_Spec.md`: Room Tree demo design/spec (grid, doors, corridors, rendering).
+- `Assets/Scripts/RoomTree/RoomTreeDungeon_Spec.md`: Room Tree demo design/spec (grid, doors, corridors, rendering).
+- `docs/room-tree-demo-scene.md`: what the **Tools → WFC → Create Room Tree Demo Scene** flow sets up and how to verify it.
 
+### Code layout (`Assets/Scripts`)
 
-## Info / Tutorials 
+- **[`Assets/Scripts/README.md`](Assets/Scripts/README.md)** — **WFC** vs **RoomTree** vs **Tilemaps** vs **Editor** menus, tools table, and links to technical `.md` files next to code.
+
+## Info / Tutorials
 
 ### Starting with Unity
+
 The following 6 will help with quickly understanding the interface:
+
 1. [Interface Overview (~5m)](https://www.youtube.com/watch?v=D7v2pjke5sc)
 1. [Scene View (~11m)](https://youtu.be/nG0fXdXylMI)
 1. [Game View (~6m)](https://www.youtube.com/watch?v=w7RLUM9TBXY)
@@ -22,27 +30,33 @@ The following 6 will help with quickly understanding the interface:
 1. [Project Window  (~8m)](https://www.youtube.com/watch?v=4iT4Zhez-zw)
 1. [Inspector Window (~10m)](https://www.youtube.com/watch?v=qltyYjFdyVc)
 
-
 ### PCG resources
+
 [unity wave function colapse](https://www.youtube.com/watch?v=57MaTTVH_XI)
 
-### Seting up unity and Git
-[Using Git with Unity (~7m)](https://csumb.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=64a26be7-199c-4ef5-ac22-b101018a97f8)
+### Setting up Unity and Git
 
+[Using Git with Unity (~7m)](https://csumb.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=64a26be7-199c-4ef5-ac22-b101018a97f8)
 
 [Scripting tutorial series](https://www.youtube.com/playlist?list=PLX2vGYjWbI0S9-X2Q021GUtolTqbUBB9B)
 
 ### Creating new weapon pickups
+
 - For initial creation, create an empty game object called WeaponPickup with a sprite renderer, any collider set to trigger, and add a text tmp pro UGUI as a child to this object
-- Add the weapon pickup behavior script to the parent object we created and assign the pickupSO, text pop up and sprite renderer from THIS object. 
+- Add the weapon pickup behavior script to the parent object we created and assign the pickupSO, text pop up and sprite renderer from THIS object.
 - Make this a prefab without the SO assigned
 
-- When wanting to make a new weapon, just drag the weaponPickup prefab into the scene, and assign the specific weaponSO to the weapon pickup behavior script. 
+- When wanting to make a new weapon, just drag the weaponPickup prefab into the scene, and assign the specific weaponSO to the weapon pickup behavior script.
 - The weaponSO takes a sprite, the weapon prefab that will be passed to the player, and a weapon name
 
-### Claude help with structure:
+### Structure of this repository (code)
 
-## Complete Flow:
+See **[`Assets/Scripts/README.md`](Assets/Scripts/README.md)** for WFC vs Room Tree vs pathfinding and links to per-folder READMEs.
+
+### Claude help with structure
+
+## Complete Flow
+
 ```
 Asset Creation:
 1. Create WeaponSO (e.g., "SwordDataSO") → Set damage, sprite, stats
@@ -54,7 +68,8 @@ In Scene:
 5. Player collects → Weapon instantiated with all its data!
 ```
 
-## Visual Structure:
+## Visual Structure
+
 ```
 Project Assets:
 ├── ScriptableObjects/

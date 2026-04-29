@@ -13,6 +13,8 @@ public class WeaponThrowController : MonoBehaviour
     [SerializeField] float _throwDuration = 0.4f;
     [SerializeField] float _arcHeight = 2f;
     [SerializeField] float _spinSpeed = 720f;
+    [SerializeField] float _thrownDamage = 3f;
+    [SerializeField] float _thrownTriggerRadius = 0.35f;
 
     PlayerEquipment _equipment;
     Camera _cam;
@@ -56,8 +58,7 @@ public class WeaponThrowController : MonoBehaviour
         Vector3 end = _cam.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, depth));
         end.z = 0;
 
-        ThrownWeaponProjectileImpl.Launch(start, end, sprite, _throwDuration, _arcHeight, _spinSpeed);
-        _equipment.ConsumeWeapon(); // Weapon is thrown, not returned to inventory
+        ThrownWeaponProjectileImpl.Launch(start, end, sprite, _thrownDamage, _thrownTriggerRadius, _throwDuration, _arcHeight, _spinSpeed);
     }
 }
 
@@ -67,7 +68,15 @@ public class WeaponThrowController : MonoBehaviour
 /// </summary>
 static class ThrownWeaponProjectileImpl
 {
-    public static void Launch(Vector3 start, Vector3 target, Sprite sprite, float duration = 0.4f, float arcHeight = 2f, float spinSpeed = 720f)
+    public static void Launch(
+        Vector3 start,
+        Vector3 target,
+        Sprite sprite,
+        float damage,
+        float triggerRadius,
+        float duration = 0.4f,
+        float arcHeight = 2f,
+        float spinSpeed = 720f)
     {
         var go = new GameObject("ThrownWeapon");
         go.transform.position = start;
@@ -77,6 +86,7 @@ static class ThrownWeaponProjectileImpl
         sr.sprite = sprite;
         sr.sortingOrder = 20;
 
+        ThrownProjectile2D.Setup(go, damage, triggerRadius, destroyOnFirstHit: true);
         go.AddComponent<ThrownWeaponProjectileBehaviour>().Init(start, target, duration, arcHeight, -spinSpeed);
     }
 }
@@ -85,20 +95,42 @@ class ThrownWeaponProjectileBehaviour : MonoBehaviour
 {
     Vector3 _start, _target;
     float _duration, _arcHeight, _spinSpeed, _elapsed;
+    Rigidbody2D _rb;
+
+    void Awake()
+    {
+        _rb = GetComponent<Rigidbody2D>();
+    }
 
     public void Init(Vector3 start, Vector3 target, float duration, float arcHeight, float spinSpeed)
     {
         _start = start; _target = target; _duration = duration; _arcHeight = arcHeight; _spinSpeed = spinSpeed;
+        _elapsed = 0f;
+        if (_rb != null)
+        {
+            _rb.position = start;
+            transform.position = start;
+        }
     }
 
-    void Update()
+    /// <summary>
+    /// Move in FixedUpdate with <see cref="Rigidbody2D.MovePosition"/> so 2D trigger queries use the same positions as the physics step.
+    /// </summary>
+    void FixedUpdate()
     {
-        _elapsed += Time.deltaTime;
+        if (_rb == null)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        _elapsed += Time.fixedDeltaTime;
         float t = Mathf.Clamp01(_elapsed / _duration);
         Vector3 linear = Vector3.Lerp(_start, _target, t);
         float arc = 4f * _arcHeight * t * (1f - t);
-        transform.position = linear + Vector3.up * arc;
-        transform.Rotate(0, 0, _spinSpeed * Time.deltaTime);
+        Vector3 pos = linear + Vector3.up * arc;
+        _rb.MovePosition(pos);
+        transform.Rotate(0, 0, _spinSpeed * Time.fixedDeltaTime);
         if (t >= 1f) Destroy(gameObject);
     }
 }

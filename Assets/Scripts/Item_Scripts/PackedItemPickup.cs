@@ -54,7 +54,7 @@ public class PackedItemPickup : MonoBehaviour
             return;
         }
 
-        bool added = inventory.Add(_reference);
+        bool added = inventory.Add(_reference, fromWorldPickup: true);
         Debug.Log($"[PackedItemPickup] Collected by player, Add={added} (inv count={inventory.Count})");
         Destroy(gameObject);
     }

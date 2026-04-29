@@ -5,7 +5,7 @@ using Serialization;
 namespace DataSchemas.PackedItem
 {
     /// <summary>
-    /// Saves and loads lists of PackedItemData to and from files. Uses FileStorage with delegates.
+    /// Saves and loads packed items to and from files. Format is a list of (block0, block1) only; slot is derived from block0 when loading.
     /// </summary>
     public static class PackedItemStorage
     {
@@ -13,35 +13,29 @@ namespace DataSchemas.PackedItem
         public const string DefaultFileName = "items.dat";
 
         /// <summary>
-        /// Serializes entries to file. Uses atomic write with .tmp and .bak.
-        /// </summary>
-        public static void SaveToFile(string path, IReadOnlyList<PackedItemEntry> entries)
-        {
-            FileStorage.SaveToFile(path, entries, PackedItemSerialization.Serialize);
-        }
-
-        /// <summary>
-        /// Converts flat list to entries (type, partition from BiomeFlags, key from SpriteKey) and saves.
+        /// Saves items to file (block0, block1 only). Uses atomic write with .tmp and .bak.
         /// </summary>
         public static void SaveToFile(string path, IReadOnlyList<PackedItemData> items)
         {
-            if (items is null) throw new ArgumentNullException(nameof(items));
-            var entries = new List<PackedItemEntry>(items.Count);
-            foreach (PackedItemData d in items)
-            {
-                int p = PackedItemTableCore.GetPartitionIndex(d.BiomeFlags);
-                entries.Add(new PackedItemEntry((byte)d.ItemType, (byte)p, d.SpriteKey, d.Block0, d.Block1));
-            }
-            SaveToFile(path, entries);
+            _ = items ?? throw new ArgumentNullException(nameof(items));
+            FileStorage.SaveToFile(path, items, PackedItemSerialization.Serialize);
         }
 
         /// <summary>
-        /// Loads items from file. Tries main file first, falls back to .bak. Returns Items from the load result.
+        /// Loads from file and returns the flat list of items. Tries main file first, falls back to .bak.
         /// </summary>
-        public static List<PackedItemData> LoadFromFile(string path)
+        public static PackedItemData[] LoadItemsFromFile(string path)
         {
-            PackedItemLoadResult result = FileStorage.LoadFromFile(path, PackedItemSerialization.Deserialize);
+            PackedItemLoadResult result = LoadResultFromFile(path);
             return result.Items;
+        }
+
+        /// <summary>
+        /// Loads from file and returns the full result (Items + Version).
+        /// </summary>
+        public static PackedItemLoadResult LoadResultFromFile(string path)
+        {
+            return FileStorage.LoadFromFile(path, PackedItemSerialization.Deserialize);
         }
     }
 }
