@@ -81,7 +81,7 @@ public class GameManager : MonoBehaviour
     public IEnumerator DeathSequence()
     {
         yield return new WaitForSeconds(3f);
-        LoadNextScene();
+        LoadScene(SIDE_VIEW_SCENE);
     }
 
     /**

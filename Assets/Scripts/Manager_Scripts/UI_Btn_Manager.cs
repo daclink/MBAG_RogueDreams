@@ -85,4 +85,28 @@ public class UI_Btn_Manager : MonoBehaviour
     {
         PauseManager.Instance.ResumeGame();
     }
+
+    public void ShowAudioSettings()
+    {
+        Debug.Log("Audio Settings");
+        PauseManager.Instance.ShowVolumeSlider();
+    }
+
+    public void HideAudioSettings()
+    {
+        Debug.Log("Hide Audio Settings");
+        PauseManager.Instance.HideVolumeSlider();
+    }
+
+    public void ShowDisplaySettings()
+    {
+        Debug.Log("Display Settings");
+        PauseManager.Instance.ShowDisplaySettings();
+    }
+
+    public void HideDisplaySettings()
+    {
+        Debug.Log("Hide Display Settings");
+        PauseManager.Instance.HideDisplaySettings();
+    }
 }

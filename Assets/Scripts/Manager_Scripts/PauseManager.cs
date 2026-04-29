@@ -11,10 +11,16 @@ public class PauseManager : MonoBehaviour
     
     [Header("Pause Prefabs")]
     [SerializeField] private GameObject optionsMenu;
+    [SerializeField] private GameObject volumeSlider;
+    [SerializeField] private GameObject displayPieces;
+
     
     private PauseAction action;
     private bool paused = false;
     private bool gamePausable = false;
+
+    private bool volumeSliderActive = false;
+    private bool displaySettingsActive = false;
 
     private void Awake()
     {
@@ -91,7 +97,7 @@ public class PauseManager : MonoBehaviour
         }
     }
     
-    /*
+    /**
      * When the game is paused, freeze the time and audio and activate the pause menu overlay
      */
     public void PauseGame()
@@ -102,6 +108,10 @@ public class PauseManager : MonoBehaviour
         Time.timeScale = 0;
         AudioListener.pause = true;
         paused = true;
+        volumeSliderActive = false;
+        volumeSlider.SetActive(false);
+        displaySettingsActive = false;
+        displayPieces.SetActive(false);
         optionsMenu.SetActive(true);
     }
 
@@ -123,4 +133,37 @@ public class PauseManager : MonoBehaviour
     {
         SceneManager.activeSceneChanged -= OnSceneChanged;
     }
+
+
+    /** 
+     * Functions to show and hide the volume slider and display the current existing settings
+     */
+    public void ShowVolumeSlider()
+    {
+        if (volumeSliderActive) return;
+        if (displaySettingsActive) HideDisplaySettings();
+        volumeSliderActive = true;
+        volumeSlider.SetActive(true);
+    }
+
+    public void HideVolumeSlider()
+    {
+        volumeSliderActive = false;
+        volumeSlider.SetActive(false);
+    }
+
+    public void ShowDisplaySettings()
+    {
+        if (displaySettingsActive) return;
+        if (volumeSliderActive) HideVolumeSlider();
+        displaySettingsActive = true;
+        displayPieces.SetActive(true);
+    }
+
+    public void HideDisplaySettings()
+    {
+        displaySettingsActive = false;
+        displayPieces.SetActive(false);
+    }
+
 }
