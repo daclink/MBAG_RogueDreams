@@ -128,21 +128,33 @@ namespace WFC
         */
         private void AssignSpecialRooms()
         {
+            
+            if (placedRooms.Count < 2)
+            {
+                endRoomIndex = startRoomIndex;
+                itemRoomIndex = startRoomIndex;
+                return;
+            }
+            
+            endRoomIndex = GetFarthestRoomIndex(startRoomIndex);
+            
             // This check ensures we have enough rooms generated to assign rooms
             if (placedRooms.Count < 3)
             {
+                itemRoomIndex = endRoomIndex;
                 return;
             }
 
             //Find the furthest room from the start room to be used as the boss/end room
-            endRoomIndex = GetFarthestRoomIndex(startRoomIndex);
 
             //find a dead end for the item room. Will be assigned to any random room if no deadend found
             itemRoomIndex = GetRandomDeadEnd();
+            int safetyCounter = 0;
 
-            while (itemRoomIndex == -1 || itemRoomIndex == startRoomIndex || itemRoomIndex == endRoomIndex)
+            while ((itemRoomIndex == -1 || itemRoomIndex == startRoomIndex || itemRoomIndex == endRoomIndex) && safetyCounter < 100)
             {
                 itemRoomIndex = Random.Range(0, placedRooms.Count);
+                safetyCounter++;
             }
 
         }
@@ -313,8 +325,8 @@ namespace WFC
         // getters
         public List<Vector2Int> GetRoomPositions() => placedRooms;
         public Vector2Int GetStartRoomPosition() => placedRooms[startRoomIndex];
-        public Vector2Int GetEndRoomPosition() => placedRooms[endRoomIndex];
-        public Vector2Int GetItemRoomPosition() => placedRooms[itemRoomIndex];
+        public Vector2Int GetEndRoomPosition() => endRoomIndex >= 0 ? placedRooms[endRoomIndex] : placedRooms[startRoomIndex];
+        public Vector2Int GetItemRoomPosition() => itemRoomIndex >= 0 ? placedRooms[itemRoomIndex] : placedRooms[startRoomIndex];
         public RoomType GetRoomType(Vector2Int pos)
         {
             if (!roomIndexByPosition.TryGetValue(pos, out int index))
