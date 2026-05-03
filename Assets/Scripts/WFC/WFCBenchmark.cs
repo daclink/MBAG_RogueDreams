@@ -1,51 +1,3 @@
-// using System.Collections.Generic;
-// using System.Diagnostics;
-// using UnityEngine;
-// using WFC;
-// using MBAG;
-//
-// public class WFCBenchmark : MonoBehaviour
-// {
-//     [SerializeField] private int runsPerSize = 1000;
-//
-//     // Each entry: (mapWidth, mapHeight, minRooms, maxRooms)
-//     private readonly (int w, int h, int min, int max)[] _testSizes = new[]
-//     {
-//         (3,  3,  2,  4),
-//         (5,  5,  4,  8),
-//         (8,  8,  8,  16),
-//         (10, 10, 10, 20),
-//         (15, 15, 15, 30),
-//     };
-//
-//     void Start()
-//     {
-//         foreach (var (w, h, min, max) in _testSizes)
-//         {
-//             double totalMs = 0;
-//
-//             for (int i = 0; i < runsPerSize; i++)
-//             {
-//                 // Fresh layout each run
-//                 var layoutGen = new RoomLayoutGenerator();
-//                 var roomLayout = layoutGen.GenerateRoomGrid(w, h, min, max);
-//                 var roomPositions = layoutGen.GetRoomPositions();
-//
-//                 var sw = Stopwatch.StartNew();
-//
-//                 var wfc = new WFCTilemap(roomLayout, roomPositions, layoutGen, pathWidth: 2);
-//                 wfc.Generate();
-//
-//                 sw.Stop();
-//                 totalMs += sw.Elapsed.TotalMilliseconds;
-//             }
-//
-//             double avgMs = totalMs / runsPerSize;
-//             UnityEngine.Debug.Log($"Grid {w}x{h} | {runsPerSize} runs | Avg: {avgMs:F3} ms");
-//         }
-//     }
-// }
-
 using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
@@ -58,14 +10,14 @@ public class WFCBenchmark : MonoBehaviour
         // (mapW, mapH, minRooms, maxRooms, runsForThisSize)
         var testSizes = new (int w, int h, int min, int max, int runs)[]
         {
-            (3,  3,  3,  4,   1000),
-            (5,  5,  4,  8,   1000),
-            (8,  8,  8,  16,  500),
-            (10, 10, 10, 20,  500),
-            (15, 15, 15, 30,  200),
-            (20, 20, 20, 40,  100),
-            (30, 30, 30, 60,  50),
-            (50, 50, 50, 100, 10),
+            (3,  3,  3,  6,   1000),
+            (6,  6,  4,  12,  1000),
+            (12, 12, 8,  24,  500),
+            (16, 16, 10, 32,  500),
+            (24, 24, 15, 48,  200),
+            (36, 36, 20, 72,  100),
+            (48, 48, 30, 96,  50),
+            (64, 64, 40, 128, 10),
         };
 
         UnityEngine.Debug.Log("=== WFC Benchmark Start ===");
