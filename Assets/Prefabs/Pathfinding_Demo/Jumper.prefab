@@ -136,7 +136,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b56124f2850c1194699ec94fc1271b92, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Jumper
-  moveSpeed: 2.5
+  moveSpeed: 4
   turnSpeed: 720
   arrivedDistance: 0.02
   collisionRadius: 0.22

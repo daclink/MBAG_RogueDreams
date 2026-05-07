@@ -116,6 +116,25 @@ namespace MBAG.Pathfinding
             return true;
         }
 
+        /// <summary>Bresenham line-of-sight on the walk mask. Returns true if every cell on the line is walkable.</summary>
+        public static bool HasLineOfSight(ulong walkMask, int fromIdx, int toIdx)
+        {
+            int x0 = fromIdx % Dim, y0 = fromIdx / Dim;
+            int x1 = toIdx   % Dim, y1 = toIdx   / Dim;
+            int dx = Math.Abs(x1 - x0), dy = Math.Abs(y1 - y0);
+            int sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
+            int err = dx - dy, x = x0, y = y0;
+            while (true)
+            {
+                if (!IsWalkable(walkMask, y * Dim + x)) return false;
+                if (x == x1 && y == y1) break;
+                int e2 = 2 * err;
+                if (e2 > -dy) { err -= dy; x += sx; }
+                if (e2 <  dx) { err += dx; y += sy; }
+            }
+            return true;
+        }
+
         /// <summary>Pick a neighbor of <paramref name="fromIndex"/> that strictly decreases distance-to-goal (BFS field).</summary>
         public static bool TryGreedyTowardGoal(ulong walkMask, int[] dist, int fromIndex, out int nextIndex)
         {
