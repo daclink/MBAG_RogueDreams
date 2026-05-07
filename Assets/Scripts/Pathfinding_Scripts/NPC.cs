@@ -1,13 +1,14 @@
 using System;
 using UnityEngine;
 
+public enum NPCType { Walker, Jumper }
+
 public class NPC : MonoBehaviour
 {
-    [SerializeField] private float moveSpeed = 1f;
+    [SerializeField] protected float moveSpeed = 1f;
     [SerializeField] private float turnSpeed = 720f;
     [SerializeField] private float arrivedDistance = 0.02f;
     [SerializeField] private float collisionRadius = 0.22f;
-    public Vector2 debugMove = new Vector2(10f, 10f);
 
     private Vector2 _targetPos;
     private bool _hasTarget;
@@ -15,14 +16,15 @@ public class NPC : MonoBehaviour
 
     public event Action<NPC> Arrived;
 
-    void Awake()
+    public virtual void RecordLanding() { }
+
+    protected virtual void Awake()
     {
         _rigidbody2D = GetComponent<Rigidbody2D>();
         if (_rigidbody2D == null)
             _rigidbody2D = gameObject.AddComponent<Rigidbody2D>();
 
-        // Dynamic (not Kinematic) so static TilemapCollider2D walls actually block MovePosition.
-        // Kinematic bodies ignore static contacts and pass through walls.
+        // Dynamic so static TilemapCollider2D walls actually block MovePosition.
         _rigidbody2D.bodyType = RigidbodyType2D.Dynamic;
         _rigidbody2D.gravityScale = 0f;
         _rigidbody2D.constraints = RigidbodyConstraints2D.FreezeRotation;
@@ -35,22 +37,14 @@ public class NPC : MonoBehaviour
         }
     }
 
-    void Start()
-    {
-        _hasTarget = false;
-        if (debugMove != Vector2.zero)
-            SetMoveTarget(debugMove);
-    }
-
-    void FixedUpdate()
+    private void FixedUpdate()
     {
         UpdateMove();
     }
 
     private void UpdateMove()
     {
-        if (!_hasTarget)
-            return;
+        if (!_hasTarget) return;
 
         float z = transform.position.z;
         Vector2 currentPos = _rigidbody2D != null ? _rigidbody2D.position : (Vector2)transform.position;
@@ -89,16 +83,7 @@ public class NPC : MonoBehaviour
         _hasTarget = true;
     }
 
-    public void ClearTarget()
-    {
-        _hasTarget = false;
-    }
-
-    public bool HasTarget()
-    {
-        return _hasTarget;
-    }
-
-    /// <summary>Room-tree pathfinding may add NPC at runtime (e.g. on melee enemy prefab); use this to match chase feel.</summary>
+    public void ClearTarget() => _hasTarget = false;
+    public bool HasTarget() => _hasTarget;
     public void SetMoveSpeedForPathfinding(float speed) => moveSpeed = Mathf.Max(0.01f, speed);
 }

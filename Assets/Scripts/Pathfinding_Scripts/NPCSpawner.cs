@@ -1,25 +1,30 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class NPCSpawner : MonoBehaviour
 {
-    [SerializeField] private GameObject agent;
-    [SerializeField] private int nToSpawn;
-    public BbGrid grid;
-
-    public bool spawned;
-    
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    [Serializable]
+    public struct NPCPrefabEntry
     {
-        // init vals
-        spawned = false;
-        // spawn npcs
+        public NPCType type;
+        public GameObject prefab;
     }
 
-    // Update is called once per frame
-    void Update()
+    [SerializeField] private NPCPrefabEntry[] _npcPrefabs;
+    public BbGrid grid;
+    public bool spawned;
+
+    private Dictionary<NPCType, GameObject> _prefabLookup;
+
+    void Awake()
     {
-        
+        BuildLookup();
+    }
+
+    void Start()
+    {
+        spawned = false;
     }
 
     public void SpawnAgents(int numToSpawn)
@@ -27,21 +32,47 @@ public class NPCSpawner : MonoBehaviour
         // for loop from 0 to numToSpawn
             // get random number between 0-64
             // if valid spot, spawn an agent at position of square at index
-            // send agent into network
-                // we can do this with signals
+            // send agent into network via signals
     }
 
-    public NPC SpawnAgentOnIndex(int idx)
+    public NPC SpawnAgentOnIndex(int idx, NPCType type)
     {
         if (!grid.IsIndexOpen(idx))
         {
-            Debug.Log("tried to spawn in an invalid cell!");
+            Debug.LogWarning($"NPCSpawner: index {idx} is not open.");
             return null;
         }
-        GameObject npc = Instantiate(agent);
-        npc.transform.position = grid.squares[idx].transform.position;
+
+        if (!_prefabLookup.TryGetValue(type, out GameObject prefab))
+        {
+            Debug.LogWarning($"NPCSpawner: no prefab registered for NPCType.{type}.");
+            return null;
+        }
+
+        GameObject go = Instantiate(prefab, grid.squares[idx].transform.position, Quaternion.identity);
         spawned = true;
-        return npc.GetComponent<NPC>();
+        return go.GetComponent<NPC>();
     }
-    
+
+    private void BuildLookup()
+    {
+        _prefabLookup = new Dictionary<NPCType, GameObject>(_npcPrefabs.Length);
+
+        foreach (NPCPrefabEntry entry in _npcPrefabs)
+        {
+            if (_prefabLookup.ContainsKey(entry.type))
+            {
+                Debug.LogWarning($"NPCSpawner: duplicate entry for NPCType.{entry.type} — ignoring.");
+                continue;
+            }
+            _prefabLookup[entry.type] = entry.prefab;
+        }
+
+        // Warn at startup for any NPCType that has no registered prefab.
+        foreach (NPCType type in Enum.GetValues(typeof(NPCType)))
+        {
+            if (!_prefabLookup.ContainsKey(type))
+                Debug.LogWarning($"NPCSpawner: NPCType.{type} has no prefab registered.");
+        }
+    }
 }

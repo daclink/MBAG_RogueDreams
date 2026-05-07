@@ -213,8 +213,6 @@ namespace WFC
                 if (_pathNpcMoveSpeed > 0f)
                     npc.SetMoveSpeedForPathfinding(_pathNpcMoveSpeed);
 
-                // Disable the legacy demo target so this system fully owns room-local movement.
-                npc.debugMove = Vector2.zero;
                 state.Enemies.Add(npc);
                 state.SavedPositions.Add(world);
             }

@@ -96,6 +96,26 @@ namespace MBAG.Pathfinding
             return best;
         }
 
+        /// <summary>
+        /// Advance up to <paramref name="steps"/> greedy hops along the BFS field toward the goal.
+        /// Returns true if at least one hop was made; <paramref name="nextIndex"/> is the furthest cell reached.
+        /// When <paramref name="steps"/> is 1 this is identical to <see cref="TryGreedyTowardGoal"/>.
+        /// </summary>
+        public static bool TryAdvanceAlongPath(ulong walkMask, int[] dist, int fromIndex, int steps, out int nextIndex)
+        {
+            nextIndex = fromIndex;
+            int current = fromIndex;
+            for (int i = 0; i < steps; i++)
+            {
+                if (!TryGreedyTowardGoal(walkMask, dist, current, out int n))
+                    break;
+                current = n;
+            }
+            if (current == fromIndex) return false;
+            nextIndex = current;
+            return true;
+        }
+
         /// <summary>Pick a neighbor of <paramref name="fromIndex"/> that strictly decreases distance-to-goal (BFS field).</summary>
         public static bool TryGreedyTowardGoal(ulong walkMask, int[] dist, int fromIndex, out int nextIndex)
         {
