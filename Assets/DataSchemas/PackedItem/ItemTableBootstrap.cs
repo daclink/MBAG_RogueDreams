@@ -13,6 +13,7 @@ namespace DataSchemas.PackedItem
     {
         [SerializeField] SpriteTable2D _spriteTable;
         [SerializeField] TextTable2D _textTable;
+        [SerializeField] private ItemSpriteStorageMode _spriteStorageMode = ItemSpriteStorageMode.ProjectAssetTextures;
         [SerializeField] string _itemsPath = "";
         [SerializeField] string _spritesPath = "";
         [SerializeField] string _textsPath = "";
@@ -33,7 +34,6 @@ namespace DataSchemas.PackedItem
                 Debug.LogWarning("ItemTableBootstrap: Multiple instances; keeping first.");
                 return;
             }
-            _instance = this;
 
             if (_spriteTable == null)
             {
@@ -41,6 +41,15 @@ namespace DataSchemas.PackedItem
                 return;
             }
 
+            if (_textTable == null)
+            {
+                Debug.LogError("ItemTableBootstrap: TextTable2D not assigned.");
+                return;
+            }
+
+            // Register singleton only after required references are present; otherwise Instance would
+            // point at a half-initialized bootstrap.
+            _instance = this;
             _table = new PackedItemTable(_spriteTable, _textTable);
 
             string itemsPath = GetPath(_itemsPath, PackedItemStorage.DefaultFileName);
@@ -49,8 +58,9 @@ namespace DataSchemas.PackedItem
 
             try
             {
-                _table.LoadFromFiles(itemsPath, spritesPath, textsPath);
-                Debug.Log($"ItemTableBootstrap: Loaded from {itemsPath}");
+                bool loadSpritesFromBinary = _spriteStorageMode == ItemSpriteStorageMode.LegacyPixelBinary;
+                _table.LoadFromFiles(itemsPath, spritesPath, textsPath, loadSpritesFromBinary);
+                Debug.Log($"ItemTableBootstrap: Loaded from {itemsPath} (sprites={(loadSpritesFromBinary ? "legacy sprites.dat" : "project textures")})");
             }
             catch (Exception ex)
             {
@@ -68,7 +78,8 @@ namespace DataSchemas.PackedItem
         {
             if (!string.IsNullOrWhiteSpace(custom))
                 return custom;
-            return Path.Combine(Application.persistentDataPath, defaultFileName);
+            // Match Item Authoring default: commit-friendly paths under Assets/GameData/Items
+            return Path.Combine(Application.dataPath, "GameData", "Items", defaultFileName);
         }
     }
 }

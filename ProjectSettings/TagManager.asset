@@ -46,5 +46,23 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Background
+    uniqueID: 628070111
+    locked: 0
+  - name: Ground
+    uniqueID: 3100370153
+    locked: 0
+  - name: Enviornment
+    uniqueID: 2311931643
+    locked: 0
+  - name: Entities
+    uniqueID: 701879811
+    locked: 0
+  - name: Effects
+    uniqueID: 1792882367
+    locked: 0
+  - name: Canopy
+    uniqueID: 1309129889
+    locked: 0
   m_RenderingLayers:
   - Default

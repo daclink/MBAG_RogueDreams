@@ -240,6 +240,7 @@ namespace WFC
             }
 
             baseLayerTilemap.SetTilesBlock(new BoundsInt(0, 0, 0, width, height, 1), block);
+            WfcTilemapCollisionUtility.EnsureTilemapCollider2D(baseLayerTilemap);
         }
 
         private TileBase GetTileAsset(TileType type)

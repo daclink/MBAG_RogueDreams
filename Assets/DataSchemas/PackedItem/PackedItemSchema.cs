@@ -88,10 +88,10 @@ namespace DataSchemas.PackedItem
         Swamp = 1 << 4
     }
 
-    // PackedItemSchema is a static helper theat defines the layout of three packed blocks.
-    // The class provides method for packing and unpacking these blocks.
+    // PackedItemSchema is a static helper that defines the layout of three packed blocks.
+    // The class provides methods for packing and unpacking these blocks.
     // block0 contains metadata for the packed item.
-    // block1 contains numerical data fornthe item's stats.
+    // block1 contains numerical data for the item's stats.
     public static class PackedItemSchema
     {
         // Constant shift amounts to be reused across functions to land at the correct right bit
@@ -164,31 +164,24 @@ namespace DataSchemas.PackedItem
     }
 
     /// <summary>
-    /// PackedItemData is a readonly struct that holds three blocks and exposes as decoded fields, providing a runtime view.
+    /// PackedItemData is a readonly struct that holds two blocks and exposes decoded fields on read (no caching).
     /// </summary>
     public readonly struct PackedItemData
     {
         // Blocks as they were stored in asset form or save data
         public ulong Block0 { get; }
         public ulong Block1 { get; }
-        private readonly AspectFlags _aspectFlags;
-        private readonly StatusFlags _statusFlags;
-
-        // Constructor that takes three blocks and assigns them to the readonly fields as well as the flag cache
-        // Only the constructor can set a field. Everything else is read only
         public PackedItemData(ulong block0, ulong block1)
         {
             Block0 = block0;
             Block1 = block1;
-            _aspectFlags = PackedItemSchema.GetAspectFlags(block0);
-            _statusFlags = PackedItemSchema.GetStatusFlags(block0);
         }
 
-        // Properties derived from block0. aspectFlags uses cached version from constructor all others compute when called.
-        public ItemType ItemType => PackedItemSchema.GetItemType(Block0);
-        public AspectFlags AspectFlags => _aspectFlags;
-        public StatusFlags StatusFlags => _statusFlags;
-        public BiomeFlags BiomeFlags => PackedItemSchema.GetBiomeFlags(Block0);
+        // Properties derived from block0. All compute when called.
+        public ItemType ItemType       => PackedItemSchema.GetItemType(Block0);
+        public AspectFlags AspectFlags => PackedItemSchema.GetAspectFlags(Block0);
+        public StatusFlags StatusFlags => PackedItemSchema.GetStatusFlags(Block0);
+        public BiomeFlags BiomeFlags   => PackedItemSchema.GetBiomeFlags(Block0);
         public RarityFlags RarityFlags => PackedItemSchema.GetRarityFlags(Block0);
         /// <summary>Key into sprite table [type][spriteKey]. Icon = spriteKey + stride.</summary>
         public byte SpriteKey => PackedItemSchema.GetSpriteKey(Block0);
@@ -196,14 +189,14 @@ namespace DataSchemas.PackedItem
         public byte TextKey => PackedItemSchema.GetTextKey(Block0);
 
         // Properties derived from block1. Values for unset flags default to zero
-        public sbyte Health => (_aspectFlags & AspectFlags.Health) != 0 ? PackedItemSchema.GetHealth(Block1) : (sbyte)0;
-        public sbyte Power => (_aspectFlags & AspectFlags.Power) != 0 ? PackedItemSchema.GetPower(Block1) : (sbyte)0;
-        public sbyte Armor => (_aspectFlags & AspectFlags.Armor) != 0 ? PackedItemSchema.GetArmor(Block1) : (sbyte)0;
-        public sbyte Agility => (_aspectFlags & AspectFlags.Agility) != 0 ? PackedItemSchema.GetAgility(Block1) : (sbyte)0;
-        public sbyte Vigor => (_aspectFlags & AspectFlags.Vigor) != 0 ? PackedItemSchema.GetVigor(Block1) : (sbyte)0;
-        public sbyte Fortune => (_aspectFlags & AspectFlags.Fortune) != 0 ? PackedItemSchema.GetFortune(Block1) : (sbyte)0;
-        public sbyte Range => (_aspectFlags & AspectFlags.Range) != 0 ? PackedItemSchema.GetRange(Block1) : (sbyte)0;
-        public sbyte Rarity => (_aspectFlags & AspectFlags.Rarity) != 0 ? PackedItemSchema.GetRarity(Block1) : (sbyte)0;
+        public sbyte Health  => (AspectFlags & AspectFlags.Health)  != 0 ? PackedItemSchema.GetHealth(Block1) : (sbyte)0;
+        public sbyte Power   => (AspectFlags & AspectFlags.Power)   != 0 ? PackedItemSchema.GetPower(Block1) : (sbyte)0;
+        public sbyte Armor   => (AspectFlags & AspectFlags.Armor)   != 0 ? PackedItemSchema.GetArmor(Block1) : (sbyte)0;
+        public sbyte Agility => (AspectFlags & AspectFlags.Agility) != 0 ? PackedItemSchema.GetAgility(Block1) : (sbyte)0;
+        public sbyte Vigor   => (AspectFlags & AspectFlags.Vigor)   != 0 ? PackedItemSchema.GetVigor(Block1) : (sbyte)0;
+        public sbyte Fortune => (AspectFlags & AspectFlags.Fortune) != 0 ? PackedItemSchema.GetFortune(Block1) : (sbyte)0;
+        public sbyte Range   => (AspectFlags & AspectFlags.Range)   != 0 ? PackedItemSchema.GetRange(Block1) : (sbyte)0;
+        public sbyte Rarity  => (AspectFlags & AspectFlags.Rarity)  != 0 ? PackedItemSchema.GetRarity(Block1) : (sbyte)0;
 
     }
 }
