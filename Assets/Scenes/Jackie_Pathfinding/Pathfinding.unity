@@ -369,8 +369,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6002d79961bf0649a1df7133628caa3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NPCSpawner
-  agent: {fileID: 2467229450485462925, guid: 226edf6ba9d149d45be51a1fdc503aea, type: 3}
-  nToSpawn: 0
+  _npcPrefabs:
+  - type: 0
+    prefab: {fileID: 2467229450485462925, guid: 226edf6ba9d149d45be51a1fdc503aea, type: 3}
+  - type: 1
+    prefab: {fileID: 2467229450485462925, guid: b43f90c7bd0dc6b45abda2c38aaaa8e2, type: 3}
   grid: {fileID: 1636873077}
   spawned: 0
 --- !u!4 &811027745

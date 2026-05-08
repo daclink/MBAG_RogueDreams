@@ -63,6 +63,33 @@ public struct Bitboard
     }
         
     
+    public bool IsSet(int idx)    => (uint)idx < 64 && (_data & (1UL << idx)) != 0;
+    public void SetBit(int idx)   { if ((uint)idx < 64) _data |=  1UL << idx; }
+    public void ClearBit(int idx) { if ((uint)idx < 64) _data &= ~(1UL << idx); }
+    public void MoveBit(int from, int to) { ClearBit(from); SetBit(to); }
+
+    // Mutex-style API — prefer these over raw Set/Clear for occupancy tracking.
+    // TryLock: acquire cell; returns false if already held.
+    public bool TryLock(int idx)
+    {
+        if ((uint)idx >= 64 || (_data & (1UL << idx)) != 0) return false;
+        _data |= 1UL << idx;
+        return true;
+    }
+
+    // Unlock: release a cell this caller holds.
+    public void Unlock(int idx) => ClearBit(idx);
+
+    // TryTransfer: atomically release `from` and acquire `to`.
+    // Returns false (and leaves both bits unchanged) if `to` is already held.
+    public bool TryTransfer(int from, int to)
+    {
+        if ((uint)to >= 64 || (_data & (1UL << to)) != 0) return false;
+        ClearBit(from);
+        _data |= 1UL << to;
+        return true;
+    }
+
     public void ForEachBit(Action<int> func)
     {
         BitIter.ForEachSetBit(_data, func);

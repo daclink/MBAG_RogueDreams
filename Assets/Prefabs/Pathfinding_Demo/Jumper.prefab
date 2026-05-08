@@ -82,7 +82,7 @@ SpriteRenderer:
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 75f5f34dc1b5347e0b8351032682f224, type: 3}
-  m_Color: {r: 1, g: 0, b: 0, a: 1}
+  m_Color: {r: 0.021864057, g: 1, b: 0, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -100,9 +100,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6609317091138904717}
-  - component: {fileID: 7530529921519173166}
+  - component: {fileID: 6163333177278050832}
   m_Layer: 0
-  m_Name: NPC
+  m_Name: Jumper
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -124,7 +124,7 @@ Transform:
   - {fileID: 6823338258807773295}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7530529921519173166
+--- !u!114 &6163333177278050832
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -133,13 +133,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 2467229450485462925}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dce2799d57e8c944da061cd159cf2376, type: 3}
+  m_Script: {fileID: 11500000, guid: b56124f2850c1194699ec94fc1271b92, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::NPC
-  moveSpeed: 1
+  m_EditorClassIdentifier: Assembly-CSharp::Jumper
+  moveSpeed: 4
   turnSpeed: 720
   arrivedDistance: 0.02
-  debugMove: {x: 10, y: 10}
+  collisionRadius: 0.22
+  _jumpDistance: 2
+  _postJumpPause: 1
 --- !u!1 &4131433657981003965
 GameObject:
   m_ObjectHideFlags: 0
@@ -255,7 +257,7 @@ SpriteRenderer:
   m_SortingOrder: 2
   m_MaskInteraction: 0
   m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
-  m_Color: {r: 0.5471698, g: 0.022563228, b: 0, a: 1}
+  m_Color: {r: 0.016022356, g: 0.3886792, b: 0, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0

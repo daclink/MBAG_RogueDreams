@@ -232,9 +232,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WFC.RoomTreeEnemyPathfindingSystem
   _dungeon: {fileID: 404848577}
   _grid: {fileID: 0}
-  _npcPrefab: {fileID: 3024127687653583934, guid: d74182711f07343b4ae5bdf97c719464, type: 3}
   _enemiesPerRoom: 1
-  _pathNpcMoveSpeed: 2
+  _pathNpcMoveSpeed: 0
+  _npcPrefabs:
+  - type: 0
+    prefab: {fileID: 2467229450485462925, guid: 226edf6ba9d149d45be51a1fdc503aea, type: 3}
+  - type: 1
+    prefab: {fileID: 2467229450485462925, guid: b43f90c7bd0dc6b45abda2c38aaaa8e2, type: 3}
+  _spawnWeights:
+  - type: 0
+    weight: 1
+  - type: 1
+    weight: 1
   _idleWanderMinInterval: 0.6
   _idleWanderMaxInterval: 1.6
 --- !u!114 &404848577

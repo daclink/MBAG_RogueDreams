@@ -96,6 +96,45 @@ namespace MBAG.Pathfinding
             return best;
         }
 
+        /// <summary>
+        /// Advance up to <paramref name="steps"/> greedy hops along the BFS field toward the goal.
+        /// Returns true if at least one hop was made; <paramref name="nextIndex"/> is the furthest cell reached.
+        /// When <paramref name="steps"/> is 1 this is identical to <see cref="TryGreedyTowardGoal"/>.
+        /// </summary>
+        public static bool TryAdvanceAlongPath(ulong walkMask, int[] dist, int fromIndex, int steps, out int nextIndex)
+        {
+            nextIndex = fromIndex;
+            int current = fromIndex;
+            for (int i = 0; i < steps; i++)
+            {
+                if (!TryGreedyTowardGoal(walkMask, dist, current, out int n))
+                    break;
+                current = n;
+            }
+            if (current == fromIndex) return false;
+            nextIndex = current;
+            return true;
+        }
+
+        /// <summary>Bresenham line-of-sight on the walk mask. Returns true if every cell on the line is walkable.</summary>
+        public static bool HasLineOfSight(ulong walkMask, int fromIdx, int toIdx)
+        {
+            int x0 = fromIdx % Dim, y0 = fromIdx / Dim;
+            int x1 = toIdx   % Dim, y1 = toIdx   / Dim;
+            int dx = Math.Abs(x1 - x0), dy = Math.Abs(y1 - y0);
+            int sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
+            int err = dx - dy, x = x0, y = y0;
+            while (true)
+            {
+                if (!IsWalkable(walkMask, y * Dim + x)) return false;
+                if (x == x1 && y == y1) break;
+                int e2 = 2 * err;
+                if (e2 > -dy) { err -= dy; x += sx; }
+                if (e2 <  dx) { err += dx; y += sy; }
+            }
+            return true;
+        }
+
         /// <summary>Pick a neighbor of <paramref name="fromIndex"/> that strictly decreases distance-to-goal (BFS field).</summary>
         public static bool TryGreedyTowardGoal(ulong walkMask, int[] dist, int fromIndex, out int nextIndex)
         {
