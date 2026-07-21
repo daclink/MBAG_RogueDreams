@@ -121,3 +121,11 @@ Assets/_Recovery/
 
 # macOS zip archive artifacts
 **/__MACOSX/
+fmod_editor.log
+Assets/Plugins/FMOD.meta
+Assets/Plugins/FMOD/platforms.meta
+Assets/Plugins/FMOD/platforms/win.meta
+Assets/Plugins/FMOD/platforms/win/lib.meta
+Assets/Plugins/FMOD/platforms/win/lib/x86_64.meta
+Assets/Plugins/FMOD/platforms/win/lib/x86_64/fmodstudioL.dll
+Assets/Plugins/FMOD/platforms/win/lib/x86_64/fmodstudioL.dll.meta
